@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 168 de 168 casos pasaron.
+**✅ TODO BIEN** — 208 de 208 casos pasaron.
 
-- Fecha: 05/10/2026 23:38 (hora de Ciudad de México)
-- Versión probada: `d08bf49` + cambios aún sin guardar
-- Duración: 29 s
+- Fecha: 05/10/2026 23:54 (hora de Ciudad de México)
+- Versión probada: `ed733f2` + cambios aún sin guardar
+- Duración: 38 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -20,6 +20,8 @@
 | 6 | Jugadores de la liga | 15 | ✅ |
 | 7 | Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar | 37 | ✅ |
 | 8 | Ajustes, hazañas, archivar y borrar | 19 | ✅ |
+| 9 | Equipo: ayudantes por invitación | 26 | ✅ |
+| 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
 
 ## Todos los casos
 
@@ -230,3 +232,53 @@
 | 17 | también borra sus invitaciones pendientes | ✅ |
 | 18 | la Liga A no se tocó | ✅ |
 | 19 | las páginas abrieron sin errores | ✅ |
+
+### 9. Equipo: ayudantes por invitación
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | Ana ve la pestaña Equipo con sus ayudantes Beto y Carla | ✅ |
+| 2 | explica qué puede y qué no puede un ayudante | ✅ |
+| 3 | crea una invitación con código largo y caducidad de 7 días | ✅ |
+| 4 | muestra el enlace con su código | ✅ |
+| 5 | «Enviar por WhatsApp» lleva el mensaje con el enlace | ✅ |
+| 6 | aparece en «Invitaciones sin usar» (caduca en 7 días) | ✅ |
+| 7 | «Cancelar» borra la invitación | ✅ |
+| 8 | las reglas aceptaron todo lo de Ana | ✅ |
+| 9 | sin sesión: dice quién invita a qué liga y pide entrar con Google | ✅ |
+| 10 | aclara que no se guarda el correo | ✅ |
+| 11 | al entrar ofrece «Aceptar y ser ayudante» | ✅ |
+| 12 | queda como ayudante con su primer nombre (Pepe) | ✅ |
+| 13 | la invitación se borró (un solo uso) | ✅ |
+| 14 | dice «¡Listo! Ya eres ayudante» | ✅ |
+| 15 | en «Mis ligas» le aparece Liga A como AYUDANTE | ✅ |
+| 16 | las reglas aceptaron la aceptación | ✅ |
+| 17 | el mismo enlace ya no sirve para otra persona | ✅ |
+| 18 | una invitación de la Liga A no sirve en la Liga B | ✅ |
+| 19 | una invitación caducada no sirve | ✅ |
+| 20 | desde WhatsApp: pide abrirlo en Chrome o Safari y ofrece copiar el enlace | ✅ |
+| 21 | Ana quita a Pepe del equipo | ✅ |
+| 22 | Beto no ve las pestañas Equipo ni Ajustes | ✅ |
+| 23 | Beto puede dejar de ser ayudante por su cuenta | ✅ |
+| 24 | REGLAS: alguien que no es el dueño no puede crear invitaciones | ✅ |
+| 25 | REGLAS: nadie se puede volver ayudante sin invitación | ✅ |
+| 26 | las páginas abrieron sin errores | ✅ |
+
+### 10. Compartir por WhatsApp y descargar Excel
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | el visitante (sin cuenta) ve «Compartir por WhatsApp» y «Descargar Excel» | ✅ |
+| 2 | el mensaje dice la liga y «tabla tras la jornada 2» | ✅ |
+| 3 | el primero es «1. Lasombra · 1 GW · 3 VP» | ✅ |
+| 4 | trae como máximo 5 jugadores | ✅ |
+| 5 | termina con el enlace a la liga | ✅ |
+| 6 | descarga «liga-a.xlsx» | ✅ |
+| 7 | tiene 3 hojas: Tabla, Jornadas, Hazañas | ✅ |
+| 8 | Tabla: encabezados y primer lugar Lasombra (1 GW, 3 VP) | ✅ |
+| 9 | Jornadas: una fila por jugador de cada mesa jugada (5) y la abierta no sale | ✅ |
+| 10 | Jornadas: el de 3 VP tiene GW = 1 | ✅ |
+| 11 | Hazañas: «Sangrado más cuantioso» de Toni en la jornada 2 | ✅ |
+| 12 | liga sin hazañas: el Excel no lleva hoja de hazañas | ✅ |
+| 13 | sin internet para el Excel: aviso claro | ✅ |
+| 14 | las páginas abrieron sin errores | ✅ |

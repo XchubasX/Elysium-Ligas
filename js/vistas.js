@@ -1,6 +1,6 @@
 // =====================================================================
 // js/vistas.js — PANTALLAS (se dibujan dentro de <main id="app">)
-// Rutas: #/ portada · #/archivadas · #/liga/{id}/{pestaña} · #/liga/{id}/jornada/{j} · #/mis-eventos · #/crear
+// Rutas: #/ portada · #/archivadas · #/liga/{id}/{pestaña} · #/liga/{id}/jornada/{j} · #/invitacion/{id}/{código} · #/mis-eventos · #/crear
 // =====================================================================
 const CARD = 'border border-wine-600/40 rounded-xl p-4 flex flex-col gap-2';
 const BTN = 'inline-flex items-center justify-center bg-wine-600 hover:bg-wine-500 text-white font-bold text-sm px-4 py-2.5 rounded-lg transition';
@@ -60,7 +60,7 @@ function vistaLiga(id, pestana) {
   const pestanas = [['tabla', 'Tabla'], ['calendario', 'Calendario'], ['hazanas', 'Hazañas'], ['reglas', 'Reglas']];
   if (ev.hazanasModo === 'no') pestanas.splice(2, 1);
   if (puedeCapturar(ev)) pestanas.push(['jugadores', 'Jugadores']);
-  if (puedeAdministrar(ev)) pestanas.push(['ajustes', 'Ajustes']);
+  if (puedeAdministrar(ev)) pestanas.push(['equipo', 'Equipo'], ['ajustes', 'Ajustes']);
   if (!pestanas.some(p => p[0] === pestana)) pestana = 'tabla';
   let rol = '';
   if (puedeAdministrar(ev)) rol = '<span class="' + PILL + ' bg-wine-900/60 text-wine-200 border border-wine-600/70">' + (esDueno(ev) ? 'Organizas tú' : 'Superusuario') + '</span>';
@@ -71,16 +71,17 @@ function vistaLiga(id, pestana) {
     (ev.archivada ? '<p class="text-[13px] text-amber-300">Liga archivada: ya no aparece en la portada.</p>' : '') + '</div>';
   h += '<nav class="flex gap-1.5 flex-wrap" aria-label="Secciones de la liga">' + pestanas.map(([k, t]) =>
     '<a href="#/liga/' + esc(id) + '/' + k + '" class="text-sm px-3 py-1.5 rounded-full ' + (k === pestana ? 'bg-wine-600 text-white font-semibold' : 'border border-zinc-700 text-zinc-400 hover:text-zinc-200') + '"' + (k === pestana ? ' aria-current="page"' : '') + '>' + t + '</a>').join('') + '</nav>';
-  if (pestana === 'tabla') h += seccionTabla(ev);
+  if (pestana === 'tabla') h += seccionTabla(id, ev);
   else if (pestana === 'calendario') h += puedeCapturar(ev) ? seccionCalendarioEquipo(id, ev) : seccionCalendario(id, ev);
   else if (pestana === 'jugadores') h += seccionJugadores(id, ev);
   else if (pestana === 'ajustes') h += seccionAjustes(id, ev);
+  else if (pestana === 'equipo') h += seccionEquipo(id, ev);
   else if (pestana === 'hazanas') h += seccionHazanas(ev);
   else h += seccionReglas(ev);
   return h;
 }
 
-function seccionTabla(ev) {
+function seccionTabla(id, ev) {
   const t = tablaLiga(ev);
   if (!t.length) return '<p class="text-zinc-400 text-sm py-6 text-center">Todavía no hay jornadas jugadas. La tabla aparece cuando se cierre la primera.</p>';
   const conHaz = ev.hazanasModo !== 'no';
@@ -94,6 +95,8 @@ function seccionTabla(ev) {
       (conHaz ? '<span class="text-right text-amber-300">' + (f.hazanas ? f.hazanas : '') + '</span>' : '') + '</div>';
   });
   h += '</div><p class="text-xs text-zinc-500">Orden: GW, luego VP' + (ev.hazanasModo === 'desempate' ? ', luego hazañas' : '') + '. GW: el único con más VP en su mesa, con al menos 2 VP. Solo cuentan jornadas cerradas.</p>';
+  h += '<div class="flex gap-2 flex-wrap"><a href="' + esc(enlaceWhatsApp(textoCompartirTabla(id, ev))) + '" target="_blank" rel="noopener" class="' + BTN + ' !bg-emerald-700 hover:!bg-emerald-600 flex-1">Compartir por WhatsApp</a>' +
+    '<button type="button" onclick="descargarExcel(\'' + esc(id) + '\')" class="' + BTN2 + ' flex-1">Descargar Excel</button></div>';
   return h;
 }
 

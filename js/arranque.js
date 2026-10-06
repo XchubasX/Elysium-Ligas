@@ -14,7 +14,8 @@ function dibujar(motivo) {
   redibujoPendiente = false;
   $('barraSesion').innerHTML = barraSesion();
   let html;
-  if (r.vista === 'liga' && r.id && r.pestana === 'jornada' && r.sub) html = vistaJornada(r.id, r.sub);
+  if (r.vista === 'invitacion') html = vistaInvitacion(r.id, r.pestana === 'tabla' ? null : r.pestana);
+  else if (r.vista === 'liga' && r.id && r.pestana === 'jornada' && r.sub) html = vistaJornada(r.id, r.sub);
   else if (r.vista === 'liga' && r.id) html = vistaLiga(r.id, r.pestana);
   else if (r.vista === 'archivadas') html = vistaPortada(true);
   else if (r.vista === 'mis-eventos') html = vistaMisEventos();
@@ -29,7 +30,7 @@ if (!window.LIGAS_CONFIG) {
 } else {
   if (window.LIGAS_CONFIG.esPruebas) $('franjaPruebas').classList.remove('hidden');
   iniciarFirebase();
-  window.addEventListener('hashchange', () => { ui.editarJornada = null; ui.agregarJornada = false; ui.editarJugador = null; dibujar('ruta'); window.scrollTo(0, 0); });
+  window.addEventListener('hashchange', () => { ui.editarJornada = null; ui.agregarJornada = false; ui.editarJugador = null; resultadoInvitacion = null; if (!/equipo/.test(location.hash)) ultimaInvitacion = null; dibujar('ruta'); window.scrollTo(0, 0); });
   $('app').addEventListener('focusout', () => setTimeout(() => { if (redibujoPendiente && !($('app').contains(document.activeElement) && document.activeElement.value)) dibujar('ruta'); }, 0));
   escucharSesion(dibujar);
   escucharEventos(dibujar);

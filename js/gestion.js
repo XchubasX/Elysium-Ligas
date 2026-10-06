@@ -120,6 +120,9 @@ function seccionJugadores(id, ev) {
       '<div class="flex gap-2"><select id="copiarDe" class="' + INP + '">' + otras.map(k => '<option value="' + esc(k) + '">' + esc(eventos[k].nombre) + ' (' + Object.keys(eventos[k].jugadores).length + ')</option>').join('') + '</select>' +
       '<button type="button" id="btnCopiar" onclick="copiarJugadores()" class="' + BTN2 + '">Copiar</button></div><p class="text-xs text-zinc-500">Solo se agregan los nicks que todavía no están en esta liga.</p></div>';
   }
+  if (esAyudante(ev) && !puedeAdministrar(ev)) {
+    h += '<button type="button" onclick="dosToques(this,()=>dejarDeAyudar(\'' + esc(id) + '\'))" class="' + BTN_PELIGRO + ' self-start">Dejar de ser ayudante de esta liga</button>';
+  }
   return h;
 }
 
