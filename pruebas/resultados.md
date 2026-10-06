@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 258 de 258 casos pasaron.
+**✅ TODO BIEN** — 273 de 273 casos pasaron.
 
-- Fecha: 06/10/2026 08:30 (hora de Ciudad de México)
-- Versión probada: `5ce0517` + cambios aún sin guardar
-- Duración: 53 s
+- Fecha: 06/10/2026 08:42 (hora de Ciudad de México)
+- Versión probada: `1aa7b04` + cambios aún sin guardar
+- Duración: 57 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -24,6 +24,7 @@
 | 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
 | 11 | Torneos de un día | 44 | ✅ |
 | 12 | Enlaces del sitio de pruebas y detalles de diseño | 5 | ✅ |
+| 13 | Fechas de la liga: validaciones | 15 | ✅ |
 
 ## Todos los casos
 
@@ -326,7 +327,7 @@
 | 34 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 37 | WhatsApp: «campeón: Eva» | ✅ |
+| 37 | WhatsApp: «campeón: Toni» | ✅ |
 | 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -344,3 +345,23 @@
 | 3 | no queda ningún enlace a producción en la página | ✅ |
 | 4 | la página abrió sin errores | ✅ |
 | 5 | fechas y horas usan el esquema oscuro (ícono de calendario/reloj claro y visible) | ✅ |
+
+### 13. Fechas de la liga: validaciones
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | jornada nueva después del fin de la temporada → bloqueada | ✅ |
+| 2 | jornada nueva antes del inicio de la temporada → bloqueada | ✅ |
+| 3 | jornada nueva antes de la última jornada → «Debe ser después de la jornada 3» | ✅ |
+| 4 | jornada nueva el mismo día que otra → «Ese día ya está la jornada 3» | ✅ |
+| 5 | fecha válida (21 nov) → se agrega la jornada 4 | ✅ |
+| 6 | cambiar J3 a después de J4 → «Debe ser antes de la jornada 4» | ✅ |
+| 7 | cambiar J3 a antes de J2 → «Debe ser después de la jornada 2» | ✅ |
+| 8 | cambiar J3 entre J2 y J4 (14 nov) → sí se guarda | ✅ |
+| 9 | una jornada cancelada no estorba: se agrega la J5 el 21 nov | ✅ |
+| 10 | reactivar la J4 (choca con el 21 nov de la J5) → bloqueado con aviso | ✅ |
+| 11 | las reglas aceptaron todo | ✅ |
+| 12 | acortar la temporada dejando la J3 fuera → bloqueado y lo dice | ✅ |
+| 13 | mover el inicio después de la J1 → bloqueado | ✅ |
+| 14 | crear liga sin fechas → «Las fechas de inicio y fin son obligatorias.» | ✅ |
+| 15 | las páginas abrieron sin errores | ✅ |

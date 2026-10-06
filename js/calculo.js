@@ -231,3 +231,27 @@ function etapaTorneo(ev) {
   return { etapa: 'ronda', ronda: Math.max(1, rondasOrdenadas(j).length) };
 }
 function textoRondas(ev) { return (ev.rondasPlan || 3) + ' rondas' + (ev.conFinal ? ' + final' : ''); }
+
+// ---------------- Fechas de las jornadas de una liga
+// La fecha debe caer dentro de la temporada y entre la jornada anterior y la siguiente
+// (sin contar canceladas). Así el número de jornada siempre sigue el orden de las fechas.
+// jid = la jornada que se cambia (null si es nueva). Devuelve '' si está bien, o el problema.
+function problemaFechaJornada(ev, fecha, jid) {
+  if (!fechaValida(fecha)) return 'Elige la fecha de la jornada.';
+  if (ev.inicio && fecha < ev.inicio) return 'La fecha queda antes del inicio de la temporada (' + fechaCorta(ev.inicio) + ').';
+  if (ev.fin && fecha > ev.fin) return 'La fecha queda después del fin de la temporada (' + fechaCorta(ev.fin) + ').';
+  const js = jornadasOrdenadas(ev).filter(j => j.estado !== 'cancelada' && j.id !== jid);
+  const propia = jid && ev.jornadas && ev.jornadas[jid];
+  const numero = propia ? propia.numero : Infinity;
+  const mismoDia = js.find(j => j.fecha === fecha);
+  if (mismoDia) return 'Ese día ya está la jornada ' + mismoDia.numero + '.';
+  const antes = js.filter(j => j.numero < numero).pop();
+  const despues = js.find(j => j.numero > numero);
+  if (antes && fecha <= antes.fecha) return 'Debe ser después de la jornada ' + antes.numero + ' (' + fechaCorta(antes.fecha) + ').';
+  if (despues && fecha >= despues.fecha) return 'Debe ser antes de la jornada ' + despues.numero + ' (' + fechaCorta(despues.fecha) + ').';
+  return '';
+}
+// Jornadas (no canceladas) que quedarían fuera de una temporada nueva
+function jornadasFuera(ev, inicio, fin) {
+  return jornadasOrdenadas(ev).filter(j => j.estado !== 'cancelada' && ((inicio && j.fecha < inicio) || (fin && j.fecha > fin)));
+}

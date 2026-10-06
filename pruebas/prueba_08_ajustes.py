@@ -18,7 +18,7 @@ def correr(nav, g):
     pg.fill('#ajFin', '2026-09-01'); pg.click('text=Guardar cambios'); pg.wait_for_timeout(150)
     g.caso('fin antes del inicio → aviso y no se guarda', 'anterior al inicio' in pg.inner_text('#ajError') and pg.evaluate(EV + '.fin') == '2027-01-16')
     pg.fill('#ajFin', ''); pg.click('text=Guardar cambios'); pg.wait_for_timeout(150)
-    g.caso('no deja borrar las fechas de la temporada', 'no se pueden dejar vacías' in pg.inner_text('#ajError'))
+    g.caso('no deja borrar las fechas de la temporada', 'son obligatorias' in pg.inner_text('#ajError'))
 
     pg.goto(pg.url.split('#')[0] + '#/liga/liga-a/ajustes'); pg.wait_for_timeout(150)
     pg.fill('#nuevaHazana', 'Mazo más original'); pg.press('#nuevaHazana', 'Enter'); pg.wait_for_timeout(250)

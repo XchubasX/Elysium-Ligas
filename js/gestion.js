@@ -32,6 +32,7 @@ function seccionCalendarioEquipo(id, ev) {
       h += '<form class="py-2 space-y-2" onsubmit="guardarFechaJornada(event,\'' + esc(j.id) + '\')"><b>Jornada ' + esc(j.numero) + '</b>' +
         '<div class="grid grid-cols-2 gap-2"><label class="space-y-1"><span class="text-xs text-zinc-400">Nueva fecha</span><input id="jfFecha" type="date" required value="' + esc(j.fecha) + '" class="' + INP + '"></label>' +
         '<label class="space-y-1"><span class="text-xs text-zinc-400">Hora (opcional)</span><input id="jfHora" type="time" value="' + esc(j.hora || '') + '" class="' + INP + '"></label></div>' +
+        '<p id="jfError" class="text-sm text-red-300 hidden" role="alert"></p>' +
         '<div class="flex gap-2"><button class="' + BTN + '">Guardar</button><button type="button" onclick="ui.editarJornada=null;dibujar(\'ruta\')" class="' + BTN2 + '">Cancelar</button></div></form>';
       return;
     }
@@ -41,7 +42,7 @@ function seccionCalendarioEquipo(id, ev) {
       acciones.push('<button type="button" onclick="ui.editarJornada=\'' + esc(j.id) + '\';dibujar(\'ruta\')" class="' + BTN_CH + '">Cambiar fecha</button>');
       acciones.push('<button type="button" onclick="dosToques(this,()=>cambiarEstadoJornada(\'' + esc(j.id) + '\',\'cancelada\'))" class="' + BTN_PELIGRO + '">Cancelar</button>');
     }
-    if (admin && j.estado === 'cancelada') acciones.push('<button type="button" onclick="cambiarEstadoJornada(\'' + esc(j.id) + '\',\'pendiente\')" class="' + BTN_CH + '">Reactivar</button>');
+    if (admin && j.estado === 'cancelada') acciones.push('<button type="button" onclick="reactivarJornada(\'' + esc(j.id) + '\')" class="' + BTN_CH + '">Reactivar</button>');
     h += '<div data-jornada="' + esc(j.numero) + '" class="py-2 space-y-1.5"><div class="flex justify-between gap-2"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(fechaCorta(j.fecha)) + (j.hora ? ' · ' + esc(j.hora) : '') +
       (j.fechaAnterior && j.estado !== 'cerrada' ? ' <span class="text-amber-300 text-[11px]">antes ' + esc(fechaCorta(j.fechaAnterior)) + '</span>' : '') + '</span>' +
       '<span class="' + e.clase + ' whitespace-nowrap">' + e.texto + (j.estado === 'cerrada' && n ? ' · ' + n + ' jug.' : '') + '</span></div>' +
@@ -54,6 +55,7 @@ function seccionCalendarioEquipo(id, ev) {
       h += '<form class="bg-zinc-800 border border-wine-600/50 rounded-xl p-3 space-y-2 text-sm" onsubmit="agregarJornada(event)"><b>Jornada ' + prox + '</b>' +
         '<div class="grid grid-cols-2 gap-2"><label class="space-y-1"><span class="text-xs text-zinc-400">Fecha</span><input id="jnFecha" type="date" required class="' + INP + '"></label>' +
         '<label class="space-y-1"><span class="text-xs text-zinc-400">Hora (opcional)</span><input id="jnHora" type="time" class="' + INP + '"></label></div>' +
+        '<p id="jnError" class="text-sm text-red-300 hidden" role="alert"></p>' +
         '<div class="flex gap-2"><button class="' + BTN + '">Agregar</button><button type="button" onclick="ui.agregarJornada=false;dibujar(\'ruta\')" class="' + BTN2 + '">Cancelar</button></div></form>';
     } else {
       h += '<button type="button" onclick="ui.agregarJornada=true;dibujar(\'ruta\')" class="' + BTN2 + ' w-full border-dashed">+ Agregar jornada</button>';
@@ -67,7 +69,8 @@ async function agregarJornada(e) {
   e.preventDefault();
   const id = idLigaActual(); const ev = ligaActual(); if (!ev) return;
   const fecha = $('jnFecha').value, hora = $('jnHora').value;
-  if (!fechaValida(fecha)) return aviso('Elige la fecha de la jornada.', 'error');
+  const problema = problemaFechaJornada(ev, fecha, null);
+  if (problema) return errorForm('jnError', problema);
   const numero = jornadasOrdenadas(ev).reduce((m, j) => Math.max(m, j.numero || 0), 0) + 1;
   const jid = siguienteId(ev.jornadas, 'j');
   const datos = { numero, fecha, estado: 'pendiente' }; if (hora) datos.hora = hora;
@@ -78,7 +81,7 @@ async function guardarFechaJornada(e, jid) {
   e.preventDefault();
   const id = idLigaActual(); const ev = ligaActual(); const j = ev && ev.jornadas && ev.jornadas[jid]; if (!j) return;
   const fecha = $('jfFecha').value, hora = $('jfHora').value;
-  if (!fechaValida(fecha)) return aviso('Elige la nueva fecha.', 'error');
+  if (fecha !== j.fecha) { const problema = problemaFechaJornada(ev, fecha, jid); if (problema) return errorForm('jfError', problema); }
   const cambios = {};
   if (fecha !== j.fecha) { cambios['jornadas/' + jid + '/fecha'] = fecha; cambios['jornadas/' + jid + '/fechaAnterior'] = j.fecha; }
   if ((hora || '') !== (j.hora || '')) cambios['jornadas/' + jid + '/hora'] = hora || null;
@@ -90,6 +93,15 @@ async function guardarFechaJornada(e, jid) {
     }
     dibujar('ruta');
   }
+}
+
+function errorForm(idP, texto) { const p = $(idP); if (p) { p.textContent = texto; p.classList.remove('hidden'); } else aviso(texto, 'error'); }
+
+function reactivarJornada(jid) {
+  const ev = ligaActual(); const j = ev.jornadas[jid];
+  const problema = problemaFechaJornada(ev, j.fecha, jid);
+  if (problema) return aviso('No se puede reactivar: ' + problema.charAt(0).toLowerCase() + problema.slice(1) + ' Mejor agrega una jornada nueva.', 'error');
+  return cambiarEstadoJornada(jid, 'pendiente');
 }
 
 function cambiarEstadoJornada(jid, estado) {
@@ -238,9 +250,10 @@ async function guardarAjustes(e) {
     if (j && hora && hora !== j.hora) extra['jornadas/j1/hora'] = hora;
   } else {
     const inicio = $('ajInicio').value, fin = $('ajFin').value;
-    if ((ev.inicio && !inicio) || (ev.fin && !fin)) return err('Las fechas de la temporada no se pueden dejar vacías.');
-    if ((inicio && !fechaValida(inicio)) || (fin && !fechaValida(fin))) return err('Revisa las fechas.');
-    if (inicio && fin && fin < inicio) return err('La fecha de fin es anterior al inicio.');
+    if (!fechaValida(inicio) || !fechaValida(fin)) return err('Las fechas de inicio y fin son obligatorias.');
+    if (fin < inicio) return err('La fecha de fin es anterior al inicio.');
+    const fuera = jornadasFuera(ev, inicio, fin);
+    if (fuera.length) return err((fuera.length === 1 ? 'La jornada ' : 'Las jornadas ') + fuera.map(j => j.numero + ' (' + fechaCorta(j.fecha) + ')').join(', ') + (fuera.length === 1 ? ' queda' : ' quedan') + ' fuera de la temporada. Primero cámbiale la fecha o cancélala.');
     if (inicio) nuevo.inicio = inicio; if (fin) nuevo.fin = fin;
   }
   $('ajError').classList.add('hidden');

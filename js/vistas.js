@@ -235,7 +235,7 @@ function vistaCrear(tipo) {
       '<label class="flex gap-2 items-center text-sm"><input id="crFinal" type="checkbox" checked class="accent-wine-500"> Final de 5 con los mejores clasificados</label>';
   } else {
     h += '<div class="grid grid-cols-2 gap-2">' + campo('Inicio', '<input id="crInicio" type="date" class="' + inp + '">') + campo('Fin', '<input id="crFin" type="date" class="' + inp + '">') + '</div>' +
-      '<p class="text-xs text-zinc-500 -mt-1">Las fechas se pueden cambiar después.</p>';
+      '<p class="text-xs text-zinc-500 -mt-1">Las fechas se pueden cambiar después; las jornadas deben caer dentro de la temporada.</p>';
   }
   h += '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Hazañas</legend>' +
     [['mencion', 'Solo mención', true], ['desempate', 'Desempatan después de VP'], ['no', 'Sin hazañas']].map(([v, t, c]) =>
@@ -270,8 +270,8 @@ async function enviarCrear(ev) {
     datos.jornadas = { j1: Object.assign({ numero: 1, fecha, estado: 'pendiente' }, hora ? { hora } : {}) };
   } else {
     const inicio = $('crInicio').value, fin = $('crFin').value;
-    if ((inicio && !fechaValida(inicio)) || (fin && !fechaValida(fin))) return err('Revisa las fechas.');
-    if (inicio && fin && fin < inicio) return err('La fecha de fin es anterior al inicio.');
+    if (!fechaValida(inicio) || !fechaValida(fin)) return err('Las fechas de inicio y fin son obligatorias.');
+    if (fin < inicio) return err('La fecha de fin es anterior al inicio.');
     if (inicio) datos.inicio = inicio; if (fin) datos.fin = fin;
   }
   const reglas = $('crReglas').value.trim(); if (reglas) datos.reglasTexto = reglas;
