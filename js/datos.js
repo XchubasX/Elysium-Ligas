@@ -1,0 +1,58 @@
+// =====================================================================
+// js/datos.js — FIREBASE: conexión, sesión con Google y permisos.
+// Los permisos que se revisan aquí solo deciden qué botones mostrar;
+// la protección real son las reglas de la base de datos.
+// =====================================================================
+let db = null, auth = null;
+let usuario = null, soyAdmin = false, soyOrganizador = false, sesionLista = false;
+let eventos = {}, datosCargados = false, errorDatos = false;
+
+function iniciarFirebase() {
+  const cfg = window.LIGAS_CONFIG;
+  firebase.initializeApp(cfg.firebase);
+  firebase.appCheck().activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(cfg.recaptchaKey), true);
+  db = firebase.database();
+  auth = firebase.auth();
+}
+
+function escucharEventos(alCambiar) {
+  db.ref('eventos').on('value', (s) => { eventos = s.val() || {}; datosCargados = true; errorDatos = false; alCambiar('datos'); },
+    (e) => { console.warn('No se pudieron leer las ligas:', e && e.message); errorDatos = true; alCambiar('datos'); });
+}
+
+async function leerPropio(rama, uid) {
+  try { const s = await db.ref(rama + '/' + uid).get(); return s.val() === true; } catch (e) { return false; }
+}
+
+function escucharSesion(alCambiar) {
+  auth.onAuthStateChanged(async (u) => {
+    usuario = u || null; soyAdmin = false; soyOrganizador = false;
+    if (usuario) { [soyAdmin, soyOrganizador] = await Promise.all([leerPropio('admins', usuario.uid), leerPropio('organizadores', usuario.uid)]); }
+    sesionLista = true;
+    alCambiar('sesion');
+  });
+}
+
+function entrarConGoogle() {
+  if (navegadorDentroDeApp()) { aviso('Abre esta página en Chrome o Safari para entrar con Google.', 'error'); return Promise.resolve(); }
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({ prompt: 'select_account' });
+  return auth.signInWithPopup(p).catch((e) => {
+    if (e && e.code === 'auth/popup-closed-by-user') return;
+    aviso('No se pudo entrar con Google. Intenta de nuevo.', 'error');
+  });
+}
+function cerrarSesion() { return auth.signOut(); }
+
+function esDueno(ev) { return !!(usuario && ev && ev.ownerUid === usuario.uid && soyOrganizador); }
+function esAyudante(ev) { return !!(usuario && ev && ev.ayudantes && ev.ayudantes[usuario.uid]); }
+function puedeAdministrar(ev) { return soyAdmin || esDueno(ev); }
+function puedeCapturar(ev) { return puedeAdministrar(ev) || esAyudante(ev); }
+
+function nombreUsuario() { return (usuario && (usuario.displayName || '').split(' ')[0]) || 'Tú'; }
+
+function crearLiga(id, datos) {
+  return db.ref('eventos/' + id).set(Object.assign({}, datos, {
+    ownerUid: usuario.uid, tipo: 'liga', creada: firebase.database.ServerValue.TIMESTAMP
+  }));
+}
