@@ -1,4 +1,4 @@
-"""Torneos de un día: crear, filtros de portada, rondas, final (asientos 5º→1º), campeón, TP como desempate."""
+"""Torneos de un día: crear, filtros de portada, rondas, final (solo VP), campeón, TP como desempate."""
 import herramientas as H
 
 TITULO = 'Torneos de un día'
@@ -100,22 +100,18 @@ def correr(nav, g):
     fin = pg.evaluate(T + '.jornadas.j1.final') or {}
     g.caso('la final tiene a los 5 primeros de la clasificación, con su lugar', sorted(fin) == sorted(f['jid'] for f in clasif[:5]) or len(fin) == 5 and set(v['lugar'] for v in fin.values()) == {1, 2, 3, 4, 5}, (fin, clasif[:6]))
     g.caso('las rondas quedan cerradas a cambios (sin selectores de VP de rondas)', pg.locator('[data-mesa] select').count() == 0)
-    quinto = next(k for k, v in fin.items() if v['lugar'] == 5)
-    nick5 = pg.evaluate(f"eventos['torneo-a'].jugadores['{quinto}'].nick")
-    g.caso('elige asiento primero el 5º clasificado', f'{nick5} (5º)' in pg.inner_text('[data-final]'), pg.inner_text('[data-final]'))
-    for asiento in [2, 4, 1, 5, 3]:
-        pg.click(f'[data-final] button[data-asiento="{asiento}"]'); pg.wait_for_timeout(150)
-    fin = pg.evaluate(T + '.jornadas.j1.final')
-    g.caso('asientos elegidos en orden 5º→1º (el 5º tomó el 2, el 1º el 3)', fin[quinto]['asiento'] == 2 and next(v for v in fin.values() if v['lugar'] == 1)['asiento'] == 3, fin)
+    t = pg.inner_text('[data-final]')
+    g.caso('la final NO tiene selección de asientos ni orden de elección', pg.locator('[data-asiento]').count() == 0 and 'asiento' not in t.lower() and 'elegir' not in t.lower(), t)
+    g.caso('la final lista a los 5 por su lugar (1º a 5º)', all(f'{n}º' in t for n in range(1, 6)), t)
     sels = pg.locator('[data-final] select')
-    g.caso('aparecen los 5 selectores de VP de la final', sels.count() == 5)
+    g.caso('aparecen de una vez los 5 selectores de VP de la final', sels.count() == 5)
     for i, v in enumerate([1, 1, 2, 0, 1]):
         sels.nth(i).select_option(str(v)); pg.wait_for_timeout(80)
     pg.wait_for_timeout(150)
     pg.click('button:has-text("Terminar torneo")'); pg.click('text=¿Seguro? Toca otra vez'); pg.wait_for_timeout(300)
     g.caso('Beto termina el torneo', pg.evaluate(T + '.jornadas.j1.estado') == 'cerrada', pg.evaluate('window.__denegadas'))
     g.caso('las reglas aceptaron todo lo de Beto', not pg.evaluate('window.__denegadas'), pg.evaluate('window.__denegadas'))
-    campeon_jid = next(k for k, v in fin.items() if v['asiento'] == 3)
+    campeon_jid = next(k for k, v in fin.items() if v['lugar'] == 3)
     campeon = pg.evaluate(f"eventos['torneo-a'].jugadores['{campeon_jid}'].nick")
     store = pg.evaluate('window.__store()')
     ctx.close()

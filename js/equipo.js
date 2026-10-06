@@ -152,7 +152,7 @@ function hojasExcelTorneo(ev) {
     const res = resultadosMesa(Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }])));
     m.jugadores.forEach(x => mesas.push([r.n, m.n, x.asiento, nick(x.jid), typeof x.vp === 'number' ? x.vp : '', res[x.jid].gw]));
   }));
-  finalistas(ev).sort((a, b) => (a.asiento || 9) - (b.asiento || 9)).forEach(f => mesas.push(['Final', 1, f.asiento || '', f.nick, typeof f.vp === 'number' ? f.vp : '', '']));
+  finalistas(ev).forEach(f => mesas.push(['Final', 1, '', f.nick, typeof f.vp === 'number' ? f.vp : '', '']));
   const hojas = [['Clasificación', tabla], ['Mesas', mesas]];
   if (conHaz) { const hz = [['Hazaña', 'Jugador']]; hazanasLiga(ev).forEach(x => hz.push([x.nombre, x.nick])); hojas.push(['Hazañas', hz]); }
   return hojas;

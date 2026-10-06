@@ -2,7 +2,7 @@
 // js/torneo.js — TORNEOS DE UN DÍA
 // Pestaña Clasificación (pública) y pestaña Mesas: el día del torneo.
 // El torneo usa la jornada j1 del evento: pase de lista, rondas (2 o 3) y,
-// si el organizador la activó, la final de 5 (elige asiento primero el 5º).
+// si el organizador la activó, la final de 5 (solo VP; los asientos se eligen en la mesa física).
 // =====================================================================
 
 // ---------------- Clasificación
@@ -86,10 +86,10 @@ function bloqueCierreTorneo(id, ev, j) {
       (n < 5 ? '<p class="text-amber-300 text-xs">Se necesitan al menos 5 jugadores para la final.</p>' : '') +
       '<button type="button" ' + (n < 5 ? 'disabled ' : '') + 'onclick="dosToques(this,()=>pasarAFinal())" class="' + BTN + ' w-full disabled:opacity-40">Pasar a la final (top 5)</button></div>';
   }
-  const faltan = ev.conFinal ? finalistas(ev).some(f => !f.asiento || typeof f.vp !== 'number') : !listas;
+  const faltan = ev.conFinal ? finalistas(ev).some(f => typeof f.vp !== 'number') : !listas;
   if (faltan && !ev.conFinal) return '';
   return '<div class="bg-zinc-800 border border-zinc-700 rounded-xl p-3 space-y-2 text-sm">' +
-    (faltan ? '<p class="text-xs text-amber-300">Faltan asientos o VP de la final.</p>' : '<p class="text-zinc-300">Todo capturado.</p>') +
+    (faltan ? '<p class="text-xs text-amber-300">Faltan VP de la final.</p>' : '<p class="text-zinc-300">Todo capturado.</p>') +
     '<button type="button" ' + (faltan ? 'disabled ' : '') + 'onclick="dosToques(this,()=>cambiarEstadoJornada(\'j1\',\'cerrada\'))" class="' + BTN + ' w-full disabled:opacity-40">Terminar torneo</button></div>';
 }
 
@@ -102,49 +102,24 @@ async function pasarAFinal() {
   }
 }
 
-// ---------------- Final: asientos (elige primero el 5º) y VP
+// ---------------- Final: solo VP. Los asientos se eligen en la mesa física con las cartas de orden.
 function bloqueFinal(id, ev, j, editable) {
   const fs = finalistas(ev);
-  const pendientes = fs.filter(f => !f.asiento).sort((a, b) => b.lugar - a.lugar);
-  const turno = pendientes[0];
-  const ocupado = {}; fs.forEach(f => { if (f.asiento) ocupado[f.asiento] = f; });
-  let h = '<div data-final class="bg-zinc-800 border border-wine-600/50 rounded-xl p-3 space-y-3 text-sm"><p class="font-bold">Final</p>';
-  if (turno) {
-    h += editable ? '<p>Le toca elegir asiento: <b class="text-wine-300">' + esc(turno.nick) + ' (' + turno.lugar + 'º)</b></p>' : '<p class="text-zinc-400">Eligiendo asientos…</p>';
-    h += '<div class="grid grid-cols-5 gap-1.5 text-center text-xs">' + [1, 2, 3, 4, 5].map(a => {
-      const f = ocupado[a];
-      const cls = 'rounded-lg py-2 px-1 border ' + (f ? 'border-wine-600 bg-wine-900/40' : 'border-zinc-700');
-      const dentro = '<b>' + a + '</b><br>' + (f ? esc(f.nick) : '<span class="text-zinc-500">libre</span>');
-      return (editable && !f) ? '<button type="button" data-asiento="' + a + '" onclick="elegirAsiento(\'' + esc(turno.jid) + '\',' + a + ')" class="' + cls + ' hover:border-wine-500">' + dentro + '</button>' : '<div class="' + cls + '">' + dentro + '</div>';
-    }).join('') + '</div>';
-    h += '<p class="text-xs text-zinc-400">Orden: ' + fs.slice().sort((a, b) => b.lugar - a.lugar).map(f => esc(f.nick) + ' (' + f.lugar + 'º)' + (f.asiento ? ' ✓' : '')).join(' → ') + '</p>';
-    if (editable) {
-      const ult = fs.filter(f => f.asiento).sort((a, b) => a.lugar - b.lugar)[0];
-      h += '<div class="flex gap-2">' + (ult ? '<button type="button" onclick="quitarAsiento(\'' + esc(ult.jid) + '\')" class="' + BTN_CH + '">Deshacer</button>' : '') +
-        (!fs.some(f => f.asiento) ? '<button type="button" onclick="dosToques(this,()=>deshacerFinal())" class="' + BTN_PELIGRO + '">Regresar a las rondas</button>' : '') + '</div>';
-    }
-  } else {
-    const porAsiento = fs.slice().sort((a, b) => a.asiento - b.asiento);
-    const todos = fs.every(f => typeof f.vp === 'number');
-    const res = todos ? resultadoTorneo(ev)[0] : null;
-    porAsiento.forEach(f => {
-      const gana = res && res.jid === f.jid;
-      h += '<div class="flex items-center gap-2"><span class="w-5 text-zinc-500 text-xs">' + f.asiento + '</span><span class="flex-1 truncate' + (gana ? ' font-bold text-wine-200' : '') + '">' + esc(f.nick) + ' <span class="text-[11px] text-zinc-500">' + f.lugar + 'º</span>' + (gana ? ' 🏆' : '') + '</span>';
-      if (editable) h += '<select aria-label="VP final de ' + esc(f.nick) + '" onchange="ponerVPFinal(\'' + esc(f.jid) + '\',this.value)" class="bg-zinc-900 border border-zinc-700 rounded px-1.5 py-1 text-sm w-[64px]"><option value="">VP</option>' +
-        VP_OPCIONES.map(v => '<option value="' + v + '"' + (f.vp === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select>';
-      else h += '<span class="w-12 text-right">' + (typeof f.vp === 'number' ? f.vp + ' VP' : '—') + '</span>';
-      h += '</div>';
-    });
-    const suma = fs.reduce((s, f) => s + (typeof f.vp === 'number' ? f.vp : 0), 0);
-    if (suma > fs.length) h += '<p class="text-xs text-amber-300">La suma de VP (' + suma + ') es mayor que el número de jugadores (' + fs.length + ').</p>';
-    if (editable && !fs.some(f => typeof f.vp === 'number')) {
-      const ult = fs.slice().sort((a, b) => a.lugar - b.lugar)[0];
-      h += '<button type="button" onclick="quitarAsiento(\'' + esc(ult.jid) + '\')" class="' + BTN_CH + ' self-start">Deshacer último asiento</button>';
-    }
-  }
+  const todos = fs.every(f => typeof f.vp === 'number');
+  const res = todos ? resultadoTorneo(ev)[0] : null;
+  let h = '<div data-final class="bg-zinc-800 border border-wine-600/50 rounded-xl p-3 space-y-2 text-sm"><p class="font-bold">Final</p>';
+  fs.forEach(f => {
+    const gana = res && res.jid === f.jid;
+    h += '<div class="flex items-center gap-2"><span class="w-6 text-zinc-500 text-xs">' + f.lugar + 'º</span><span class="flex-1 truncate' + (gana ? ' font-bold text-wine-200' : '') + '">' + esc(f.nick) + (gana ? ' 🏆' : '') + '</span>';
+    if (editable) h += '<select aria-label="VP final de ' + esc(f.nick) + '" onchange="ponerVPFinal(\'' + esc(f.jid) + '\',this.value)" class="bg-zinc-900 border border-zinc-700 rounded px-1.5 py-1 text-sm w-[64px]"><option value="">VP</option>' +
+      VP_OPCIONES.map(v => '<option value="' + v + '"' + (f.vp === v ? ' selected' : '') + '>' + v + '</option>').join('') + '</select>';
+    else h += '<span class="w-12 text-right">' + (typeof f.vp === 'number' ? f.vp + ' VP' : '—') + '</span>';
+    h += '</div>';
+  });
+  const suma = fs.reduce((s, f) => s + (typeof f.vp === 'number' ? f.vp : 0), 0);
+  if (suma > fs.length) h += '<p class="text-xs text-amber-300">La suma de VP (' + suma + ') es mayor que el número de jugadores (' + fs.length + ').</p>';
+  if (editable && !fs.some(f => typeof f.vp === 'number')) h += '<button type="button" onclick="dosToques(this,()=>deshacerFinal())" class="' + BTN_PELIGRO + ' self-start">Regresar a las rondas</button>';
   return h + '</div>';
 }
-function elegirAsiento(jid, asiento) { return guardar(idLigaActual(), { ['jornadas/j1/final/' + jid + '/asiento']: asiento }); }
-function quitarAsiento(jid) { return guardar(idLigaActual(), { ['jornadas/j1/final/' + jid + '/asiento']: null }); }
 function deshacerFinal() { return guardar(idLigaActual(), { 'jornadas/j1/final': null }, 'Final deshecha'); }
 function ponerVPFinal(jid, valor) { return guardar(idLigaActual(), { ['jornadas/j1/final/' + jid + '/vp']: valor === '' ? null : Number(valor) }); }

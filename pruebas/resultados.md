@@ -2,9 +2,9 @@
 
 **✅ TODO BIEN** — 257 de 257 casos pasaron.
 
-- Fecha: 06/10/2026 08:20 (hora de Ciudad de México)
-- Versión probada: `2dd509f` + cambios aún sin guardar
-- Duración: 54 s
+- Fecha: 06/10/2026 08:24 (hora de Ciudad de México)
+- Versión probada: `4ab8e14` + cambios aún sin guardar
+- Duración: 52 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -315,9 +315,9 @@
 | 23 | aparece «Pasar a la final (top 5)» | ✅ |
 | 24 | la final tiene a los 5 primeros de la clasificación, con su lugar | ✅ |
 | 25 | las rondas quedan cerradas a cambios (sin selectores de VP de rondas) | ✅ |
-| 26 | elige asiento primero el 5º clasificado | ✅ |
-| 27 | asientos elegidos en orden 5º→1º (el 5º tomó el 2, el 1º el 3) | ✅ |
-| 28 | aparecen los 5 selectores de VP de la final | ✅ |
+| 26 | la final NO tiene selección de asientos ni orden de elección | ✅ |
+| 27 | la final lista a los 5 por su lugar (1º a 5º) | ✅ |
+| 28 | aparecen de una vez los 5 selectores de VP de la final | ✅ |
 | 29 | Beto termina el torneo | ✅ |
 | 30 | las reglas aceptaron todo lo de Beto | ✅ |
 | 31 | Clasificación pública: «🏆 CAMPEÓN» con quien tuvo más VP en la final (2 VP) | ✅ |
@@ -326,7 +326,7 @@
 | 34 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 37 | WhatsApp: «campeón: Toni» | ✅ |
+| 37 | WhatsApp: «campeón: Fer» | ✅ |
 | 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
