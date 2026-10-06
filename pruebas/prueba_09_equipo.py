@@ -44,7 +44,7 @@ def correr(nav, g):
     g.caso('la invitación se borró (un solo uso)', not (s.get('invitaciones', {}).get('liga-a') or {}).get(codigo))
     g.caso('dice «¡Listo! Ya eres ayudante»', 'Ya eres ayudante' in pg.inner_text('#app'))
     pg.goto(pg.url.split('#')[0] + '#/mis-eventos'); pg.wait_for_timeout(150)
-    g.caso('en «Mis ligas» le aparece Liga A como AYUDANTE', 'Liga A' in pg.inner_text('#app') and 'AYUDANTE' in pg.inner_text('#app'))
+    g.caso('en «Mis eventos» le aparece Liga A como AYUDANTE', 'Liga A' in pg.inner_text('#app') and 'AYUDANTE' in pg.inner_text('#app'))
     g.caso('las reglas aceptaron la aceptación', not pg.evaluate('window.__denegadas'), pg.evaluate('window.__denegadas'))
     store = s
     ctx.close()

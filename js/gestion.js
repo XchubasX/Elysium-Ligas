@@ -93,7 +93,9 @@ async function guardarFechaJornada(e, jid) {
 }
 
 function cambiarEstadoJornada(jid, estado) {
-  const textos = { cancelada: 'Jornada cancelada', pendiente: 'Jornada reactivada', abierta: 'Jornada en curso', cerrada: 'Jornada cerrada: la tabla ya se actualizó' };
+  const textos = esTorneo(ligaActual())
+    ? { cancelada: 'Torneo cancelado', pendiente: 'Torneo reactivado', abierta: 'Torneo en curso', cerrada: 'Torneo terminado' }
+    : { cancelada: 'Jornada cancelada', pendiente: 'Jornada reactivada', abierta: 'Jornada en curso', cerrada: 'Jornada cerrada: la tabla ya se actualizó' };
   return guardar(idLigaActual(), { ['jornadas/' + jid + '/estado']: estado }, textos[estado]);
 }
 
@@ -180,9 +182,14 @@ function seccionAjustes(id, ev) {
     campo('Nombre', '<input id="ajNombre" maxlength="80" value="' + esc(ev.nombre) + '" class="' + INP + '">') +
     campo('Ciudad', '<input id="ajCiudad" maxlength="60" value="' + esc(ev.ciudad || '') + '" class="' + INP + '">') +
     campo('Nombre del organizador', '<input id="ajOrganizador" maxlength="40" value="' + esc(ev.organizadorNombre || '') + '" class="' + INP + '">') +
-    '<div class="grid grid-cols-2 gap-2">' + campo('Inicio', '<input id="ajInicio" type="date" value="' + esc(ev.inicio || '') + '" class="' + INP + '">') + campo('Fin', '<input id="ajFin" type="date" value="' + esc(ev.fin || '') + '" class="' + INP + '">') + '</div>' +
+    (esTorneo(ev)
+      ? '<div class="grid grid-cols-2 gap-2">' + campo('Fecha', '<input id="ajFecha" type="date" value="' + esc(ev.fecha || '') + '" class="' + INP + '">') + campo('Hora', '<input id="ajHora" type="time" value="' + esc(ev.hora || '') + '" class="' + INP + '">') + '</div>' +
+        '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Rondas antes de la final</legend><div class="flex gap-2">' +
+        [2, 3].map(n => '<label class="flex gap-2 items-center text-sm border border-zinc-700 rounded-full px-3 py-1.5"><input type="radio" name="ajRondas" value="' + n + '"' + ((ev.rondasPlan || 3) === n ? ' checked' : '') + ' class="accent-wine-500"> ' + n + ' rondas</label>').join('') + '</div></fieldset>' +
+        '<label class="flex gap-2 items-center text-sm"><input id="ajFinal" type="checkbox"' + (ev.conFinal ? ' checked' : '') + ' class="accent-wine-500"> Final de 5 con los mejores clasificados</label>'
+      : '<div class="grid grid-cols-2 gap-2">' + campo('Inicio', '<input id="ajInicio" type="date" value="' + esc(ev.inicio || '') + '" class="' + INP + '">') + campo('Fin', '<input id="ajFin" type="date" value="' + esc(ev.fin || '') + '" class="' + INP + '">') + '</div>') +
     '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Hazañas</legend>' +
-    [['mencion', 'Solo mención (no suman puntos)'], ['desempate', 'Suman en la tabla (desempate después de VP)'], ['no', 'Sin hazañas']].map(([v, t]) =>
+    [['mencion', 'Solo mención'], ['desempate', 'Desempatan después de VP'], ['no', 'Sin hazañas']].map(([v, t]) =>
       '<label class="flex gap-2 items-center text-sm"><input type="radio" name="ajHazanas" value="' + v + '"' + ((ev.hazanasModo || 'mencion') === v ? ' checked' : '') + ' class="accent-wine-500"> ' + t + '</label>').join('') + '</fieldset>' +
     campo('Reglas o notas', '<textarea id="ajReglas" maxlength="1500" rows="3" class="' + INP + '">' + esc(ev.reglasTexto || '') + '</textarea>') +
     '<p id="ajError" class="text-sm text-red-300 hidden" role="alert"></p>' +
@@ -198,13 +205,13 @@ function seccionAjustes(id, ev) {
 
   h += '<div class="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 space-y-2 text-sm"><h3 class="font-bold">Archivar</h3>' +
     (ev.archivada
-      ? '<p class="text-zinc-300">La liga está archivada: no sale en la portada, pero se puede ver en «Ligas archivadas».</p><button type="button" onclick="archivar(false)" class="' + BTN2 + '">Desarchivar</button>'
-      : '<p class="text-zinc-300">Al terminar la temporada, archívala: deja de salir en la portada y se conserva todo.</p><button type="button" onclick="dosToques(this,()=>archivar(true))" class="' + BTN2 + '">Archivar liga</button>') + '</div>';
+      ? '<p class="text-zinc-300">Está archivado: no sale en la portada, pero se puede ver en «Ver archivados».</p><button type="button" onclick="archivar(false)" class="' + BTN2 + '">Desarchivar</button>'
+      : '<p class="text-zinc-300">Deja de salir en la portada y se conserva todo.</p><button type="button" onclick="dosToques(this,()=>archivar(true))" class="' + BTN2 + '">Archivar ' + (esTorneo(ev) ? 'torneo' : 'liga') + '</button>') + '</div>';
 
   if (soyAdmin) {
     h += '<div class="border border-red-900 rounded-2xl p-4 space-y-2 text-sm"><h3 class="font-bold text-red-300">Borrar definitivamente (solo superusuario)</h3>' +
-      '<p class="text-zinc-300">Se borra la liga con todas sus jornadas y resultados. No se puede deshacer.</p>' +
-      '<button type="button" onclick="dosToques(this,()=>borrarLiga(\'' + esc(id) + '\').then(ok=>{if(ok)location.hash=\'#/\'}))" class="' + BTN_PELIGRO + '">Borrar liga</button></div>';
+      '<p class="text-zinc-300">Se borra con todas sus jornadas y resultados. No se puede deshacer.</p>' +
+      '<button type="button" onclick="dosToques(this,()=>borrarLiga(\'' + esc(id) + '\').then(ok=>{if(ok)location.hash=\'#/\'}))" class="' + BTN_PELIGRO + '">Borrar definitivamente</button></div>';
   }
   return h;
 }
@@ -213,17 +220,32 @@ async function guardarAjustes(e) {
   e.preventDefault();
   const id = idLigaActual(); const ev = ligaActual(); if (!ev) return;
   const err = (t) => { const p = $('ajError'); p.textContent = t; p.classList.remove('hidden'); };
-  const nombre = $('ajNombre').value.trim(), inicio = $('ajInicio').value, fin = $('ajFin').value;
-  if (!nombre) return err('Escribe el nombre de la liga.');
-  if ((ev.inicio && !inicio) || (ev.fin && !fin)) return err('Las fechas de la temporada no se pueden dejar vacías.');
-  if ((inicio && !fechaValida(inicio)) || (fin && !fechaValida(fin))) return err('Revisa las fechas.');
-  if (inicio && fin && fin < inicio) return err('La fecha de fin es anterior al inicio.');
-  $('ajError').classList.add('hidden');
+  const nombre = $('ajNombre').value.trim();
+  if (!nombre) return err('Escribe el nombre.');
   const nuevo = { nombre, ciudad: $('ajCiudad').value.trim(), organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
     hazanasModo: (document.querySelector('input[name="ajHazanas"]:checked') || {}).value || 'mencion', reglasTexto: $('ajReglas').value.trim() };
-  if (inicio) nuevo.inicio = inicio; if (fin) nuevo.fin = fin;
-  const cambios = {};
-  Object.keys(nuevo).forEach(k => { if ((ev[k] || '') !== nuevo[k]) cambios[k] = nuevo[k]; });
+  const extra = {};
+  if (esTorneo(ev)) {
+    const fecha = $('ajFecha').value, hora = $('ajHora').value;
+    if (!fechaValida(fecha)) return err('Elige la fecha del torneo.');
+    const rondas = Number((document.querySelector('input[name="ajRondas"]:checked') || {}).value || 3);
+    const j = diaTorneo(ev); const jugadas = j ? rondasOrdenadas(j).length : 0;
+    if (rondas < jugadas) return err('Ya se sortearon ' + jugadas + ' rondas: no puedes poner menos.');
+    if (j && j.final && !$('ajFinal').checked) return err('La final ya empezó: no se puede quitar.');
+    nuevo.fecha = fecha; nuevo.rondasPlan = rondas; nuevo.conFinal = $('ajFinal').checked;
+    if (hora) nuevo.hora = hora; // la hora se puede cambiar, no borrar
+    if (j && fecha !== j.fecha) extra['jornadas/j1/fecha'] = fecha;
+    if (j && hora && hora !== j.hora) extra['jornadas/j1/hora'] = hora;
+  } else {
+    const inicio = $('ajInicio').value, fin = $('ajFin').value;
+    if ((ev.inicio && !inicio) || (ev.fin && !fin)) return err('Las fechas de la temporada no se pueden dejar vacías.');
+    if ((inicio && !fechaValida(inicio)) || (fin && !fechaValida(fin))) return err('Revisa las fechas.');
+    if (inicio && fin && fin < inicio) return err('La fecha de fin es anterior al inicio.');
+    if (inicio) nuevo.inicio = inicio; if (fin) nuevo.fin = fin;
+  }
+  $('ajError').classList.add('hidden');
+  const cambios = Object.assign({}, extra);
+  Object.keys(nuevo).forEach(k => { if ((ev[k] === undefined ? '' : ev[k]) !== nuevo[k]) cambios[k] = nuevo[k]; });
   if (!Object.keys(cambios).length) return aviso('No hay cambios que guardar.');
   if (await guardar(id, cambios, 'Cambios guardados')) dibujar('ruta');
 }

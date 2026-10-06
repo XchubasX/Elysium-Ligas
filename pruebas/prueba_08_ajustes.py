@@ -33,7 +33,7 @@ def correr(nav, g):
 
     pg.click('text=Archivar liga'); pg.click('text=¿Seguro? Toca otra vez'); pg.wait_for_timeout(250)
     g.caso('archivar: la liga queda archivada', pg.evaluate(EV + '.archivada') is True)
-    g.caso('Ana no ve «Borrar liga» (solo superusuario)', 'Borrar liga' not in H.texto(pg))
+    g.caso('Ana no ve «Borrar definitivamente» (solo superusuario)', 'Borrar definitivamente' not in H.texto(pg))
     pg.click('text=Desarchivar'); pg.wait_for_timeout(250)
     g.caso('desarchivar la regresa', pg.evaluate(EV + '.archivada') is False)
     g.caso('las reglas aceptaron todo', not pg.evaluate('window.__denegadas'), pg.evaluate('window.__denegadas'))
@@ -49,8 +49,8 @@ def correr(nav, g):
 
     seed['invitaciones']['liga-b'] = {'prueba-invitacion-ligaB-0001': {'creada': 1, 'expira': 4102444800000}}
     ctx, pg, e3 = H.abrir(nav, seed, '#/liga/liga-b/ajustes', usuario=H.ADMIN)
-    g.caso('el superusuario ve «Borrar liga» en cualquier liga', pg.is_visible('text=Borrar liga'))
-    pg.click('text=Borrar liga'); pg.click('text=¿Seguro? Toca otra vez'); pg.wait_for_timeout(300)
+    g.caso('el superusuario ve «Borrar definitivamente» en cualquier liga', pg.is_visible('button:has-text("Borrar definitivamente")'))
+    pg.click('button:has-text("Borrar definitivamente")'); pg.click('text=¿Seguro? Toca otra vez'); pg.wait_for_timeout(300)
     g.caso('borra la liga y regresa a la portada', pg.evaluate("window.__store().eventos['liga-b']") is None and pg.url.endswith('#/'), pg.evaluate('window.__denegadas'))
     g.caso('también borra sus invitaciones pendientes', not pg.evaluate("window.__store().invitaciones['liga-b']"), pg.evaluate("window.__store().invitaciones"))
     g.caso('la Liga A no se tocó', pg.evaluate("!!window.__store().eventos['liga-a'] && !!window.__store().invitaciones['liga-a']"))

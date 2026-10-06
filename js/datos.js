@@ -51,9 +51,9 @@ function puedeCapturar(ev) { return puedeAdministrar(ev) || esAyudante(ev); }
 
 function nombreUsuario() { return (usuario && (usuario.displayName || '').split(' ')[0]) || 'Tú'; }
 
-function crearLiga(id, datos) {
+function crearLiga(id, datos, tipo) {
   return db.ref('eventos/' + id).set(Object.assign({}, datos, {
-    ownerUid: usuario.uid, tipo: 'liga', creada: firebase.database.ServerValue.TIMESTAMP
+    ownerUid: usuario.uid, tipo: tipo === 'torneo' ? 'torneo' : 'liga', creada: firebase.database.ServerValue.TIMESTAMP
   }));
 }
 

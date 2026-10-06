@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 208 de 208 casos pasaron.
+**✅ TODO BIEN** — 253 de 253 casos pasaron.
 
-- Fecha: 05/10/2026 23:54 (hora de Ciudad de México)
-- Versión probada: `ed733f2` + cambios aún sin guardar
-- Duración: 38 s
+- Fecha: 06/10/2026 07:32 (hora de Ciudad de México)
+- Versión probada: `960a16e` + cambios aún sin guardar
+- Duración: 52 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -13,8 +13,8 @@
 | # | Grupo | Casos | Resultado |
 |---|---|---|---|
 | 1 | Cálculos: GW, VP y orden de la tabla | 14 | ✅ |
-| 2 | Portada y página pública de la liga | 23 | ✅ |
-| 3 | Sesión, roles y Mis ligas | 17 | ✅ |
+| 2 | Portada y página pública de la liga | 24 | ✅ |
+| 3 | Sesión, roles y Mis eventos | 17 | ✅ |
 | 4 | Crear liga | 22 | ✅ |
 | 5 | Calendario de jornadas (organizador) | 21 | ✅ |
 | 6 | Jugadores de la liga | 15 | ✅ |
@@ -22,6 +22,7 @@
 | 8 | Ajustes, hazañas, archivar y borrar | 19 | ✅ |
 | 9 | Equipo: ayudantes por invitación | 26 | ✅ |
 | 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
+| 11 | Torneos de un día | 44 | ✅ |
 
 ## Todos los casos
 
@@ -56,7 +57,7 @@
 | 6 | la tarjeta muestra el líder: Lasombra · 1 GW · 3 VP | ✅ |
 | 7 | hay botón «Entrar con Google» | ✅ |
 | 8 | el pie trae el aviso legal (Paradox · Dark Pack) | ✅ |
-| 9 | «Ver ligas archivadas» muestra Liga B | ✅ |
+| 9 | «Ver archivados» muestra Liga B | ✅ |
 | 10 | al tocar la tarjeta abre la liga en la pestaña Tabla | ✅ |
 | 11 | la tabla: 1° Lasombra con 1 GW y 3 VP | ✅ |
 | 12 | la jornada abierta no cuenta (Iván con 5 VP no aparece arriba) | ✅ |
@@ -65,24 +66,25 @@
 | 15 | calendario: jornada 1 «En curso», jornada 2 «Jugada · 5 jugadores» | ✅ |
 | 16 | calendario: la jornada 3 avisa la fecha anterior (antes sáb 31 oct) | ✅ |
 | 17 | hazañas: «Sangrado más cuantioso — Toni» en J2 | ✅ |
-| 18 | reglas: explica GW con mínimo 2 VP y que las hazañas no suman | ✅ |
-| 19 | sin desborde horizontal a 390 px | ✅ |
-| 20 | una liga que no existe muestra aviso y botón para volver | ✅ |
-| 21 | liga «sin hazañas»: no hay pestaña Hazañas ni columna 🏅 | ✅ |
-| 22 | sin ligas: mensaje «Todavía no hay ligas» | ✅ |
-| 23 | las páginas abrieron sin errores | ✅ |
+| 18 | sin notas del organizador no hay pestaña Reglas | ✅ |
+| 19 | ya no hay textos que expliquen los puntos | ✅ |
+| 20 | sin desborde horizontal a 390 px | ✅ |
+| 21 | una liga que no existe muestra aviso y botón para volver | ✅ |
+| 22 | liga «sin hazañas»: no hay pestaña Hazañas ni columna 🏅 | ✅ |
+| 23 | sin eventos: mensaje «Todavía no hay ligas ni torneos» | ✅ |
+| 24 | las páginas abrieron sin errores | ✅ |
 
-### 3. Sesión, roles y Mis ligas
+### 3. Sesión, roles y Mis eventos
 
 | # | Caso | Resultado |
 |---|---|---|
 | 1 | al entrar, el encabezado muestra «Ana» y «Organizador» | ✅ |
-| 2 | Mis ligas de Ana: Liga A (suya) y botón «+ Nueva liga» | ✅ |
+| 2 | Mis eventos de Ana: Liga A (suya) y botón «+ Nueva liga» | ✅ |
 | 3 | Ana no ve Liga B ni Liga D (no son suyas) | ✅ |
 | 4 | a un organizador no se le pide su identificador | ✅ |
 | 5 | en su liga, Ana ve la pastilla «Organizas tú» | ✅ |
 | 6 | «Salir» regresa el botón «Entrar con Google» | ✅ |
-| 7 | Beto (ayudante de Liga A) la ve en Mis ligas con la etiqueta AYUDANTE | ✅ |
+| 7 | Beto (ayudante de Liga A) la ve en Mis eventos con la etiqueta AYUDANTE | ✅ |
 | 8 | Beto no tiene botón «+ Nueva liga» | ✅ |
 | 9 | en Liga A, Beto ve la pastilla «Ayudante» | ✅ |
 | 10 | cuenta nueva: «Todavía no organizas ni ayudas» | ✅ |
@@ -91,7 +93,7 @@
 | 13 | sin desborde horizontal a 390 px | ✅ |
 | 14 | Dora (dueña pero SIN permiso de organizadora) no ve «Organizas tú» | ✅ |
 | 15 | el superusuario ve «Superusuario» en cualquier liga | ✅ |
-| 16 | sin sesión, Mis ligas pide entrar con Google | ✅ |
+| 16 | sin sesión, Mis eventos pide entrar con Google | ✅ |
 | 17 | las páginas abrieron sin errores | ✅ |
 
 ### 4. Crear liga
@@ -221,13 +223,13 @@
 | 6 | no deja quitar una hazaña ya otorgada | ✅ |
 | 7 | sí quita una que no se ha otorgado | ✅ |
 | 8 | archivar: la liga queda archivada | ✅ |
-| 9 | Ana no ve «Borrar liga» (solo superusuario) | ✅ |
+| 9 | Ana no ve «Borrar definitivamente» (solo superusuario) | ✅ |
 | 10 | desarchivar la regresa | ✅ |
 | 11 | las reglas aceptaron todo | ✅ |
 | 12 | sin desborde horizontal a 390 px | ✅ |
 | 13 | Beto (ayudante) no puede entrar a Ajustes (le muestra la Tabla) | ✅ |
 | 14 | REGLAS: Beto no puede archivar a mano | ✅ |
-| 15 | el superusuario ve «Borrar liga» en cualquier liga | ✅ |
+| 15 | el superusuario ve «Borrar definitivamente» en cualquier liga | ✅ |
 | 16 | borra la liga y regresa a la portada | ✅ |
 | 17 | también borra sus invitaciones pendientes | ✅ |
 | 18 | la Liga A no se tocó | ✅ |
@@ -251,7 +253,7 @@
 | 12 | queda como ayudante con su primer nombre (Pepe) | ✅ |
 | 13 | la invitación se borró (un solo uso) | ✅ |
 | 14 | dice «¡Listo! Ya eres ayudante» | ✅ |
-| 15 | en «Mis ligas» le aparece Liga A como AYUDANTE | ✅ |
+| 15 | en «Mis eventos» le aparece Liga A como AYUDANTE | ✅ |
 | 16 | las reglas aceptaron la aceptación | ✅ |
 | 17 | el mismo enlace ya no sirve para otra persona | ✅ |
 | 18 | una invitación de la Liga A no sirve en la Liga B | ✅ |
@@ -282,3 +284,52 @@
 | 12 | liga sin hazañas: el Excel no lleva hoja de hazañas | ✅ |
 | 13 | sin internet para el Excel: aviso claro | ✅ |
 | 14 | las páginas abrieron sin errores | ✅ |
+
+### 11. Torneos de un día
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | TP mesa de 5 con empates promediados: 60 · 42 · 42 · 18 · 18 | ✅ |
+| 2 | TP mesa de 4: 60 · 36 · 36 · 12 (sin el 36 del tercer lugar) | ✅ |
+| 3 | empate en GW y VP: desempata el TP (B quedó 1º en su mesa y va arriba de A) | ✅ |
+| 4 | «Mis eventos» tiene «+ Nueva liga» y «+ Nuevo torneo» | ✅ |
+| 5 | el formulario de torneo pide fecha, hora, rondas y final | ✅ |
+| 6 | solo se puede elegir 2 o 3 rondas | ✅ |
+| 7 | sin fecha → «Elige la fecha del torneo.» | ✅ |
+| 8 | se crea como torneo: fecha, hora, 2 rondas, con final y su día j1 pendiente | ✅ |
+| 9 | abre la página del torneo con pestañas Clasificación y Mesas | ✅ |
+| 10 | muestra «2 rondas + final» | ✅ |
+| 11 | la tarjeta del torneo trae la etiqueta TORNEO y «2 rondas + final» | ✅ |
+| 12 | filtro «Torneos»: solo el torneo | ✅ |
+| 13 | filtro «Ligas»: sin el torneo | ✅ |
+| 14 | buscar «monterrey» (sin importar mayúsculas) deja solo el torneo de esa ciudad | ✅ |
+| 15 | escribir en la búsqueda no pierde lo escrito | ✅ |
+| 16 | sin coincidencias: «Ningún evento coincide» | ✅ |
+| 17 | fecha 5 dic: el torneo de ese día y las ligas que se juegan esas fechas (A, B, D) | ✅ |
+| 18 | fecha sin eventos: «Ningún evento coincide» | ✅ |
+| 19 | sin desborde horizontal a 390 px | ✅ |
+| 20 | Beto empieza el torneo | ✅ |
+| 21 | pase de lista: 10 presentes | ✅ |
+| 22 | con 2 rondas planeadas no ofrece una tercera | ✅ |
+| 23 | aparece «Pasar a la final (top 5)» | ✅ |
+| 24 | la final tiene a los 5 primeros de la clasificación, con su lugar | ✅ |
+| 25 | las rondas quedan cerradas a cambios (sin selectores de VP de rondas) | ✅ |
+| 26 | elige asiento primero el 5º clasificado | ✅ |
+| 27 | asientos elegidos en orden 5º→1º (el 5º tomó el 2, el 1º el 3) | ✅ |
+| 28 | aparecen los 5 selectores de VP de la final | ✅ |
+| 29 | Beto termina el torneo | ✅ |
+| 30 | las reglas aceptaron todo lo de Beto | ✅ |
+| 31 | Clasificación pública: «🏆 CAMPEÓN» con quien tuvo más VP en la final (2 VP) | ✅ |
+| 32 | la tabla trae la columna «Final» y 10 jugadores | ✅ |
+| 33 | no muestra TP ni explicaciones de puntos | ✅ |
+| 34 | el público ve la final y las 2 rondas sin controles | ✅ |
+| 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
+| 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
+| 37 | WhatsApp: «campeón: Jordi» | ✅ |
+| 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
+| 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
+| 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
+| 41 | sin desborde horizontal a 390 px | ✅ |
+| 42 | REGLAS: el ayudante no cambia las rondas | ✅ |
+| 43 | REGLAS: nadie pone 4 rondas | ✅ |
+| 44 | las páginas abrieron sin errores | ✅ |

@@ -19,7 +19,7 @@ function dibujar(motivo) {
   else if (r.vista === 'liga' && r.id) html = vistaLiga(r.id, r.pestana);
   else if (r.vista === 'archivadas') html = vistaPortada(true);
   else if (r.vista === 'mis-eventos') html = vistaMisEventos();
-  else if (r.vista === 'crear') html = vistaCrear();
+  else if (r.vista === 'crear') html = vistaCrear(r.id);
   else html = vistaPortada(false);
   $('app').innerHTML = html;
   const f = $('formCrear'); if (f) f.addEventListener('submit', enviarCrear);

@@ -99,7 +99,7 @@ function bloqueRondas(id, ev, j, editable) {
         }
         h += '</div>';
       });
-      if (todos && !ganador) h += '<p class="text-xs text-zinc-500">Sin GW en esta mesa (empate en el primer lugar o menos de 2 VP).</p>';
+      if (todos && !ganador) h += '<p class="text-xs text-zinc-500">Sin GW en esta mesa.</p>';
       if (alerta) h += '<p class="text-xs text-amber-300">' + esc(alerta) + '</p>';
       h += '</div>';
     });
@@ -115,7 +115,8 @@ function bloqueRondas(id, ev, j, editable) {
   if (editable) {
     const ult = rs[rs.length - 1];
     const listo = ult && ult.mesas.length && ult.mesas.every(m => m.jugadores.every(x => typeof x.vp === 'number'));
-    if (listo) h += '<button type="button" onclick="sortearRonda(\'' + esc(j.id) + '\',\'' + esc(siguienteId(j.rondas, 'r')) + '\')" class="' + BTN2 + ' w-full">+ Sortear ronda ' + (rs.length + 1) + ' (' + pres.length + ' presentes)</button>';
+    const tope = esTorneo(ev) && rs.length >= (ev.rondasPlan || 3);
+    if (listo && !tope) h += '<button type="button" onclick="sortearRonda(\'' + esc(j.id) + '\',\'' + esc(siguienteId(j.rondas, 'r')) + '\')" class="' + BTN2 + ' w-full">+ Sortear ronda ' + (rs.length + 1) + ' (' + pres.length + ' presentes)</button>';
   }
   return h;
 }

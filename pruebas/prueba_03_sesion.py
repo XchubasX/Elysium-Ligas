@@ -1,7 +1,7 @@
-"""Entrar con Google, roles y «Mis ligas»."""
+"""Entrar con Google, roles y «Mis eventos»."""
 import herramientas as H
 
-TITULO = 'Sesión, roles y Mis ligas'
+TITULO = 'Sesión, roles y Mis eventos'
 
 
 def correr(nav, g):
@@ -11,10 +11,10 @@ def correr(nav, g):
     pg.click('#barraSesion >> text=Entrar con Google'); pg.wait_for_timeout(200)
     b = pg.inner_text('#barraSesion')
     g.caso('al entrar, el encabezado muestra «Ana» y «Organizador»', 'Ana' in b and 'Organizador' in b, b)
-    pg.click('text=Mis ligas'); pg.wait_for_timeout(150)
+    pg.click('text=Mis eventos'); pg.wait_for_timeout(150)
     t = H.texto(pg)
-    g.caso('Mis ligas de Ana: Liga A (suya) y botón «+ Nueva liga»', 'Liga A' in t and '+ Nueva liga' in t, t[:500])
-    g.caso('Ana no ve Liga B ni Liga D (no son suyas)', 'Liga B' not in t.split('Mis ligas', 1)[1] and 'Liga D' not in t.split('Mis ligas', 1)[1])
+    g.caso('Mis eventos de Ana: Liga A (suya) y botón «+ Nueva liga»', 'Liga A' in t and '+ Nueva liga' in t, t[:500])
+    g.caso('Ana no ve Liga B ni Liga D (no son suyas)', 'Liga B' not in t.split('Mis eventos', 1)[1] and 'Liga D' not in t.split('Mis eventos', 1)[1])
     g.caso('a un organizador no se le pide su identificador', not pg.is_visible('#miUid'))
     pg.goto(pg.url.split('#')[0] + '#/liga/liga-a'); pg.wait_for_timeout(120)
     g.caso('en su liga, Ana ve la pastilla «Organizas tú»', 'Organizas tú' in H.texto(pg))
@@ -24,7 +24,7 @@ def correr(nav, g):
 
     ctx, pg, e2 = H.abrir(nav, seed, '#/mis-eventos', usuario=H.BETO)
     t = H.texto(pg)
-    g.caso('Beto (ayudante de Liga A) la ve en Mis ligas con la etiqueta AYUDANTE', 'Liga A' in t and 'AYUDANTE' in t, t[:500])
+    g.caso('Beto (ayudante de Liga A) la ve en Mis eventos con la etiqueta AYUDANTE', 'Liga A' in t and 'AYUDANTE' in t, t[:500])
     g.caso('Beto no tiene botón «+ Nueva liga»', '+ Nueva liga' not in t)
     pg.goto(pg.url.split('#')[0] + '#/liga/liga-a'); pg.wait_for_timeout(120)
     g.caso('en Liga A, Beto ve la pastilla «Ayudante»', 'Ayudante' in H.texto(pg))
@@ -47,7 +47,7 @@ def correr(nav, g):
     ctx.close()
 
     ctx, pg, e6 = H.abrir(nav, seed, '#/mis-eventos')
-    g.caso('sin sesión, Mis ligas pide entrar con Google', 'Entra con Google para ver tus ligas' in H.texto(pg))
+    g.caso('sin sesión, Mis eventos pide entrar con Google', 'Entra con Google para ver tus eventos' in H.texto(pg))
     ctx.close()
     todos = errores + e2 + e3 + e4 + e5 + e6
     g.caso('las páginas abrieron sin errores', not todos, todos)

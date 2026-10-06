@@ -42,7 +42,7 @@ def correr(nav, g):
     pg.evaluate(STUB_XLSX); pg.click('text=Descargar Excel'); pg.wait_for_timeout(200)
     hojas = [n for n, _ in pg.evaluate('window.__libros')[0]['hojas']]
     g.caso('liga sin hazañas: el Excel no lleva hoja de hazañas', hojas == ['Tabla', 'Jornadas'], hojas)
-    pg.evaluate('delete window.XLSX'); pg.click('text=Descargar Excel'); pg.wait_for_timeout(300)
+    pg.evaluate('delete window.XLSX'); pg.click('text=Descargar Excel'); pg.wait_for_timeout(3000)
     g.caso('sin internet para el Excel: aviso claro', 'No se pudo preparar el Excel' in H.texto(pg))
     ctx.close()
     todos = err + e2

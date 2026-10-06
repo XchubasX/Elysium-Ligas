@@ -56,7 +56,7 @@ function tablaLiga(ev) {
 function hazanasLiga(ev) {
   const cat = (ev && ev.hazanasCatalogo) || {}; const jug = (ev && ev.jugadores) || {};
   const out = [];
-  jornadasOrdenadas(ev).filter(j => j.estado === 'cerrada').forEach(j => {
+  jornadasOrdenadas(ev).filter(j => j.estado === 'cerrada' || esTorneo(ev)).forEach(j => {
     Object.values(j.hazanas || {}).forEach(h => {
       out.push({ numero: j.numero, fecha: j.fecha, nombre: (cat[h.hazana] || {}).nombre || 'Hazaña', nick: (jug[h.jugador] || {}).nick || '(jugador borrado)' });
     });
@@ -158,3 +158,76 @@ function hazanaUsada(ev, hid) {
 function jugadoresOrdenados(ev) {
   return lista(ev && ev.jugadores).sort((a, b) => String(a.nick).localeCompare(String(b.nick), 'es', { sensitivity: 'base' }));
 }
+
+// =====================================================================
+// TORNEOS DE UN DÍA (todo vive en la jornada j1 del evento)
+// Clasificación como VEKN: GW, luego VP, luego TP (no se muestra; solo desempata).
+// TP por lugar en la mesa: 60·48·36·24·12; en mesa de 4: 60·48·24·12; empates promediados.
+// =====================================================================
+function esTorneo(ev) { return !!ev && ev.tipo === 'torneo'; }
+function diaTorneo(ev) { const j = (ev && ev.jornadas && ev.jornadas.j1) || null; if (j) j.id = 'j1'; return j; }
+
+function tpMesa(mesa) {
+  const filas = Object.keys(mesa || {}).map(jid => ({ jid, vp: Number((mesa[jid] || {}).vp) || 0 })).sort((a, b) => b.vp - a.vp);
+  const escala = filas.length === 4 ? [60, 48, 24, 12] : [60, 48, 36, 24, 12].slice(0, filas.length);
+  const out = {}; let i = 0;
+  while (i < filas.length) {
+    let k = i; while (k + 1 < filas.length && filas[k + 1].vp === filas[i].vp) k++;
+    const prom = escala.slice(i, k + 1).reduce((s, x) => s + x, 0) / (k - i + 1);
+    for (let t = i; t <= k; t++) out[filas[t].jid] = prom;
+    i = k + 1;
+  }
+  return out;
+}
+
+// Clasificación de las rondas: [{ jid, nick, gw, vp, tp, hazanas, rondas }]
+function clasificacionTorneo(ev) {
+  const j = diaTorneo(ev); const jug = (ev && ev.jugadores) || {}; const t = {};
+  const fila = (jid) => (t[jid] = t[jid] || { jid, nick: (jug[jid] || {}).nick || '(jugador borrado)', gw: 0, vp: 0, tp: 0, hazanas: 0, rondas: 0 });
+  Object.values((j && j.rondas) || {}).forEach(r => Object.values((r && r.mesas) || {}).forEach(mesa => {
+    const res = resultadosMesa(mesa); const tp = tpMesa(mesa);
+    Object.keys(mesa).forEach(jid => { const f = fila(jid); f.vp += res[jid].vp; f.gw += res[jid].gw; f.tp += tp[jid]; f.rondas += 1; });
+  }));
+  Object.values((j && j.hazanas) || {}).forEach(h => { if (h && h.jugador) fila(h.jugador).hazanas += 1; });
+  const desempate = ev && ev.hazanasModo === 'desempate';
+  return Object.values(t).sort((a, b) => (b.gw - a.gw) || (b.vp - a.vp) || (b.tp - a.tp) || (desempate ? b.hazanas - a.hazanas : 0) || a.nick.localeCompare(b.nick, 'es'));
+}
+function mismoPuesto(a, b) { return a && b && a.gw === b.gw && a.vp === b.vp && a.tp === b.tp; }
+
+// Los 5 de la final. Si hay empate exacto (GW, VP y TP) en el corte, se sortea entre los empatados.
+// → { lugares: { jid: 1..5 }, sorteados: [nicks] }
+function elegirFinalistas(ev) {
+  const c = clasificacionTorneo(ev); if (c.length < 5) return null;
+  const corte = c[4];
+  const arriba = c.filter((f, i) => i < 5 && !mismoPuesto(f, corte));
+  const empatados = c.filter(f => mismoPuesto(f, corte));
+  const entran = arriba.concat(barajar(empatados).slice(0, 5 - arriba.length));
+  const orden = c.filter(f => entran.includes(f));
+  const lugares = {}; orden.forEach((f, i) => { lugares[f.jid] = i + 1; });
+  return { lugares, sorteados: empatados.length > 5 - arriba.length ? empatados.map(f => f.nick) : [] };
+}
+
+// Finalistas ordenados por lugar: [{ jid, nick, lugar, asiento, vp }]
+function finalistas(ev) {
+  const j = diaTorneo(ev); const jug = (ev && ev.jugadores) || {};
+  return Object.keys((j && j.final) || {}).map(jid => Object.assign({ jid, nick: (jug[jid] || {}).nick || '(jugador borrado)' }, j.final[jid])).sort((a, b) => a.lugar - b.lugar);
+}
+
+// Resultado final del torneo: [{ jid, nick, gw, vp, finalVp|null, puesto }]
+// Final: más VP en la final; si empatan, el mejor clasificado. Después, la clasificación de las rondas.
+function resultadoTorneo(ev) {
+  const c = clasificacionTorneo(ev); const fin = finalistas(ev);
+  const enFinal = new Set(fin.map(f => f.jid));
+  const primero = fin.slice().sort((a, b) => ((b.vp || 0) - (a.vp || 0)) || (a.lugar - b.lugar)).map(f => Object.assign({}, c.find(x => x.jid === f.jid) || { jid: f.jid, nick: f.nick, gw: 0, vp: 0 }, { finalVp: typeof f.vp === 'number' ? f.vp : null }));
+  return primero.concat(c.filter(f => !enFinal.has(f.jid)).map(f => Object.assign({}, f, { finalVp: null })));
+}
+
+// Estado del torneo para mostrar: pendiente | ronda | final | terminado
+function etapaTorneo(ev) {
+  const j = diaTorneo(ev); if (!j || j.estado === 'pendiente' || !j.estado) return { etapa: 'pendiente' };
+  if (j.estado === 'cancelada') return { etapa: 'cancelado' };
+  if (j.estado === 'cerrada') return { etapa: 'terminado' };
+  if (j.final) return { etapa: 'final' };
+  return { etapa: 'ronda', ronda: Math.max(1, rondasOrdenadas(j).length) };
+}
+function textoRondas(ev) { return (ev.rondasPlan || 3) + ' rondas' + (ev.conFinal ? ' + final' : ''); }

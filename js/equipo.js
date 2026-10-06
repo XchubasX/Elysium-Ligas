@@ -124,6 +124,13 @@ async function aceptarInvitacion(id, codigo) {
 
 // ---------------- Compartir la tabla por WhatsApp (top 5 + enlace)
 function textoCompartirTabla(id, ev) {
+  if (esTorneo(ev)) {
+    const e = etapaTorneo(ev); const terminado = e.etapa === 'terminado';
+    const t = (terminado || e.etapa === 'final') ? resultadoTorneo(ev) : clasificacionTorneo(ev);
+    return '🏆 ' + ev.nombre + (terminado && t[0] ? ' · campeón: ' + t[0].nick : (e.etapa === 'ronda' ? ' · clasificación tras la ronda ' + e.ronda : '')) + '\n' +
+      t.slice(0, 5).map((f, i) => (i + 1) + '. ' + f.nick + (typeof f.finalVp === 'number' ? ' · ' + f.finalVp + ' VP en la final' : ' · ' + f.gw + ' GW · ' + f.vp + ' VP')).join('\n') +
+      '\nVer todo: ' + location.origin + location.pathname + '#/liga/' + id;
+  }
   const t = tablaLiga(ev);
   const cerradas = jornadasOrdenadas(ev).filter(j => j.estado === 'cerrada');
   const ult = cerradas.length ? cerradas[cerradas.length - 1].numero : null;
@@ -133,7 +140,26 @@ function textoCompartirTabla(id, ev) {
 }
 
 // ---------------- Excel (tabla, jornadas y hazañas)
+function hojasExcelTorneo(ev) {
+  const nick = (pid) => ((ev.jugadores || {})[pid] || {}).nick || '(jugador borrado)';
+  const conHaz = ev.hazanasModo !== 'no'; const j = diaTorneo(ev) || {};
+  const hayFinal = !!j.final;
+  const tabla = [['#', 'Jugador'].concat(hayFinal ? ['VP final'] : []).concat(['GW', 'VP']).concat(conHaz ? ['Hazañas'] : [])];
+  const lista = hayFinal ? resultadoTorneo(ev) : clasificacionTorneo(ev);
+  lista.forEach((f, i) => tabla.push([i + 1, f.nick].concat(hayFinal ? [typeof f.finalVp === 'number' ? f.finalVp : ''] : []).concat([f.gw, f.vp]).concat(conHaz ? [f.hazanas] : [])));
+  const mesas = [['Ronda', 'Mesa', 'Asiento', 'Jugador', 'VP', 'GW']];
+  rondasOrdenadas(j).forEach(r => r.mesas.forEach(m => {
+    const res = resultadosMesa(Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }])));
+    m.jugadores.forEach(x => mesas.push([r.n, m.n, x.asiento, nick(x.jid), typeof x.vp === 'number' ? x.vp : '', res[x.jid].gw]));
+  }));
+  finalistas(ev).sort((a, b) => (a.asiento || 9) - (b.asiento || 9)).forEach(f => mesas.push(['Final', 1, f.asiento || '', f.nick, typeof f.vp === 'number' ? f.vp : '', '']));
+  const hojas = [['Clasificación', tabla], ['Mesas', mesas]];
+  if (conHaz) { const hz = [['Hazaña', 'Jugador']]; hazanasLiga(ev).forEach(x => hz.push([x.nombre, x.nick])); hojas.push(['Hazañas', hz]); }
+  return hojas;
+}
+
 function hojasExcel(ev) {
+  if (esTorneo(ev)) return hojasExcelTorneo(ev);
   const nick = (pid) => ((ev.jugadores || {})[pid] || {}).nick || '(jugador borrado)';
   const conHaz = ev.hazanasModo !== 'no';
   const tabla = [['#', 'Jugador', 'GW', 'VP'].concat(conHaz ? ['Hazañas'] : []).concat(['Jornadas jugadas'])];

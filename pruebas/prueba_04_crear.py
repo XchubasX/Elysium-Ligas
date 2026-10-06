@@ -74,7 +74,7 @@ def correr(nav, g):
     pg.evaluate("window.__store().organizadores = {}")  # le quitan el permiso mientras llenaba
     pg.click('text=Crear liga'); pg.wait_for_timeout(300)
     if H.HAY_REGLAS:
-        g.caso('si la base rechaza (le quitaron el permiso), se ve un aviso claro y no se crea', 'No se pudo crear la liga' in error(pg) and not pg.evaluate("window.__store().eventos['liga-dos']"), error(pg))
+        g.caso('si la base rechaza (le quitaron el permiso), se ve un aviso claro y no se crea', 'No se pudo crear' in error(pg) and not pg.evaluate("window.__store().eventos['liga-dos']"), error(pg))
     ctx.close()
     todos = errores + e2 + e3
     g.caso('las páginas abrieron sin errores', not todos, todos)

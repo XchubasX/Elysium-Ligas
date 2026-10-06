@@ -20,9 +20,9 @@ def correr(nav, g):
     g.caso('hay botón «Entrar con Google»', pg.is_visible('text=Entrar con Google'))
     g.caso('el pie trae el aviso legal (Paradox · Dark Pack)', 'Paradox Interactive' in t and 'worldofdarkness.com' in t, t[-400:])
 
-    pg.click('text=Ver ligas archivadas'); pg.wait_for_timeout(150)
+    pg.click('text=Ver archivados'); pg.wait_for_timeout(150)
     t = H.texto(pg)
-    g.caso('«Ver ligas archivadas» muestra Liga B', 'Liga B' in t and 'Ligas archivadas' in t)
+    g.caso('«Ver archivados» muestra Liga B', 'Liga B' in t and 'Eventos archivados' in t)
 
     pg.goto(pg.url.split('#')[0] + '#/'); pg.wait_for_timeout(150)
     pg.click('text=Liga A'); pg.wait_for_timeout(150)
@@ -41,9 +41,8 @@ def correr(nav, g):
     pg.click('nav >> text=Hazañas'); pg.wait_for_timeout(120)
     t = H.texto(pg)
     g.caso('hazañas: «Sangrado más cuantioso — Toni» en J2', 'Sangrado más cuantioso — Toni' in t and 'J2' in t, t[-300:])
-    pg.click('nav >> text=Reglas'); pg.wait_for_timeout(120)
-    t = H.texto(pg)
-    g.caso('reglas: explica GW con mínimo 2 VP y que las hazañas no suman', 'al menos 2' in t and 'no suman puntos' in t, t[-400:])
+    g.caso('sin notas del organizador no hay pestaña Reglas', 'Reglas' not in pg.inner_text('nav'))
+    g.caso('ya no hay textos que expliquen los puntos', 'al menos 2' not in H.texto(pg) and 'no suman puntos' not in H.texto(pg) and 'Orden: GW' not in H.texto(pg))
     g.caso('sin desborde horizontal a 390 px', H.sin_desborde(pg))
 
     pg.goto(pg.url.split('#')[0] + '#/liga/no-existe'); pg.wait_for_timeout(120)
@@ -56,7 +55,7 @@ def correr(nav, g):
     ctx2.close()
 
     ctx3, pg3, err3 = H.abrir(nav, {'eventos': {}})
-    g.caso('sin ligas: mensaje «Todavía no hay ligas»', 'Todavía no hay ligas' in H.texto(pg3))
+    g.caso('sin eventos: mensaje «Todavía no hay ligas ni torneos»', 'Todavía no hay ligas ni torneos' in H.texto(pg3))
     ctx3.close()
     g.caso('las páginas abrieron sin errores', not errores and not err2 and not err3, errores + err2 + err3)
     ctx.close()
