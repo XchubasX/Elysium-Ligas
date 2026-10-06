@@ -1,0 +1,18 @@
+// Configuración de Cloudflare Workers para Elysium · Ligas.
+// Un solo repositorio, dos sitios:
+//  - Producción: Worker "elysium-ligas", rama main, comando de despliegue "npx wrangler deploy"
+//  - Pruebas:    Worker "elysium-ligas-uat", rama uat, comando de despliegue "npx wrangler deploy --env uat"
+// Comando de construcción en los dos: "bash cloudflare-publicar.sh" (pone el sitio en la carpeta "publicado").
+{
+  "name": "elysium-ligas",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./publicado",
+    "not_found_handling": "404-page"
+  },
+  "env": {
+    "uat": {
+      "name": "elysium-ligas-uat"
+    }
+  }
+}
