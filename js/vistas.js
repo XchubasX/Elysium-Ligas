@@ -1,6 +1,6 @@
 // =====================================================================
 // js/vistas.js — PANTALLAS (se dibujan dentro de <main id="app">)
-// Rutas: #/ portada · #/archivadas · #/liga/{id}/{pestaña} · #/mis-eventos · #/crear
+// Rutas: #/ portada · #/archivadas · #/liga/{id}/{pestaña} · #/liga/{id}/jornada/{j} · #/mis-eventos · #/crear
 // =====================================================================
 const CARD = 'border border-wine-600/40 rounded-xl p-4 flex flex-col gap-2';
 const BTN = 'inline-flex items-center justify-center bg-wine-600 hover:bg-wine-500 text-white font-bold text-sm px-4 py-2.5 rounded-lg transition';
@@ -10,7 +10,7 @@ const PILL = 'text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap';
 function rutaActual() {
   const h = (window.location.hash || '#/').replace(/^#\/?/, '');
   const p = h.split('/').filter(Boolean).map(decodeURIComponent);
-  return { vista: p[0] || 'portada', id: p[1] || null, pestana: p[2] || 'tabla' };
+  return { vista: p[0] || 'portada', id: p[1] || null, pestana: p[2] || 'tabla', sub: p[3] || null };
 }
 
 function cargando() { return '<p class="text-zinc-400 text-sm py-8 text-center">Cargando ligas…</p>'; }
@@ -59,6 +59,8 @@ function vistaLiga(id, pestana) {
   if (!ev) return '<div class="text-center py-8 space-y-3"><p class="text-zinc-300">Esta liga no existe o fue borrada.</p><a href="#/" class="' + BTN2 + '">Ir a las ligas</a></div>';
   const pestanas = [['tabla', 'Tabla'], ['calendario', 'Calendario'], ['hazanas', 'Hazañas'], ['reglas', 'Reglas']];
   if (ev.hazanasModo === 'no') pestanas.splice(2, 1);
+  if (puedeCapturar(ev)) pestanas.push(['jugadores', 'Jugadores']);
+  if (puedeAdministrar(ev)) pestanas.push(['ajustes', 'Ajustes']);
   if (!pestanas.some(p => p[0] === pestana)) pestana = 'tabla';
   let rol = '';
   if (puedeAdministrar(ev)) rol = '<span class="' + PILL + ' bg-wine-900/60 text-wine-200 border border-wine-600/70">' + (esDueno(ev) ? 'Organizas tú' : 'Superusuario') + '</span>';
@@ -70,7 +72,9 @@ function vistaLiga(id, pestana) {
   h += '<nav class="flex gap-1.5 flex-wrap" aria-label="Secciones de la liga">' + pestanas.map(([k, t]) =>
     '<a href="#/liga/' + esc(id) + '/' + k + '" class="text-sm px-3 py-1.5 rounded-full ' + (k === pestana ? 'bg-wine-600 text-white font-semibold' : 'border border-zinc-700 text-zinc-400 hover:text-zinc-200') + '"' + (k === pestana ? ' aria-current="page"' : '') + '>' + t + '</a>').join('') + '</nav>';
   if (pestana === 'tabla') h += seccionTabla(ev);
-  else if (pestana === 'calendario') h += seccionCalendario(ev);
+  else if (pestana === 'calendario') h += puedeCapturar(ev) ? seccionCalendarioEquipo(id, ev) : seccionCalendario(id, ev);
+  else if (pestana === 'jugadores') h += seccionJugadores(id, ev);
+  else if (pestana === 'ajustes') h += seccionAjustes(id, ev);
   else if (pestana === 'hazanas') h += seccionHazanas(ev);
   else h += seccionReglas(ev);
   return h;
@@ -93,14 +97,15 @@ function seccionTabla(ev) {
   return h;
 }
 
-function seccionCalendario(ev) {
+function seccionCalendario(id, ev) {
   const js = jornadasOrdenadas(ev);
   if (!js.length) return '<p class="text-zinc-400 text-sm py-6 text-center">El organizador todavía no agrega jornadas.</p>';
   return '<div class="bg-zinc-800 rounded-xl p-3 text-sm divide-y divide-zinc-700">' + js.map(j => {
     const e = estadoJornada(j); const s = sumaJornada(j); const n = Object.keys(s).length;
-    return '<div class="flex justify-between gap-2 py-2"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(fechaCorta(j.fecha)) + (j.hora ? ' · ' + esc(j.hora) : '') +
+    const conMesas = j.estado === 'cerrada' || j.estado === 'abierta';
+    return '<' + (conMesas ? 'a href="#/liga/' + esc(id) + '/jornada/' + esc(j.id) + '"' : 'div') + ' class="flex justify-between gap-2 py-2' + (conMesas ? ' hover:bg-zinc-700/40' : '') + '"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(fechaCorta(j.fecha)) + (j.hora ? ' · ' + esc(j.hora) : '') +
       (j.fechaAnterior && j.estado !== 'cerrada' ? ' <span class="text-amber-300 text-[11px]">antes ' + esc(fechaCorta(j.fechaAnterior)) + '</span>' : '') + '</span>' +
-      '<span class="' + e.clase + '">' + e.texto + (j.estado === 'cerrada' && n ? ' · ' + n + ' jugadores' : '') + '</span></div>';
+      '<span class="' + e.clase + '">' + e.texto + (j.estado === 'cerrada' && n ? ' · ' + n + ' jugadores' : '') + (conMesas ? ' ›' : '') + '</span></' + (conMesas ? 'a' : 'div') + '>';
   }).join('') + '</div>';
 }
 

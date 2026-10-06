@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 76 de 76 casos pasaron.
+**✅ TODO BIEN** — 168 de 168 casos pasaron.
 
-- Fecha: 05/10/2026 23:16 (hora de Ciudad de México)
-- Versión probada: `1d25921` + cambios aún sin guardar
-- Duración: 10 s
+- Fecha: 05/10/2026 23:38 (hora de Ciudad de México)
+- Versión probada: `d08bf49` + cambios aún sin guardar
+- Duración: 29 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -16,6 +16,10 @@
 | 2 | Portada y página pública de la liga | 23 | ✅ |
 | 3 | Sesión, roles y Mis ligas | 17 | ✅ |
 | 4 | Crear liga | 22 | ✅ |
+| 5 | Calendario de jornadas (organizador) | 21 | ✅ |
+| 6 | Jugadores de la liga | 15 | ✅ |
+| 7 | Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar | 37 | ✅ |
+| 8 | Ajustes, hazañas, archivar y borrar | 19 | ✅ |
 
 ## Todos los casos
 
@@ -114,3 +118,115 @@
 | 20 | REGLAS: nadie puede leer la lista de superusuarios | ✅ |
 | 21 | si la base rechaza (le quitaron el permiso), se ve un aviso claro y no se crea | ✅ |
 | 22 | las páginas abrieron sin errores | ✅ |
+
+### 5. Calendario de jornadas (organizador)
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | Ana ve las pestañas extra «Jugadores» y «Ajustes» | ✅ |
+| 2 | hay botón «+ Agregar jornada» | ✅ |
+| 3 | el formulario propone «Jornada 4» | ✅ |
+| 4 | se guardó la jornada 4 (sáb 21 nov, 17:00, pendiente) | ✅ |
+| 5 | aparece en el calendario: «Jornada 4 · sáb 21 nov · 17:00» | ✅ |
+| 6 | cambiar fecha guarda la nueva y recuerda la anterior | ✅ |
+| 7 | el calendario marca «antes sáb 7 nov» | ✅ |
+| 8 | sale el aviso para avisar al grupo, con el mensaje ya escrito | ✅ |
+| 9 | el botón abre WhatsApp con el mensaje | ✅ |
+| 10 | el primer toque en «Cancelar» solo pide confirmar | ✅ |
+| 11 | el segundo toque cancela la jornada | ✅ |
+| 12 | «Reactivar» la regresa a pendiente | ✅ |
+| 13 | las reglas aceptaron todo | ✅ |
+| 14 | sin desborde horizontal a 390 px | ✅ |
+| 15 | Beto (ayudante) ve «Jugadores» pero no «Ajustes» | ✅ |
+| 16 | Beto no ve «Cambiar fecha», «Cancelar» ni «+ Agregar jornada» | ✅ |
+| 17 | Beto sí ve «Abrir día ›» en las jornadas | ✅ |
+| 18 | REGLAS: si Beto intenta cambiar una fecha a mano, la base lo bloquea | ✅ |
+| 19 | público: la jornada 2 (jugada) se puede abrir | ✅ |
+| 20 | público: la jornada 3 (pendiente) no es enlace | ✅ |
+| 21 | las páginas abrieron sin errores | ✅ |
+
+### 6. Jugadores de la liga
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | Beto (ayudante) entra a la pestaña Jugadores | ✅ |
+| 2 | agrega «Carlos» | ✅ |
+| 3 | la casilla queda vacía para el siguiente | ✅ |
+| 4 | nick repetido (aunque cambien mayúsculas) → aviso y no se agrega | ✅ |
+| 5 | cambiar nick: Carlos → Carlitos | ✅ |
+| 6 | no deja quitar a quien ya jugó (Lasombra) | ✅ |
+| 7 | sí deja quitar a quien no ha jugado (Carlitos) | ✅ |
+| 8 | ofrece copiar jugadores de «Liga de Beto» | ✅ |
+| 9 | copia solo los que faltan (Nocturna y Mireia; «toni» ya estaba) | ✅ |
+| 10 | aviso «Se copiaron 2 jugadores» | ✅ |
+| 11 | las reglas aceptaron todo | ✅ |
+| 12 | sin desborde horizontal a 390 px | ✅ |
+| 13 | REGLAS: Beto no puede anotar jugadores en la Liga B (no es su equipo) | ✅ |
+| 14 | el público no ve la pestaña Jugadores (le muestra la Tabla) | ✅ |
+| 15 | las páginas abrieron sin errores | ✅ |
+
+### 7. Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | jornada pendiente: dice que no ha empezado y ofrece «Empezar jornada» | ✅ |
+| 2 | Beto (ayudante) la empieza: queda «En curso» | ✅ |
+| 3 | pase de lista: 9 presentes | ✅ |
+| 4 | «+ jugador nuevo» lo agrega a la liga y lo deja presente (10) | ✅ |
+| 5 | dice «10 presentes → 2 mesas de 5» | ✅ |
+| 6 | sorteo: 2 mesas de 5 con asientos 1 a 5 | ✅ |
+| 7 | nadie quedó en dos mesas | ✅ |
+| 8 | mover a «una mesa nueva»: queda solo en la mesa 3 y la mesa 1 se reacomoda (asientos 1–4) | ✅ |
+| 9 | regresarlo a la mesa 1: vuelve como asiento 5 y la mesa 3 desaparece | ✅ |
+| 10 | VP guardados en las dos mesas | ✅ |
+| 11 | la mesa 1 marca GW al de 3 VP | ✅ |
+| 12 | la mesa 2 dice «Sin GW» por empate | ✅ |
+| 13 | con VP capturados ya no se puede volver a sortear la ronda | ✅ |
+| 14 | si la suma de VP pasa de 5, avisa | ✅ |
+| 15 | aparece «+ Sortear ronda 2» | ✅ |
+| 16 | ronda 2 sorteada | ✅ |
+| 17 | cerrar está bloqueado mientras falten VP (lo dice) | ✅ |
+| 18 | «Borrar ronda» quita la ronda 2 (sin VP) | ✅ |
+| 19 | hazaña otorgada a Toni | ✅ |
+| 20 | todo capturado: «Cerrar jornada» habilitado | ✅ |
+| 21 | Beto la cierra: queda «Jugada» | ✅ |
+| 22 | cerrada: ya no hay selectores de VP para Beto | ✅ |
+| 23 | Beto (ayudante) NO ve «Reabrir jornada» | ✅ |
+| 24 | las reglas aceptaron todo lo de Beto | ✅ |
+| 25 | REGLAS: con la jornada cerrada, Beto ya no puede cambiar VP a mano | ✅ |
+| 26 | REGLAS: Beto no puede reabrirla a mano | ✅ |
+| 27 | sin desborde horizontal a 390 px | ✅ |
+| 28 | la tabla pública ya cuenta la jornada (el líder tiene 1 GW y 3 VP) | ✅ |
+| 29 | el público ve las mesas de la jornada con VP y GW, sin controles | ✅ |
+| 30 | el público ve la hazaña del día | ✅ |
+| 31 | Ana (organizadora) reabre la jornada | ✅ |
+| 32 | 7 presentes: avisa «1 mesa de 5 · 2 sin mesa» (como el sorteo de Elysium) | ✅ |
+| 33 | los que sobran salen en «Sin mesa (2)» para acomodarlos | ✅ |
+| 34 | se acomodan a mano en una mesa de 4 y otra de 3 | ✅ |
+| 35 | asientos sin huecos en las dos mesas | ✅ |
+| 36 | las reglas aceptaron todo | ✅ |
+| 37 | las páginas abrieron sin errores | ✅ |
+
+### 8. Ajustes, hazañas, archivar y borrar
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | Ana ve el formulario con los datos actuales | ✅ |
+| 2 | se guardan nombre, fin, hazañas y reglas | ✅ |
+| 3 | fin antes del inicio → aviso y no se guarda | ✅ |
+| 4 | no deja borrar las fechas de la temporada | ✅ |
+| 5 | agrega la hazaña «Mazo más original» | ✅ |
+| 6 | no deja quitar una hazaña ya otorgada | ✅ |
+| 7 | sí quita una que no se ha otorgado | ✅ |
+| 8 | archivar: la liga queda archivada | ✅ |
+| 9 | Ana no ve «Borrar liga» (solo superusuario) | ✅ |
+| 10 | desarchivar la regresa | ✅ |
+| 11 | las reglas aceptaron todo | ✅ |
+| 12 | sin desborde horizontal a 390 px | ✅ |
+| 13 | Beto (ayudante) no puede entrar a Ajustes (le muestra la Tabla) | ✅ |
+| 14 | REGLAS: Beto no puede archivar a mano | ✅ |
+| 15 | el superusuario ve «Borrar liga» en cualquier liga | ✅ |
+| 16 | borra la liga y regresa a la portada | ✅ |
+| 17 | también borra sus invitaciones pendientes | ✅ |
+| 18 | la Liga A no se tocó | ✅ |
+| 19 | las páginas abrieron sin errores | ✅ |

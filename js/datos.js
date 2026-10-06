@@ -56,3 +56,26 @@ function crearLiga(id, datos) {
     ownerUid: usuario.uid, tipo: 'liga', creada: firebase.database.ServerValue.TIMESTAMP
   }));
 }
+
+// Escribe varios cambios de una vez dentro de eventos/{id} (rutas relativas).
+// Si la base lo rechaza, avisa y devuelve false.
+async function guardar(id, cambios, textoOk) {
+  try {
+    await db.ref('eventos/' + id).update(cambios);
+    if (textoOk) aviso(textoOk);
+    return true;
+  } catch (e) {
+    console.warn('No se pudo guardar:', e && e.message);
+    aviso('No se pudo guardar. Revisa tu conexión o tus permisos.', 'error');
+    return false;
+  }
+}
+async function borrarLiga(id) {
+  try {
+    // Las invitaciones pendientes se borran una por una (las reglas no dejan borrar la rama completa)
+    const cambios = { ['eventos/' + id]: null };
+    try { const s = await db.ref('invitaciones/' + id).get(); Object.keys(s.val() || {}).forEach(c => { cambios['invitaciones/' + id + '/' + c] = null; }); } catch (e) { /* sin invitaciones */ }
+    await db.ref().update(cambios); aviso('Liga borrada'); return true;
+  }
+  catch (e) { aviso('No se pudo borrar la liga.', 'error'); return false; }
+}

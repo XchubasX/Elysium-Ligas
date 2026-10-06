@@ -81,3 +81,80 @@ function estadoJornada(j) {
   if (j.estado === 'abierta') return { texto: 'En curso', clase: 'text-amber-300' };
   return { texto: 'Pendiente', clase: 'text-zinc-400' };
 }
+
+// ---------------- Mesas: mismo reparto que el sorteo de Elysium
+// Mesas de 5 y 4 (las más posibles de 5). Lo que no alcanza queda "sin mesa"
+// para que el organizador decida (moverlos a mano a una mesa o a una nueva).
+function tamanosMesas(n) {
+  for (let fuera = 0; fuera <= n; fuera++) {
+    const resto = n - fuera;
+    if (resto === 0) return { tamanos: [], fuera };
+    for (let cincos = Math.floor(resto / 5); cincos >= 0; cincos--) {
+      const r = resto - cincos * 5;
+      if (r % 4 === 0) return { tamanos: Array(cincos).fill(5).concat(Array(r / 4).fill(4)), fuera };
+    }
+  }
+  return { tamanos: [], fuera: n };
+}
+function barajar(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+// jids → { mesas: { m1: { jid: { asiento } } }, sinMesa: [jid] }
+function sortearMesas(jids) {
+  const orden = barajar(jids); const { tamanos } = tamanosMesas(orden.length);
+  const mesas = {}; let k = 0;
+  tamanos.forEach((t, i) => { const m = {}; for (let s = 1; s <= t; s++) m[orden[k++]] = { asiento: s }; mesas['m' + (i + 1)] = m; });
+  return { mesas, sinMesa: orden.slice(k) };
+}
+
+// Rondas y mesas ordenadas: [{ id, n, mesas: [{ id, n, jugadores: [{ jid, asiento, vp }] }] }]
+function rondasOrdenadas(j) {
+  const num = (s) => parseInt(String(s).slice(1), 10) || 0;
+  return Object.keys((j && j.rondas) || {}).sort((a, b) => num(a) - num(b)).map((rid, i) => {
+    const r = j.rondas[rid] || {};
+    const mesas = Object.keys(r.mesas || {}).sort((a, b) => num(a) - num(b)).map((mid, k) => ({
+      id: mid, n: k + 1,
+      jugadores: Object.keys(r.mesas[mid] || {}).map(jid => ({ jid, asiento: (r.mesas[mid][jid] || {}).asiento || 0, vp: (r.mesas[mid][jid] || {}).vp }))
+        .sort((a, b) => a.asiento - b.asiento)
+    }));
+    return { id: rid, n: i + 1, mesas };
+  });
+}
+function siguienteId(obj, letra) {
+  const max = Object.keys(obj || {}).reduce((m, k) => Math.max(m, parseInt(String(k).slice(1), 10) || 0), 0);
+  return letra + (max + 1);
+}
+// ¿En qué mesa de esta ronda está el jugador? → id de mesa o null
+function mesaDe(ronda, jid) {
+  const ms = (ronda && ronda.mesas) || {};
+  return Object.keys(ms).find(m => ms[m] && ms[m][jid]) || null;
+}
+// Problemas que impiden cerrar la jornada (lista de textos; vacía = se puede cerrar)
+function faltasParaCerrar(j) {
+  const rs = rondasOrdenadas(j); const out = [];
+  if (!rs.some(r => r.mesas.length)) out.push('Todavía no hay mesas.');
+  rs.forEach(r => r.mesas.forEach(m => {
+    const sin = m.jugadores.filter(x => typeof x.vp !== 'number').length;
+    if (sin) out.push('Ronda ' + r.n + ', mesa ' + m.n + ': faltan los VP de ' + sin + (sin === 1 ? ' jugador.' : ' jugadores.'));
+  }));
+  return out;
+}
+// Avisos que no impiden cerrar (la suma de VP de una mesa no puede pasar del número de jugadores)
+function avisosMesa(m) {
+  const suma = m.jugadores.reduce((s, x) => s + (typeof x.vp === 'number' ? x.vp : 0), 0);
+  return suma > m.jugadores.length ? 'La suma de VP (' + suma + ') es mayor que el número de jugadores (' + m.jugadores.length + ').' : '';
+}
+// ¿El jugador ya aparece en alguna jornada? (entonces no se puede quitar de la lista)
+function jugadorUsado(ev, jid) {
+  return lista(ev && ev.jornadas).some(j => (j.presentes && j.presentes[jid]) ||
+    Object.values(j.rondas || {}).some(r => mesaDe(r, jid)) ||
+    Object.values(j.hazanas || {}).some(h => h && h.jugador === jid));
+}
+function hazanaUsada(ev, hid) {
+  return lista(ev && ev.jornadas).some(j => Object.values(j.hazanas || {}).some(h => h && h.hazana === hid));
+}
+function jugadoresOrdenados(ev) {
+  return lista(ev && ev.jugadores).sort((a, b) => String(a.nick).localeCompare(String(b.nick), 'es', { sensitivity: 'base' }));
+}

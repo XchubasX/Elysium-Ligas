@@ -25,7 +25,12 @@
     const ks = split(p); if (!ks.length) { store = v || {}; return; }
     let n = store; for (let i = 0; i < ks.length - 1; i++) { if (n[ks[i]] == null || typeof n[ks[i]] !== 'object') n[ks[i]] = {}; n = n[ks[i]]; }
     const last = ks[ks.length - 1];
-    if (v === null || v === undefined) delete n[last]; else n[last] = v;
+    if (v === null || v === undefined || (typeof v === 'object' && !Object.keys(v).length)) delete n[last]; else n[last] = v;
+    // Como Firebase: un nodo que se queda sin hijos deja de existir
+    for (let i = ks.length - 1; i > 0; i--) {
+      const padre = getAt(ks.slice(0, i).join('/'));
+      if (padre && typeof padre === 'object' && !Object.keys(padre).length) setAt(ks.slice(0, i).join('/'), null); else break;
+    }
   }
   function uidActual() { return authObj.currentUser ? authObj.currentUser.uid : null; }
   function permitido(op) {

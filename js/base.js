@@ -48,3 +48,17 @@ function navegadorDentroDeApp() {
   const ua = navigator.userAgent || '';
   return /FBAN|FBAV|Instagram|Line\/|; wv\)|WhatsApp/i.test(ua);
 }
+
+// Identificador nuevo (jugadores, hazañas): corto, único y sin datos personales
+function nuevoId(prefijo) { return prefijo + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// Botón de dos toques para acciones delicadas (sin ventanas del navegador):
+// el primer toque pide confirmar; el segundo, en menos de 5 s, ejecuta.
+function dosToques(boton, accion) {
+  if (boton.dataset.armado) { delete boton.dataset.armado; accion(); return; }
+  boton.dataset.armado = '1'; boton.dataset.texto = boton.textContent;
+  boton.textContent = '¿Seguro? Toca otra vez';
+  setTimeout(() => { if (boton.isConnected && boton.dataset.armado) { delete boton.dataset.armado; boton.textContent = boton.dataset.texto; } }, 5000);
+}
+
+function enlaceWhatsApp(texto) { return 'https://wa.me/?text=' + encodeURIComponent(texto); }
