@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 298 de 298 casos pasaron.
+**✅ TODO BIEN** — 316 de 316 casos pasaron.
 
-- Fecha: 06/10/2026 12:39 (hora de Ciudad de México)
-- Versión probada: `1ae66db` + cambios aún sin guardar
-- Duración: 62 s
+- Fecha: 06/10/2026 13:02 (hora de Ciudad de México)
+- Versión probada: `205d174` + cambios aún sin guardar
+- Duración: 65 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -22,10 +22,11 @@
 | 8 | Ajustes, hazañas, archivar y borrar | 19 | ✅ |
 | 9 | Equipo: ayudantes por invitación | 26 | ✅ |
 | 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
-| 11 | Torneos de un día | 44 | ✅ |
+| 11 | Torneos de un día | 43 | ✅ |
 | 12 | Enlaces del sitio de pruebas y detalles de diseño | 10 | ✅ |
 | 13 | Fechas de la liga: validaciones | 15 | ✅ |
 | 14 | Solicitudes para organizar, guía y aviso «100% casual» | 21 | ✅ |
+| 15 | País y ciudad obligatorios | 19 | ✅ |
 
 ## Todos los casos
 
@@ -304,37 +305,36 @@
 | 11 | la tarjeta del torneo trae la etiqueta TORNEO y «2 rondas + final» | ✅ |
 | 12 | filtro «Torneos»: solo el torneo | ✅ |
 | 13 | filtro «Ligas»: sin el torneo | ✅ |
-| 14 | buscar «monterrey» (sin importar mayúsculas) deja solo el torneo de esa ciudad | ✅ |
-| 15 | escribir en la búsqueda no pierde lo escrito | ✅ |
-| 16 | sin coincidencias: «Ningún evento coincide» | ✅ |
-| 17 | fecha 5 dic: el torneo de ese día y las ligas que se juegan esas fechas (A, B, D) | ✅ |
-| 18 | fecha sin eventos: «Ningún evento coincide» | ✅ |
-| 19 | sin desborde horizontal a 390 px | ✅ |
-| 20 | Beto empieza el torneo | ✅ |
-| 21 | pase de lista: 10 presentes | ✅ |
-| 22 | con 2 rondas planeadas no ofrece una tercera | ✅ |
-| 23 | aparece «Pasar a la final (top 5)» | ✅ |
-| 24 | la final tiene a los 5 primeros de la clasificación, con su lugar | ✅ |
-| 25 | las rondas quedan cerradas a cambios (sin selectores de VP de rondas) | ✅ |
-| 26 | la final NO tiene selección de asientos ni orden de elección | ✅ |
-| 27 | la final lista a los 5 por su lugar (1º a 5º) | ✅ |
-| 28 | aparecen de una vez los 5 selectores de VP de la final | ✅ |
-| 29 | Beto termina el torneo | ✅ |
-| 30 | las reglas aceptaron todo lo de Beto | ✅ |
-| 31 | Clasificación pública: «🏆 CAMPEÓN» con quien tuvo más VP en la final (2 VP) | ✅ |
-| 32 | la tabla trae la columna «Final» y 10 jugadores | ✅ |
-| 33 | no muestra TP ni explicaciones de puntos | ✅ |
-| 34 | el público ve la final y las 2 rondas sin controles | ✅ |
-| 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
-| 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 37 | WhatsApp: «campeón: Toni» | ✅ |
-| 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
-| 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
-| 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
-| 41 | sin desborde horizontal a 390 px | ✅ |
-| 42 | REGLAS: el ayudante no cambia las rondas | ✅ |
-| 43 | REGLAS: nadie pone 4 rondas | ✅ |
-| 44 | las páginas abrieron sin errores | ✅ |
+| 14 | filtro de ciudad «Monterrey» deja solo el torneo de esa ciudad | ✅ |
+| 15 | sin coincidencias: «Ningún evento coincide» | ✅ |
+| 16 | fecha 5 dic: el torneo de ese día y las ligas que se juegan esas fechas (A, B, D) | ✅ |
+| 17 | fecha sin eventos: «Ningún evento coincide» | ✅ |
+| 18 | sin desborde horizontal a 390 px | ✅ |
+| 19 | Beto empieza el torneo | ✅ |
+| 20 | pase de lista: 10 presentes | ✅ |
+| 21 | con 2 rondas planeadas no ofrece una tercera | ✅ |
+| 22 | aparece «Pasar a la final (top 5)» | ✅ |
+| 23 | la final tiene a los 5 primeros de la clasificación, con su lugar | ✅ |
+| 24 | las rondas quedan cerradas a cambios (sin selectores de VP de rondas) | ✅ |
+| 25 | la final NO tiene selección de asientos ni orden de elección | ✅ |
+| 26 | la final lista a los 5 por su lugar (1º a 5º) | ✅ |
+| 27 | aparecen de una vez los 5 selectores de VP de la final | ✅ |
+| 28 | Beto termina el torneo | ✅ |
+| 29 | las reglas aceptaron todo lo de Beto | ✅ |
+| 30 | Clasificación pública: «🏆 CAMPEÓN» con quien tuvo más VP en la final (2 VP) | ✅ |
+| 31 | la tabla trae la columna «Final» y 10 jugadores | ✅ |
+| 32 | no muestra TP ni explicaciones de puntos | ✅ |
+| 33 | el público ve la final y las 2 rondas sin controles | ✅ |
+| 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
+| 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
+| 36 | WhatsApp: «campeón: Lasombra» | ✅ |
+| 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
+| 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
+| 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
+| 40 | sin desborde horizontal a 390 px | ✅ |
+| 41 | REGLAS: el ayudante no cambia las rondas | ✅ |
+| 42 | REGLAS: nadie pone 4 rondas | ✅ |
+| 43 | las páginas abrieron sin errores | ✅ |
 
 ### 12. Enlaces del sitio de pruebas y detalles de diseño
 
@@ -396,3 +396,27 @@
 | 19 | Pepe ya ve «+ Nueva liga» y «+ Nuevo torneo», sin formulario | ✅ |
 | 20 | Rechazar: borra la solicitud y NO da permiso | ✅ |
 | 21 | las páginas abrieron sin errores | ✅ |
+
+### 15. País y ciudad obligatorios
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | el país viene en México y hay lista México, Chile, España, Otro | ✅ |
+| 2 | sugiere las ciudades que ya existen en México («Ciudad de México») | ✅ |
+| 3 | al cambiar a Chile sugiere «Santiago» | ✅ |
+| 4 | sin ciudad → «Elige el país y escribe la ciudad.» | ✅ |
+| 5 | «ciudad de mexico» se guarda como la ya existente «Ciudad de México», con país México | ✅ |
+| 6 | filtro País: solo los que tienen eventos (Chile, México) | ✅ |
+| 7 | la tarjeta dice «Ciudad de México, México» | ✅ |
+| 8 | el evento viejo sin país dice «Sin país» | ✅ |
+| 9 | País = Chile: solo Liga B | ✅ |
+| 10 | con Chile, Ciudad solo ofrece Santiago | ✅ |
+| 11 | México + Ciudad de México: Liga A, D y Liga Norte; no Liga B | ✅ |
+| 12 | la búsqueda ahora es por nombre: «norte» → Liga Norte | ✅ |
+| 13 | «Limpiar» quita país, ciudad y búsqueda | ✅ |
+| 14 | sin desborde horizontal a 390 px | ✅ |
+| 15 | Ajustes avisa «Este evento no tiene país» | ✅ |
+| 16 | no deja guardar sin país | ✅ |
+| 17 | con país y ciudad sí se guarda (España, Madrid) | ✅ |
+| 18 | REGLAS: un país fuera de la lista se rechaza | ✅ |
+| 19 | las páginas abrieron sin errores | ✅ |

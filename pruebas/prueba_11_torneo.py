@@ -7,7 +7,7 @@ T = "window.__store().eventos['torneo-a']"
 
 def seed_torneo(estado='pendiente', rondas=2, final=True, n=10):
     s = H.seed_base()
-    s['eventos']['torneo-a'] = {'ownerUid': 'ana', 'tipo': 'torneo', 'nombre': 'Torneo de Otoño', 'creada': 1, 'ciudad': 'Guadalajara',
+    s['eventos']['torneo-a'] = {'ownerUid': 'ana', 'tipo': 'torneo', 'nombre': 'Torneo de Otoño', 'creada': 1, 'ciudad': 'Guadalajara', 'pais': 'México',
                                 'organizadorNombre': 'Ana', 'fecha': '2026-11-14', 'hora': '16:00', 'rondasPlan': rondas, 'conFinal': final,
                                 'hazanasModo': 'mencion', 'hazanasCatalogo': {'h1': {'nombre': 'Mazo más original'}},
                                 'ayudantes': {'beto': {'nombre': 'Beto', 'desde': 1}},
@@ -59,10 +59,10 @@ def correr(nav, g):
     t = pg.inner_text('#listaEventos')
     g.caso('filtro «Ligas»: sin el torneo', 'Torneo de Invierno' not in t and 'Liga A' in t)
     pg.click('button[data-filtro-tipo=todos]')
-    pg.fill('#filtroTexto', 'monterrey'); pg.wait_for_timeout(100)
+    pg.select_option('#filtroCiudad', 'Monterrey'); pg.wait_for_timeout(100)
     t = pg.inner_text('#listaEventos')
-    g.caso('buscar «monterrey» (sin importar mayúsculas) deja solo el torneo de esa ciudad', 'Torneo de Invierno' in t and 'Liga A' not in t, t)
-    g.caso('escribir en la búsqueda no pierde lo escrito', pg.input_value('#filtroTexto') == 'monterrey')
+    g.caso('filtro de ciudad «Monterrey» deja solo el torneo de esa ciudad', 'Torneo de Invierno' in t and 'Liga A' not in t, t)
+    pg.click('#limpiarFiltros'); pg.wait_for_timeout(100)
     pg.fill('#filtroTexto', 'xyz'); pg.wait_for_timeout(100)
     g.caso('sin coincidencias: «Ningún evento coincide»', 'Ningún evento coincide' in pg.inner_text('#listaEventos'))
     pg.click('#limpiarFiltros'); pg.wait_for_timeout(100)

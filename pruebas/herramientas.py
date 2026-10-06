@@ -103,7 +103,11 @@ def seed_base():
     """Los mismos datos de prueba que se cargaron en la base de pruebas real (Ana, Carla, Dora, Beto…)."""
     ruta = CARPETA_REGLAS / 'datos-prueba.json'
     if ruta.exists():
-        return json.loads(ruta.read_text(encoding='utf-8'))
+        d = json.loads(ruta.read_text(encoding='utf-8'))
+        # Desde v1.6 el país y la ciudad son obligatorios: los ejemplos los traen
+        for ev in d.get('eventos', {}).values():
+            ev.setdefault('pais', 'México'); ev.setdefault('ciudad', 'Ciudad de México')
+        return d
     return {'admins': {'superusuario-prueba': True}, 'organizadores': {'ana': True, 'carla': True},
             'eventos': {'liga-a': {'ownerUid': 'ana', 'tipo': 'liga', 'nombre': 'Liga A', 'creada': 1,
                                    'ayudantes': {'beto': {'nombre': 'Beto', 'desde': 1}}}}}

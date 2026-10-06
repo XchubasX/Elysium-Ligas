@@ -192,7 +192,9 @@ function seccionAjustes(id, ev) {
   let h = '<form id="formAjustes" class="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 space-y-3" onsubmit="guardarAjustes(event)" oninput="this.dataset.sucio=1" onchange="this.dataset.sucio=1" novalidate>' +
     '<h3 class="font-bold">Datos de la liga</h3>' +
     campo('Nombre', '<input id="ajNombre" maxlength="80" value="' + esc(ev.nombre) + '" class="' + INP + '">') +
-    campo('Ciudad', '<input id="ajCiudad" maxlength="60" value="' + esc(ev.ciudad || '') + '" class="' + INP + '">') +
+    '<div class="grid grid-cols-[1fr_1.4fr] gap-2">' + campo('País *', selectorPais('ajPais', ev.pais || '', 'actualizarCiudades(\'ajPais\',\'ciudadesAj\',\'' + esc(id) + '\')')) +
+      campo('Ciudad *', '<input id="ajCiudad" maxlength="60" list="ciudadesAj" autocomplete="off" value="' + esc(ev.ciudad || '') + '" class="' + INP + '">' + listaCiudades('ciudadesAj', ev.pais || '', id)) + '</div>' +
+    (ev.pais ? '' : '<p class="text-xs text-amber-300 -mt-1">Este evento no tiene país: elígelo y guarda.</p>') +
     campo('Nombre del organizador', '<input id="ajOrganizador" maxlength="40" value="' + esc(ev.organizadorNombre || '') + '" class="' + INP + '">') +
     (esTorneo(ev)
       ? '<div class="grid grid-cols-2 gap-2">' + campo('Fecha', '<input id="ajFecha" type="date" value="' + esc(ev.fecha || '') + '" class="' + INP + '">') + campo('Hora', '<input id="ajHora" type="time" value="' + esc(ev.hora || '') + '" class="' + INP + '">') + '</div>' +
@@ -234,7 +236,9 @@ async function guardarAjustes(e) {
   const err = (t) => { const p = $('ajError'); p.textContent = t; p.classList.remove('hidden'); };
   const nombre = $('ajNombre').value.trim();
   if (!nombre) return err('Escribe el nombre.');
-  const nuevo = { nombre, ciudad: $('ajCiudad').value.trim(), organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
+  const pais = $('ajPais').value, ciudadEscrita = $('ajCiudad').value.trim();
+  if (!pais || !ciudadEscrita) return err('Elige el país y escribe la ciudad.');
+  const nuevo = { nombre, pais, ciudad: normalizarCiudad(pais, ciudadEscrita, id), organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
     hazanasModo: (document.querySelector('input[name="ajHazanas"]:checked') || {}).value || 'mencion', reglasTexto: $('ajReglas').value.trim() };
   const extra = {};
   if (esTorneo(ev)) {
