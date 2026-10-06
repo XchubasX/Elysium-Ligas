@@ -25,8 +25,12 @@ function dibujar(motivo) {
   const f = $('formCrear'); if (f) f.addEventListener('submit', enviarCrear);
 }
 
+// El enlace a las mesas apunta al Elysium del mismo entorno (pruebas → uat.eternalschedule.com)
+const MESAS = window.ELYSIUM_MESAS || 'eternalschedule.com';
+if ($('enlaceMesas')) { $('enlaceMesas').href = 'https://' + MESAS; $('enlaceMesas').textContent = MESAS; }
+
 if (!window.LIGAS_CONFIG) {
-  $('app').innerHTML = '<p class="text-center text-zinc-300 py-10">Este sitio todavía no está abierto. Mientras tanto, las mesas están en <a class="text-wine-300 underline" href="https://eternalschedule.com">eternalschedule.com</a>.</p>';
+  $('app').innerHTML = '<p class="text-center text-zinc-300 py-10">Este sitio todavía no está abierto. Mientras tanto, las mesas están en <a class="text-wine-300 underline" href="https://' + MESAS + '">' + MESAS + '</a>.</p>';
 } else {
   if (window.LIGAS_CONFIG.esPruebas) $('franjaPruebas').classList.remove('hidden');
   iniciarFirebase();

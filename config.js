@@ -26,4 +26,6 @@
   var host = window.location.hostname;
   var esDireccionReal = host === 'ligas.eternalschedule.com' || host === 'elysium-ligas.chubas.workers.dev';
   window.LIGAS_CONFIG = esDireccionReal ? PRODUCCION : PRUEBAS;
+  // Elysium (las mesas) del MISMO entorno: desde pruebas nunca se manda a nadie a producción.
+  window.ELYSIUM_MESAS = esDireccionReal ? 'eternalschedule.com' : 'uat.eternalschedule.com';
 })();

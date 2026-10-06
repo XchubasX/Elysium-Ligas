@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 253 de 253 casos pasaron.
+**✅ TODO BIEN** — 257 de 257 casos pasaron.
 
-- Fecha: 06/10/2026 07:32 (hora de Ciudad de México)
-- Versión probada: `960a16e` + cambios aún sin guardar
-- Duración: 52 s
+- Fecha: 06/10/2026 08:20 (hora de Ciudad de México)
+- Versión probada: `2dd509f` + cambios aún sin guardar
+- Duración: 54 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -23,6 +23,7 @@
 | 9 | Equipo: ayudantes por invitación | 26 | ✅ |
 | 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
 | 11 | Torneos de un día | 44 | ✅ |
+| 12 | Enlaces del sitio de pruebas | 4 | ✅ |
 
 ## Todos los casos
 
@@ -325,7 +326,7 @@
 | 34 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 37 | WhatsApp: «campeón: Jordi» | ✅ |
+| 37 | WhatsApp: «campeón: Toni» | ✅ |
 | 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -333,3 +334,12 @@
 | 42 | REGLAS: el ayudante no cambia las rondas | ✅ |
 | 43 | REGLAS: nadie pone 4 rondas | ✅ |
 | 44 | las páginas abrieron sin errores | ✅ |
+
+### 12. Enlaces del sitio de pruebas
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | en pruebas, «las mesas» lleva a uat.eternalschedule.com | ✅ |
+| 2 | y dice «uat.eternalschedule.com» | ✅ |
+| 3 | no queda ningún enlace a producción en la página | ✅ |
+| 4 | la página abrió sin errores | ✅ |
