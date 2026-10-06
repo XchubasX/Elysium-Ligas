@@ -15,7 +15,7 @@ def correr(nav, g):
     t = H.texto(pg)
     g.caso('Mis eventos de Ana: Liga A (suya) y botón «+ Nueva liga»', 'Liga A' in t and '+ Nueva liga' in t, t[:500])
     g.caso('Ana no ve Liga B ni Liga D (no son suyas)', 'Liga B' not in t.split('Mis eventos', 1)[1] and 'Liga D' not in t.split('Mis eventos', 1)[1])
-    g.caso('a un organizador no se le pide su identificador', not pg.is_visible('#miUid'))
+    g.caso('a un organizador no se le ofrece «Quiero organizar»', not pg.is_visible('#formSolicitud'))
     pg.goto(pg.url.split('#')[0] + '#/liga/liga-a'); pg.wait_for_timeout(120)
     g.caso('en su liga, Ana ve la pastilla «Organizas tú»', 'Organizas tú' in H.texto(pg))
     pg.click('#barraSesion >> text=Salir'); pg.wait_for_timeout(150)
@@ -33,8 +33,7 @@ def correr(nav, g):
     ctx, pg, e3 = H.abrir(nav, seed, '#/mis-eventos', usuario=H.NUEVO)
     t = H.texto(pg)
     g.caso('cuenta nueva: «Todavía no organizas ni ayudas»', 'Todavía no organizas' in t, t[:400])
-    g.caso('cuenta nueva: se muestra su identificador para pedir permiso', pg.is_visible('#miUid') and pg.inner_text('#miUid') == 'uid-nuevo-123')
-    g.caso('el identificador NO es el correo (no hay @)', '@' not in pg.inner_text('#miUid'))
+    g.caso('cuenta nueva: se le ofrece el formulario «¿Quieres organizar…?»', pg.is_visible('#formSolicitud'))
     g.caso('sin desborde horizontal a 390 px', H.sin_desborde(pg))
     ctx.close()
 

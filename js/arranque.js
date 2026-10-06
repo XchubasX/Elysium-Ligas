@@ -14,7 +14,8 @@ function dibujar(motivo) {
   redibujoPendiente = false;
   $('barraSesion').innerHTML = barraSesion();
   let html;
-  if (r.vista === 'invitacion') html = vistaInvitacion(r.id, r.pestana === 'tabla' ? null : r.pestana);
+  if (r.vista === 'ayuda') html = vistaAyuda();
+  else if (r.vista === 'invitacion') html = vistaInvitacion(r.id, r.pestana === 'tabla' ? null : r.pestana);
   else if (r.vista === 'liga' && r.id && r.pestana === 'jornada' && r.sub) html = vistaJornada(r.id, r.sub);
   else if (r.vista === 'liga' && r.id) html = vistaLiga(r.id, r.pestana);
   else if (r.vista === 'archivadas') html = vistaPortada(true);

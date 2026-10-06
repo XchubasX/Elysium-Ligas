@@ -6,6 +6,8 @@
 let db = null, auth = null;
 let usuario = null, soyAdmin = false, soyOrganizador = false, sesionLista = false;
 let eventos = {}, datosCargados = false, errorDatos = false;
+// Solicitudes para ser organizador: la propia (cuenta sin permiso) y todas (superusuario)
+let miSolicitud = null, solicitudes = {}, escuchandoSolicitudes = false;
 
 function iniciarFirebase() {
   const cfg = window.LIGAS_CONFIG;
@@ -28,6 +30,7 @@ function escucharSesion(alCambiar) {
   auth.onAuthStateChanged(async (u) => {
     usuario = u || null; soyAdmin = false; soyOrganizador = false;
     if (usuario) { [soyAdmin, soyOrganizador] = await Promise.all([leerPropio('admins', usuario.uid), leerPropio('organizadores', usuario.uid)]); }
+    await cargarSolicitudes(alCambiar);
     sesionLista = true;
     alCambiar('sesion');
   });
@@ -78,4 +81,15 @@ async function borrarLiga(id) {
     await db.ref().update(cambios); aviso('Liga borrada'); return true;
   }
   catch (e) { aviso('No se pudo borrar la liga.', 'error'); return false; }
+}
+
+async function cargarSolicitudes(alCambiar) {
+  miSolicitud = null;
+  if (usuario && !soyOrganizador && !soyAdmin) {
+    try { miSolicitud = (await db.ref('solicitudes/' + usuario.uid).get()).val(); } catch (e) { miSolicitud = null; }
+  }
+  if (soyAdmin && !escuchandoSolicitudes) {
+    escuchandoSolicitudes = true;
+    db.ref('solicitudes').on('value', (s) => { solicitudes = s.val() || {}; alCambiar('datos'); }, () => { solicitudes = {}; });
+  }
 }

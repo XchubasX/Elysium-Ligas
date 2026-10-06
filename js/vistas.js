@@ -94,7 +94,7 @@ function vistaPortada(archivadas) {
   if (!datosCargados) return cargando();
   const inp = 'bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-wine-500 w-full';
   let h = '<div class="flex items-center justify-between gap-3"><h2 class="text-base font-bold">' + (archivadas ? 'Eventos archivados' : 'Ligas y torneos') + '</h2>' +
-    (archivadas ? '<a href="#/" class="text-sm text-wine-300 underline">← Eventos activos</a>' : '') + '</div>';
+    (archivadas ? '<a href="#/" class="text-sm text-wine-300 underline">← Eventos activos</a>' : '') + '</div>' + '<div class="-mt-2">' + etiquetaCasual() + '</div>';
   h += '<div class="space-y-2"><div class="grid grid-cols-[1fr_150px] gap-2">' +
     '<input id="filtroTexto" type="search" placeholder="🔍 Ciudad o nombre" value="' + esc(filtro.texto) + '" oninput="cambiarFiltro(\'texto\', this.value)" class="' + inp + '" aria-label="Buscar por ciudad o nombre">' +
     '<input id="filtroFecha" type="date" value="' + esc(filtro.fecha) + '" onchange="cambiarFiltro(\'fecha\', this.value)" class="' + inp + '" aria-label="Fecha"></div>' +
@@ -102,7 +102,7 @@ function vistaPortada(archivadas) {
       '<button type="button" data-filtro-tipo="' + k + '" aria-pressed="' + (filtro.tipo === k) + '" onclick="cambiarFiltro(\'tipo\',\'' + k + '\')" class="text-sm px-3 py-1.5 rounded-full ' + (filtro.tipo === k ? 'bg-wine-600 text-white font-semibold' : 'border border-zinc-700 text-zinc-400') + '">' + t + '</button>').join('') +
     '<button type="button" id="limpiarFiltros" onclick="limpiarFiltros()" class="text-sm text-zinc-400 underline ml-auto' + ((filtro.texto || filtro.fecha || filtro.tipo !== 'todos') ? '' : ' hidden') + '">Limpiar</button></div></div>';
   h += '<div id="listaEventos">' + listaPortada(archivadas) + '</div>';
-  if (!archivadas) h += '<div class="text-center pt-2"><a href="#/archivadas" class="text-sm text-zinc-400 underline">Ver archivados</a></div>';
+  if (!archivadas) h += '<div class="text-center pt-2 flex justify-center gap-4"><a href="#/archivadas" class="text-sm text-zinc-400 underline">Ver archivados</a><a href="#/ayuda" class="text-sm text-zinc-400 underline">¿Quieres organizar? Cómo funciona</a></div>';
   return h;
 }
 
@@ -126,6 +126,7 @@ function vistaLiga(id, pestana) {
     '<p class="text-[13px] text-zinc-400">' + (torneo
       ? [esc(ev.ciudad), esc(fechaCorta(ev.fecha)) + (ev.hora ? ' · ' + esc(ev.hora) : ''), esc(textoRondas(ev)), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]
       : [esc(ev.ciudad), (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : ''), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]).filter(Boolean).join(' · ') + '</p>' +
+    etiquetaCasual() +
     (ev.archivada ? '<p class="text-[13px] text-amber-300">' + (torneo ? 'Torneo archivado' : 'Liga archivada') + ': ya no aparece en la portada.</p>' : '') + '</div>';
   h += '<nav class="flex gap-1.5 flex-wrap" aria-label="Secciones de la liga">' + pestanas.map(([k, t]) =>
     '<a href="#/liga/' + esc(id) + '/' + k + '" class="text-sm px-3 py-1.5 rounded-full ' + (k === pestana ? 'bg-wine-600 text-white font-semibold' : 'border border-zinc-700 text-zinc-400 hover:text-zinc-200') + '"' + (k === pestana ? ' aria-current="page"' : '') + '>' + t + '</a>').join('') + '</nav>';
@@ -189,7 +190,7 @@ function vistaMisEventos() {
   if (!datosCargados) return cargando();
   const mias = Object.keys(eventos).filter(id => eventos[id].ownerUid === usuario.uid || esAyudante(eventos[id]));
   mias.sort((a, b) => String(fechaOrden(eventos[a])).localeCompare(String(fechaOrden(eventos[b]))));
-  let h = '<h2 class="text-base font-bold">Mis eventos</h2>';
+  let h = bloqueSolicitudesAdmin() + '<h2 class="text-base font-bold">Mis eventos</h2>';
   if (soyOrganizador || soyAdmin) h += '<div class="grid grid-cols-2 gap-2"><a href="#/crear" class="' + BTN + '">+ Nueva liga</a><a href="#/crear/torneo" class="' + BTN + '">+ Nuevo torneo</a></div>';
   h += mias.length ? '<div class="space-y-2">' + mias.map(id => {
     const ev = eventos[id];
@@ -200,12 +201,8 @@ function vistaMisEventos() {
     return '<a href="#/liga/' + esc(id) + '" class="flex justify-between items-center bg-zinc-800 rounded-lg px-3 py-2.5 hover:bg-zinc-700/70"><span><b>' + esc(ev.nombre) + '</b>' + etiquetas +
       '<br><span class="text-xs text-zinc-400">' + esc(sub) + '</span></span><span class="text-sm font-bold text-wine-300">Abrir ›</span></a>';
   }).join('') + '</div>' : '<p class="text-zinc-400 text-sm">Todavía no organizas ni ayudas en ninguna liga o torneo.</p>';
-  if (!soyOrganizador && !soyAdmin) {
-    h += '<div class="bg-zinc-800 border border-zinc-700 rounded-xl p-4 space-y-2 text-sm"><p class="font-bold">¿Quieres organizar una liga o un torneo?</p>' +
-      '<p class="text-zinc-300">Pídele al administrador del sitio que te dé permiso de organizador y mándale este identificador de tu cuenta (no es tu correo):</p>' +
-      '<div class="flex gap-2 items-center"><code id="miUid" class="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs break-all">' + esc(usuario.uid) + '</code>' +
-      '<button type="button" onclick="copiarUid()" class="' + BTN2 + ' !py-1.5">Copiar</button></div></div>';
-  }
+  if (!soyOrganizador && !soyAdmin) h += bloqueSolicitud();
+  h += '<a href="#/ayuda" class="text-sm text-zinc-400 underline text-center">Cómo funciona</a>';
   return h;
 }
 function copiarUid() {
@@ -286,5 +283,5 @@ function barraSesion() {
   const rol = soyAdmin ? 'Superusuario' : (soyOrganizador ? 'Organizador' : '');
   return '<div class="text-right text-[13px] leading-tight"><div class="text-zinc-200 font-semibold">' + esc(nombreUsuario()) + '</div>' +
     (rol ? '<div class="text-zinc-400">' + rol + '</div>' : '') +
-    '<div class="flex gap-2 justify-end mt-0.5"><a href="#/mis-eventos" class="text-wine-300 underline">Mis eventos</a><button type="button" onclick="cerrarSesion()" class="text-zinc-400 underline">Salir</button></div></div>';
+    '<div class="flex gap-2 justify-end mt-0.5"><a href="#/mis-eventos" class="text-wine-300 underline">Mis eventos</a>' + (solicitudesPendientes() ? ' <span data-pendientes class="' + PILL + ' bg-wine-600 text-white !py-0">' + solicitudesPendientes() + '</span>' : '') + '<button type="button" onclick="cerrarSesion()" class="text-zinc-400 underline">Salir</button></div></div>';
 }

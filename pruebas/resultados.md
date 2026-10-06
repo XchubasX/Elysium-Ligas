@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 278 de 278 casos pasaron.
+**✅ TODO BIEN** — 298 de 298 casos pasaron.
 
-- Fecha: 06/10/2026 11:58 (hora de Ciudad de México)
-- Versión probada: `ddcc252` + cambios aún sin guardar
-- Duración: 57 s
+- Fecha: 06/10/2026 12:39 (hora de Ciudad de México)
+- Versión probada: `1ae66db` + cambios aún sin guardar
+- Duración: 62 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -14,7 +14,7 @@
 |---|---|---|---|
 | 1 | Cálculos: GW, VP y orden de la tabla | 14 | ✅ |
 | 2 | Portada y página pública de la liga | 24 | ✅ |
-| 3 | Sesión, roles y Mis eventos | 17 | ✅ |
+| 3 | Sesión, roles y Mis eventos | 16 | ✅ |
 | 4 | Crear liga | 22 | ✅ |
 | 5 | Calendario de jornadas (organizador) | 21 | ✅ |
 | 6 | Jugadores de la liga | 15 | ✅ |
@@ -25,6 +25,7 @@
 | 11 | Torneos de un día | 44 | ✅ |
 | 12 | Enlaces del sitio de pruebas y detalles de diseño | 10 | ✅ |
 | 13 | Fechas de la liga: validaciones | 15 | ✅ |
+| 14 | Solicitudes para organizar, guía y aviso «100% casual» | 21 | ✅ |
 
 ## Todos los casos
 
@@ -83,20 +84,19 @@
 | 1 | al entrar, el encabezado muestra «Ana» y «Organizador» | ✅ |
 | 2 | Mis eventos de Ana: Liga A (suya) y botón «+ Nueva liga» | ✅ |
 | 3 | Ana no ve Liga B ni Liga D (no son suyas) | ✅ |
-| 4 | a un organizador no se le pide su identificador | ✅ |
+| 4 | a un organizador no se le ofrece «Quiero organizar» | ✅ |
 | 5 | en su liga, Ana ve la pastilla «Organizas tú» | ✅ |
 | 6 | «Salir» regresa el botón «Entrar con Google» | ✅ |
 | 7 | Beto (ayudante de Liga A) la ve en Mis eventos con la etiqueta AYUDANTE | ✅ |
 | 8 | Beto no tiene botón «+ Nueva liga» | ✅ |
 | 9 | en Liga A, Beto ve la pastilla «Ayudante» | ✅ |
 | 10 | cuenta nueva: «Todavía no organizas ni ayudas» | ✅ |
-| 11 | cuenta nueva: se muestra su identificador para pedir permiso | ✅ |
-| 12 | el identificador NO es el correo (no hay @) | ✅ |
-| 13 | sin desborde horizontal a 390 px | ✅ |
-| 14 | Dora (dueña pero SIN permiso de organizadora) no ve «Organizas tú» | ✅ |
-| 15 | el superusuario ve «Superusuario» en cualquier liga | ✅ |
-| 16 | sin sesión, Mis eventos pide entrar con Google | ✅ |
-| 17 | las páginas abrieron sin errores | ✅ |
+| 11 | cuenta nueva: se le ofrece el formulario «¿Quieres organizar…?» | ✅ |
+| 12 | sin desborde horizontal a 390 px | ✅ |
+| 13 | Dora (dueña pero SIN permiso de organizadora) no ve «Organizas tú» | ✅ |
+| 14 | el superusuario ve «Superusuario» en cualquier liga | ✅ |
+| 15 | sin sesión, Mis eventos pide entrar con Google | ✅ |
+| 16 | las páginas abrieron sin errores | ✅ |
 
 ### 4. Crear liga
 
@@ -327,7 +327,7 @@
 | 34 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 37 | WhatsApp: «campeón: Lasombra» | ✅ |
+| 37 | WhatsApp: «campeón: Toni» | ✅ |
 | 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -370,3 +370,29 @@
 | 13 | mover el inicio después de la J1 → bloqueado | ✅ |
 | 14 | crear liga sin fechas → «Las fechas de inicio y fin son obligatorias.» | ✅ |
 | 15 | las páginas abrieron sin errores | ✅ |
+
+### 14. Solicitudes para organizar, guía y aviso «100% casual»
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | portada: etiqueta «100% CASUAL · NO SANCIONADOS POR VEKN» | ✅ |
+| 2 | portada: enlace «¿Quieres organizar? Cómo funciona» | ✅ |
+| 3 | pie: dice que son 100% casuales y no sancionados por VEKN | ✅ |
+| 4 | página de la liga: también trae la etiqueta | ✅ |
+| 5 | guía «Cómo funciona»: 5 pasos y preguntas frecuentes | ✅ |
+| 6 | la guía invita a «Quiero organizar» a quien no organiza | ✅ |
+| 7 | sin desborde horizontal a 390 px | ✅ |
+| 8 | el formulario trae su primer nombre | ✅ |
+| 9 | se guarda su solicitud (nombre, ciudad, mensaje y fecha), sin correo | ✅ |
+| 10 | cambia a «✓ Solicitud enviada» | ✅ |
+| 11 | REGLAS: no se puede aprobar a sí mismo | ✅ |
+| 12 | REGLAS: no puede ver las solicitudes de otros | ✅ |
+| 13 | al volver, sigue diciendo «Solicitud enviada» | ✅ |
+| 14 | el superusuario ve un contador «1» junto a «Mis eventos» | ✅ |
+| 15 | «Solicitudes para organizar»: Pepe · Guadalajara con su mensaje | ✅ |
+| 16 | Aprobar: queda como organizador y se borra la solicitud | ✅ |
+| 17 | ya no hay solicitudes pendientes (desaparece el bloque y el contador) | ✅ |
+| 18 | las reglas aceptaron todo | ✅ |
+| 19 | Pepe ya ve «+ Nueva liga» y «+ Nuevo torneo», sin formulario | ✅ |
+| 20 | Rechazar: borra la solicitud y NO da permiso | ✅ |
+| 21 | las páginas abrieron sin errores | ✅ |
