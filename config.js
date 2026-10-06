@@ -20,8 +20,21 @@
     },
     recaptchaKey: '6LfZTuEtAAAAAC9MIA5gA0raN0qFkFTooQOIb74J'
   };
-  // Se llena cuando se monte producción (Firebase "elysium-ligas").
-  var PRODUCCION = null;
+  // Producción (Firebase "elysium-ligas"), montada el 6 oct 2026.
+  var PRODUCCION = {
+    nombre: 'produccion',
+    esPruebas: false,
+    firebase: {
+      apiKey: 'AIzaSyAZrRr3YVenmmnM9MqTL9bQ2w8y3TLTL0Y',
+      authDomain: 'elysium-ligas.firebaseapp.com',
+      databaseURL: 'https://elysium-ligas-default-rtdb.firebaseio.com',
+      projectId: 'elysium-ligas',
+      storageBucket: 'elysium-ligas.firebasestorage.app',
+      messagingSenderId: '790037393310',
+      appId: '1:790037393310:web:0df5babf84a212fb7bb08f'
+    },
+    recaptchaKey: '6LfzN-ItAAAAAC2FoII4qC6NkyxBccLl-rMOvEpO'
+  };
 
   var host = window.location.hostname;
   var esDireccionReal = host === 'ligas.eternalschedule.com' || host === 'elysium-ligas.chubas.workers.dev';

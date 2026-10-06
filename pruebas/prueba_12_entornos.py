@@ -14,6 +14,7 @@ def correr(nav, g):
     g.caso('la página abrió sin errores', not err, err)
     ctx.close()
     correr_iconos(nav, g)
+    correr_config(g)
 
 
 def correr_iconos(nav, g):
@@ -21,3 +22,20 @@ def correr_iconos(nav, g):
     esquemas = pg.evaluate("[...document.querySelectorAll('input[type=date],input[type=time]')].map(i => getComputedStyle(i).colorScheme)")
     g.caso('fechas y horas usan el esquema oscuro (ícono de calendario/reloj claro y visible)', esquemas and all(e == 'dark' for e in esquemas), esquemas)
     ctx.close()
+
+
+def correr_config(g):
+    """Cada dirección usa SU base: producción solo en ligas.eternalschedule.com y su workers.dev."""
+    import subprocess, json
+    js = (H.REPO / 'config.js').read_text(encoding='utf-8')
+    def probar(host):
+        code = 'var window={location:{hostname:%s}};%s;console.log(JSON.stringify({p:window.LIGAS_CONFIG&&window.LIGAS_CONFIG.firebase.projectId,m:window.ELYSIUM_MESAS,e:window.LIGAS_CONFIG&&window.LIGAS_CONFIG.esPruebas}))' % (json.dumps(host), js)
+        return json.loads(subprocess.run(['node', '-e', code], capture_output=True, text=True).stdout)
+    for host, proyecto, mesas, pruebas in [('ligas.eternalschedule.com', 'elysium-ligas', 'eternalschedule.com', False),
+                                           ('elysium-ligas.chubas.workers.dev', 'elysium-ligas', 'eternalschedule.com', False),
+                                           ('uat-ligas.eternalschedule.com', 'elysium-ligas-uat', 'uat.eternalschedule.com', True),
+                                           ('elysium-ligas-uat.chubas.workers.dev', 'elysium-ligas-uat', 'uat.eternalschedule.com', True),
+                                           ('localhost', 'elysium-ligas-uat', 'uat.eternalschedule.com', True)]:
+        r = probar(host)
+        g.caso(f'{host} → base «{proyecto}», mesas en {mesas}' + (' y franja de pruebas' if pruebas else ' sin franja de pruebas'),
+               r == {'p': proyecto, 'm': mesas, 'e': pruebas}, r)

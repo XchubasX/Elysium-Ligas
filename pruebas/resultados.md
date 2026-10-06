@@ -1,9 +1,9 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 273 de 273 casos pasaron.
+**✅ TODO BIEN** — 278 de 278 casos pasaron.
 
-- Fecha: 06/10/2026 08:42 (hora de Ciudad de México)
-- Versión probada: `1aa7b04` + cambios aún sin guardar
+- Fecha: 06/10/2026 11:58 (hora de Ciudad de México)
+- Versión probada: `ddcc252` + cambios aún sin guardar
 - Duración: 57 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
@@ -23,7 +23,7 @@
 | 9 | Equipo: ayudantes por invitación | 26 | ✅ |
 | 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
 | 11 | Torneos de un día | 44 | ✅ |
-| 12 | Enlaces del sitio de pruebas y detalles de diseño | 5 | ✅ |
+| 12 | Enlaces del sitio de pruebas y detalles de diseño | 10 | ✅ |
 | 13 | Fechas de la liga: validaciones | 15 | ✅ |
 
 ## Todos los casos
@@ -327,7 +327,7 @@
 | 34 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 35 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 36 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 37 | WhatsApp: «campeón: Toni» | ✅ |
+| 37 | WhatsApp: «campeón: Lasombra» | ✅ |
 | 38 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 39 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 40 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -345,6 +345,11 @@
 | 3 | no queda ningún enlace a producción en la página | ✅ |
 | 4 | la página abrió sin errores | ✅ |
 | 5 | fechas y horas usan el esquema oscuro (ícono de calendario/reloj claro y visible) | ✅ |
+| 6 | ligas.eternalschedule.com → base «elysium-ligas», mesas en eternalschedule.com sin franja de pruebas | ✅ |
+| 7 | elysium-ligas.chubas.workers.dev → base «elysium-ligas», mesas en eternalschedule.com sin franja de pruebas | ✅ |
+| 8 | uat-ligas.eternalschedule.com → base «elysium-ligas-uat», mesas en uat.eternalschedule.com y franja de pruebas | ✅ |
+| 9 | elysium-ligas-uat.chubas.workers.dev → base «elysium-ligas-uat», mesas en uat.eternalschedule.com y franja de pruebas | ✅ |
+| 10 | localhost → base «elysium-ligas-uat», mesas en uat.eternalschedule.com y franja de pruebas | ✅ |
 
 ### 13. Fechas de la liga: validaciones
 
