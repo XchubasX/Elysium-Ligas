@@ -83,10 +83,33 @@ async function borrarLiga(id) {
   catch (e) { aviso('No se pudo borrar la liga.', 'error'); return false; }
 }
 
+let refAprobacion = null, refMiSolicitud = null;
+function dejarDeEscucharAprobacion() {
+  if (refAprobacion) refAprobacion.off(); if (refMiSolicitud) refMiSolicitud.off();
+  refAprobacion = refMiSolicitud = null;
+}
 async function cargarSolicitudes(alCambiar) {
   miSolicitud = null;
+  dejarDeEscucharAprobacion();
   if (usuario && !soyOrganizador && !soyAdmin) {
     try { miSolicitud = (await db.ref('solicitudes/' + usuario.uid).get()).val(); } catch (e) { miSolicitud = null; }
+    // En vivo: si el administrador aprueba, aparecen «+ Nueva liga» y «+ Nuevo torneo» sin recargar
+    const uid = usuario.uid;
+    refAprobacion = db.ref('organizadores/' + uid);
+    refAprobacion.on('value', (s) => {
+      if (s.val() !== true || !usuario || usuario.uid !== uid || soyOrganizador) return;
+      soyOrganizador = true; miSolicitud = null;
+      dejarDeEscucharAprobacion();
+      aviso('✅ ¡Ya te aprobaron! Ya puedes crear ligas y torneos');
+      alCambiar('sesion');
+    }, () => {});
+    // Si el administrador la rechaza (se borra), vuelve a salir el formulario
+    refMiSolicitud = db.ref('solicitudes/' + uid);
+    refMiSolicitud.on('value', (s) => {
+      if (!usuario || usuario.uid !== uid || soyOrganizador) return;
+      const v = s.val();
+      if (!!v !== !!miSolicitud) { miSolicitud = v; alCambiar('datos'); }
+    }, () => {});
   }
   if (soyAdmin && !escuchandoSolicitudes) {
     escuchandoSolicitudes = true;

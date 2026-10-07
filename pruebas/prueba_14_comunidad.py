@@ -36,6 +36,20 @@ def correr(nav, g):
     store = pg.evaluate('window.__store()')
     ctx.close()
 
+    # --- Aprobación en vivo: el administrador aprueba (o rechaza) mientras Pepe tiene la página abierta
+    COMO_ADMIN = "(c => { const s = window.__SIMULAR__; window.__SIMULAR__ = null; return db.ref().update(c).then(() => { window.__SIMULAR__ = s; }); })(%s)"
+    ctx, pg, e7 = H.abrir(nav, store, '#/mis-eventos', usuario=H.NUEVO)
+    pg.evaluate(COMO_ADMIN % "{'organizadores/uid-nuevo-123': true, 'solicitudes/uid-nuevo-123': null}"); pg.wait_for_timeout(400)
+    t = pg.inner_text('#app')
+    g.caso('en vivo: al aprobarlo, sin recargar le salen «+ Nueva liga» y «+ Nuevo torneo»', '+ Nueva liga' in t and '+ Nuevo torneo' in t and not pg.is_visible('#formSolicitud') and 'Solicitud enviada' not in t, t[:200])
+    g.caso('en vivo: le avisa «¡Ya te aprobaron!»', 'Ya te aprobaron' in pg.inner_text('body'))
+    ctx.close()
+    ctx, pg, e8 = H.abrir(nav, store, '#/mis-eventos', usuario=H.NUEVO)
+    pg.evaluate(COMO_ADMIN % "{'solicitudes/uid-nuevo-123': null}"); pg.wait_for_timeout(400)
+    g.caso('en vivo: si la rechazan, vuelve a salir el formulario (sin botones de crear)', pg.is_visible('#formSolicitud') and '+ Nueva liga' not in pg.inner_text('#app'))
+    ctx.close()
+    err = err + e7 + e8
+
     # Vuelve a entrar: sigue viendo «enviada» y puede cancelarla
     ctx, pg, e3 = H.abrir(nav, store, '#/mis-eventos', usuario=H.NUEVO)
     g.caso('al volver, sigue diciendo «Solicitud enviada»', 'Solicitud enviada' in pg.inner_text('#app'))

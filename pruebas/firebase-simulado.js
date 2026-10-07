@@ -49,6 +49,7 @@
         if (!r.permitido) { setTimeout(() => err && err(new Error('PERMISSION_DENIED')), 0); return; }
         listeners.push({ path, cb }); setTimeout(() => cb(snap(path)), 0);
       },
+      off: () => { for (let i = listeners.length - 1; i >= 0; i--) if (listeners[i].path === path) listeners.splice(i, 1); },
       update: (obj) => apply(Object.fromEntries(Object.entries(obj).map(([k, v]) => [split(path).concat(split(k)).join('/'), v]))),
       set: (v) => apply({ [path]: v }),
       remove: () => apply({ [path]: null })

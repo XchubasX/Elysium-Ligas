@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 316 de 316 casos pasaron.
+**✅ TODO BIEN** — 319 de 319 casos pasaron.
 
-- Fecha: 06/10/2026 13:02 (hora de Ciudad de México)
-- Versión probada: `205d174` + cambios aún sin guardar
-- Duración: 65 s
+- Fecha: 06/10/2026 19:51 (hora de Ciudad de México)
+- Versión probada: `2ac8c62` + cambios aún sin guardar
+- Duración: 72 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -25,7 +25,7 @@
 | 11 | Torneos de un día | 43 | ✅ |
 | 12 | Enlaces del sitio de pruebas y detalles de diseño | 10 | ✅ |
 | 13 | Fechas de la liga: validaciones | 15 | ✅ |
-| 14 | Solicitudes para organizar, guía y aviso «100% casual» | 21 | ✅ |
+| 14 | Solicitudes para organizar, guía y aviso «100% casual» | 24 | ✅ |
 | 15 | País y ciudad obligatorios | 19 | ✅ |
 
 ## Todos los casos
@@ -327,7 +327,7 @@
 | 33 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 36 | WhatsApp: «campeón: Lasombra» | ✅ |
+| 36 | WhatsApp: «campeón: Toni» | ✅ |
 | 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -387,15 +387,18 @@
 | 10 | cambia a «✓ Solicitud enviada» | ✅ |
 | 11 | REGLAS: no se puede aprobar a sí mismo | ✅ |
 | 12 | REGLAS: no puede ver las solicitudes de otros | ✅ |
-| 13 | al volver, sigue diciendo «Solicitud enviada» | ✅ |
-| 14 | el superusuario ve un contador «1» junto a «Mis eventos» | ✅ |
-| 15 | «Solicitudes para organizar»: Pepe · Guadalajara con su mensaje | ✅ |
-| 16 | Aprobar: queda como organizador y se borra la solicitud | ✅ |
-| 17 | ya no hay solicitudes pendientes (desaparece el bloque y el contador) | ✅ |
-| 18 | las reglas aceptaron todo | ✅ |
-| 19 | Pepe ya ve «+ Nueva liga» y «+ Nuevo torneo», sin formulario | ✅ |
-| 20 | Rechazar: borra la solicitud y NO da permiso | ✅ |
-| 21 | las páginas abrieron sin errores | ✅ |
+| 13 | en vivo: al aprobarlo, sin recargar le salen «+ Nueva liga» y «+ Nuevo torneo» | ✅ |
+| 14 | en vivo: le avisa «¡Ya te aprobaron!» | ✅ |
+| 15 | en vivo: si la rechazan, vuelve a salir el formulario (sin botones de crear) | ✅ |
+| 16 | al volver, sigue diciendo «Solicitud enviada» | ✅ |
+| 17 | el superusuario ve un contador «1» junto a «Mis eventos» | ✅ |
+| 18 | «Solicitudes para organizar»: Pepe · Guadalajara con su mensaje | ✅ |
+| 19 | Aprobar: queda como organizador y se borra la solicitud | ✅ |
+| 20 | ya no hay solicitudes pendientes (desaparece el bloque y el contador) | ✅ |
+| 21 | las reglas aceptaron todo | ✅ |
+| 22 | Pepe ya ve «+ Nueva liga» y «+ Nuevo torneo», sin formulario | ✅ |
+| 23 | Rechazar: borra la solicitud y NO da permiso | ✅ |
+| 24 | las páginas abrieron sin errores | ✅ |
 
 ### 15. País y ciudad obligatorios
 
