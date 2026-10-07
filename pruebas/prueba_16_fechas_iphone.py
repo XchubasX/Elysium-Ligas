@@ -28,6 +28,17 @@ def correr(nav, g):
     g.caso('al redibujar no se duplica la pista', pg.locator('[data-pista-fecha]').count() == 2, pg.locator('[data-pista-fecha]').count())
     ctx.close()
 
+    # Agregar jornada: los dos campos caben en la tarjeta (en iPhone la hora se salía)
+    ctx, pg, e5 = H.abrir(nav, seed, '#/liga/liga-a/calendario', usuario=H.ANA, user_agent=UA_IPHONE)
+    pg.evaluate("ui.agregarJornada = true; dibujar('ruta')"); pg.wait_for_timeout(150)
+    medidas = pg.evaluate("""(() => { const f = document.getElementById('jnFecha').closest('form').getBoundingClientRect();
+      return ['jnFecha','jnHora'].map(i => { const r = document.getElementById(i).getBoundingClientRect(); return [r.left >= f.left - 0.5, r.right <= f.right + 0.5, Math.round(r.width)]; }); })()""")
+    g.caso('agregar jornada en iPhone: «Fecha» y «Hora» caben dentro de la tarjeta', all(m[0] and m[1] for m in medidas), medidas)
+    g.caso('agregar jornada en iPhone: los dos campos miden lo mismo', abs(medidas[0][2] - medidas[1][2]) <= 1, medidas)
+    g.caso('agregar jornada en iPhone: con la pista «Elegir fecha» y «Elegir hora»', pg.locator('form [data-pista-fecha]').count() == 2)
+    ctx.close()
+    err = err + e5
+
     # Portada (filtro por fecha) también en iPhone
     ctx, pg, e2 = H.abrir(nav, seed, '#/', user_agent=UA_IPHONE)
     g.caso('portada en iPhone: el filtro de fecha también muestra «Elegir fecha»', pg.locator('#filtroFecha').locator('xpath=..').locator('[data-pista-fecha]').count() == 1)

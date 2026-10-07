@@ -106,9 +106,16 @@ function decorarFechas(raiz) {
     inp.dataset.pista = '1';
     const esHora = inp.type === 'time';
     const caja = document.createElement('span');
-    caja.style.cssText = 'position:relative;display:block';
+    caja.style.cssText = 'position:relative;display:block;min-width:0;width:100%';
+    inp.parentNode.style.minWidth = '0'; // en una cuadrícula de 2 columnas, que la celda pueda encogerse
     inp.parentNode.insertBefore(caja, inp);
     caja.appendChild(inp);
+    // Safari de iPhone le pone un ancho mínimo propio a fecha y hora, y se salía de la tarjeta
+    inp.style.webkitAppearance = 'none';
+    inp.style.appearance = 'none';
+    inp.style.width = '100%';
+    inp.style.minWidth = '0';
+    inp.style.boxSizing = 'border-box';
     inp.style.minHeight = '2.5rem';
     inp.style.paddingRight = '2.25rem';
     const pista = document.createElement('span');
