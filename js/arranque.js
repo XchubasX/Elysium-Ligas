@@ -23,6 +23,7 @@ function dibujar(motivo) {
   else if (r.vista === 'crear') html = vistaCrear(r.id);
   else html = vistaPortada(false);
   $('app').innerHTML = html;
+  decorarFechas($('app')); // pista «Elegir fecha/hora» en iPhone (js/base.js)
   const f = $('formCrear'); if (f) f.addEventListener('submit', enviarCrear);
 }
 

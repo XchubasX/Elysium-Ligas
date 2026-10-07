@@ -88,3 +88,37 @@ function listaCiudades(idLista, pais, salvoId) {
   return '<datalist id="' + idLista + '">' + ciudadesDe(pais, salvoId).map(c => '<option value="' + esc(c) + '">').join('') + '</datalist>';
 }
 function lugarTexto(ev) { return [ev.ciudad, ev.pais].filter(Boolean).join(', '); }
+
+// ---------------- Campos de fecha y hora en iPhone
+// Safari de iPhone no dibuja ícono ni «dd/mm/aaaa»: un campo vacío se ve como una
+// caja oscura y no se entiende que hay que tocarlo. Ahí se agrega una pista gris
+// («Elegir fecha» / «Elegir hora») que se oculta al elegir, y el ícono a la derecha.
+// En computadora y Android no cambia nada (ya muestran su propio ícono).
+function esIPhone() {
+  return /iPhone|iPad|iPod/.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+const ICONO_CALENDARIO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+const ICONO_RELOJ = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+function decorarFechas(raiz) {
+  if (!esIPhone() || !raiz) return;
+  raiz.querySelectorAll('input[type=date], input[type=time]').forEach(inp => {
+    if (inp.dataset.pista) return;
+    inp.dataset.pista = '1';
+    const esHora = inp.type === 'time';
+    const caja = document.createElement('span');
+    caja.style.cssText = 'position:relative;display:block';
+    inp.parentNode.insertBefore(caja, inp);
+    caja.appendChild(inp);
+    inp.style.minHeight = '2.5rem';
+    inp.style.paddingRight = '2.25rem';
+    const pista = document.createElement('span');
+    pista.setAttribute('aria-hidden', 'true');
+    pista.dataset.pistaFecha = esHora ? 'hora' : 'fecha';
+    pista.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 .75rem;pointer-events:none;color:#a1a1aa;font-size:.875rem';
+    pista.innerHTML = '<span data-texto>' + (esHora ? 'Elegir hora' : 'Elegir fecha') + '</span>' + (esHora ? ICONO_RELOJ : ICONO_CALENDARIO);
+    caja.appendChild(pista);
+    const actualizar = () => { pista.querySelector('[data-texto]').style.visibility = inp.value ? 'hidden' : 'visible'; };
+    ['input', 'change', 'blur'].forEach(ev => inp.addEventListener(ev, actualizar));
+    actualizar();
+  });
+}
