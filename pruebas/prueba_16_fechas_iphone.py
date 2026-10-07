@@ -2,6 +2,7 @@
 import herramientas as H
 
 TITULO = 'Fecha y hora en iPhone: pista visible en campos vacíos'
+UA_CHROME_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/129.0.6668.69 Mobile/15E148 Safari/604.1'
 UA_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
 
 
@@ -32,9 +33,14 @@ def correr(nav, g):
     g.caso('portada en iPhone: el filtro de fecha también muestra «Elegir fecha»', pg.locator('#filtroFecha').locator('xpath=..').locator('[data-pista-fecha]').count() == 1)
     ctx.close()
 
+    # Chrome en iPhone (por dentro usa el mismo motor que Safari)
+    ctx, pg, e4 = H.abrir(nav, seed, '#/crear/torneo', usuario=H.ANA, user_agent=UA_CHROME_IPHONE)
+    g.caso('Chrome en iPhone: también muestra «Elegir fecha» y «Elegir hora»', pg.locator('[data-pista-fecha]').count() == 2)
+    ctx.close()
+
     # Computadora: nada cambia
     ctx, pg, e3 = H.abrir(nav, seed, '#/crear/torneo', usuario=H.ANA)
     g.caso('computadora: sin pista (el navegador ya muestra su ícono y dd/mm/aaaa)', pg.locator('[data-pista-fecha]').count() == 0)
     ctx.close()
-    todos = err + e2 + e3
+    todos = err + e2 + e3 + e4
     g.caso('sin errores de JavaScript', not todos, todos)
