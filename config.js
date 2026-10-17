@@ -21,7 +21,7 @@
     recaptchaKey: '6LfZTuEtAAAAAC9MIA5gA0raN0qFkFTooQOIb74J',
     // Avisos al celular: Firebase → Configuración del proyecto → Cloud Messaging →
     // Certificados push web → «Par de claves» (vacío = los avisos no se ofrecen)
-    vapidKey: ''
+    vapidKey: 'BAH7ZBtRb8joZexWcnXQ1Z0I1MfSxdL-XLoZa3fNu6tSFmOaIprg49G_U450whjM-EEo0_NvfUebRD9tYb-5EG4'
   };
   // Producción (Firebase "elysium-ligas"), montada el 6 oct 2026.
   var PRODUCCION = {
