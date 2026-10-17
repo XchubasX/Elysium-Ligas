@@ -37,7 +37,7 @@
       appId: '1:790037393310:web:0df5babf84a212fb7bb08f'
     },
     recaptchaKey: '6LfzN-ItAAAAAC2FoII4qC6NkyxBccLl-rMOvEpO',
-    vapidKey: ''
+    vapidKey: 'BE6kwCQIm0JqO4w1CVkS4v6LSyN3tsnNc1DVNr2Aua6_oB299dW6Rm6if8KdtxSMTxS5kPugrnK94Ci6UcNZK70'
   };
 
   var host = window.location.hostname;

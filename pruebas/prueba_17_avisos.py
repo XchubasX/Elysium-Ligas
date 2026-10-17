@@ -137,6 +137,7 @@ def correr(nav, g):
     pg.on('pageerror', lambda e: e3.append(str(e)))
     pg.goto(H.url(H.armar_pagina(seed=seed, nombre='p_avisos.html', extra_head=SIMULAR_AVISOS), '#/mis-eventos'))
     pg.evaluate('(u) => window.__setUser(u)', H.ADMIN); pg.wait_for_timeout(300)
+    pg.evaluate("LIGAS_CONFIG.vapidKey = ''; dibujar('ruta')")
     g.caso('administrador: sin la clave de avisos dice «todavía no están configurados»', 'todavía no están configurados' in pg.inner_text('[data-avisos-admin]'))
     # Con clave: activar
     pg.evaluate("LIGAS_CONFIG.vapidKey = 'clave-de-prueba'; dibujar('ruta')"); pg.wait_for_timeout(100)

@@ -30,7 +30,7 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.window = self; // config.js escribe en window.LIGAS_CONFIG
-importScripts('config.js?v=20261017b');
+importScripts('config.js?v=20261017c');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
               'https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 firebase.initializeApp(self.LIGAS_CONFIG.firebase);
