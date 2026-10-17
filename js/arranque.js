@@ -36,6 +36,8 @@ if (!window.LIGAS_CONFIG) {
 } else {
   if (window.LIGAS_CONFIG.esPruebas) $('franjaPruebas').classList.remove('hidden');
   iniciarFirebase();
+  resultadoEntrarConGoogle();
+  escucharAvisosEnPagina();
   window.addEventListener('hashchange', () => { ui.editarJornada = null; ui.agregarJornada = false; ui.editarJugador = null; resultadoInvitacion = null; if (!/equipo/.test(location.hash)) ultimaInvitacion = null; dibujar('ruta'); window.scrollTo(0, 0); });
   $('app').addEventListener('focusout', () => setTimeout(() => { if (redibujoPendiente && !($('app').contains(document.activeElement) && document.activeElement.value)) dibujar('ruta'); }, 0));
   escucharSesion(dibujar);

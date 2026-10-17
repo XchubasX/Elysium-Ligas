@@ -18,7 +18,10 @@
       messagingSenderId: '230744729212',
       appId: '1:230744729212:web:a7e971b9da27b118a94bf9'
     },
-    recaptchaKey: '6LfZTuEtAAAAAC9MIA5gA0raN0qFkFTooQOIb74J'
+    recaptchaKey: '6LfZTuEtAAAAAC9MIA5gA0raN0qFkFTooQOIb74J',
+    // Avisos al celular: Firebase → Configuración del proyecto → Cloud Messaging →
+    // Certificados push web → «Par de claves» (vacío = los avisos no se ofrecen)
+    vapidKey: ''
   };
   // Producción (Firebase "elysium-ligas"), montada el 6 oct 2026.
   var PRODUCCION = {
@@ -33,12 +36,18 @@
       messagingSenderId: '790037393310',
       appId: '1:790037393310:web:0df5babf84a212fb7bb08f'
     },
-    recaptchaKey: '6LfzN-ItAAAAAC2FoII4qC6NkyxBccLl-rMOvEpO'
+    recaptchaKey: '6LfzN-ItAAAAAC2FoII4qC6NkyxBccLl-rMOvEpO',
+    vapidKey: ''
   };
 
   var host = window.location.hostname;
   var esDireccionReal = host === 'ligas.eternalschedule.com' || host === 'elysium-ligas.chubas.workers.dev';
   window.LIGAS_CONFIG = esDireccionReal ? PRODUCCION : PRUEBAS;
+  // Abierto como app desde el ícono (iPhone): «Entrar con Google» pasa por nuestro
+  // propio dominio (worker.js lo reenvía a Firebase), porque ahí la ventanita de
+  // Google no funciona. En el navegador normal se queda como siempre.
+  var comoApp = !!((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (window.navigator && window.navigator.standalone));
+  if (comoApp && /(^|\.)eternalschedule\.com$/.test(host)) window.LIGAS_CONFIG.firebase.authDomain = host;
   // Elysium (las mesas) del MISMO entorno: desde pruebas nunca se manda a nadie a producción.
   window.ELYSIUM_MESAS = esDireccionReal ? 'eternalschedule.com' : 'uat.eternalschedule.com';
 })();

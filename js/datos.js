@@ -33,6 +33,7 @@ function escucharSesion(alCambiar) {
     await cargarSolicitudes(alCambiar);
     sesionLista = true;
     alCambiar('sesion');
+    revisarAvisos(alCambiar); // ¿este aparato ya recibe avisos de solicitudes? (js/avisos.js)
   });
 }
 
@@ -40,12 +41,22 @@ function entrarConGoogle() {
   if (navegadorDentroDeApp()) { aviso('Abre esta página en Chrome o Safari para entrar con Google.', 'error'); return Promise.resolve(); }
   const p = new firebase.auth.GoogleAuthProvider();
   p.setCustomParameters({ prompt: 'select_account' });
+  // Abierto como app desde el ícono (iPhone): la ventanita de Google no funciona;
+  // se va a la página de Google y regresa (ver resultadoEntrarConGoogle).
+  if (abiertoComoApp() && auth.signInWithRedirect) {
+    return auth.signInWithRedirect(p).catch(() => aviso('No se pudo abrir Google. Revisa tu conexión e intenta de nuevo.', 'error'));
+  }
   return auth.signInWithPopup(p).catch((e) => {
     if (e && e.code === 'auth/popup-closed-by-user') return;
     aviso('No se pudo entrar con Google. Intenta de nuevo.', 'error');
   });
 }
-function cerrarSesion() { return auth.signOut(); }
+function cerrarSesion() { return quitarAvisosAlSalir().then(() => auth.signOut()); }
+// Al regresar de la página de Google (abierto como app): avisa si algo falló
+function resultadoEntrarConGoogle() {
+  if (!auth.getRedirectResult) return;
+  auth.getRedirectResult().catch((e) => aviso('No se pudo entrar con Google (' + ((e && e.code) || 'error') + '). Intenta de nuevo.', 'error'));
+}
 
 function esDueno(ev) { return !!(usuario && ev && ev.ownerUid === usuario.uid && soyOrganizador); }
 function esAyudante(ev) { return !!(usuario && ev && ev.ayudantes && ev.ayudantes[usuario.uid]); }

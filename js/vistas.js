@@ -206,7 +206,7 @@ function vistaMisEventos() {
   if (!datosCargados) return cargando();
   const mias = Object.keys(eventos).filter(id => eventos[id].ownerUid === usuario.uid || esAyudante(eventos[id]));
   mias.sort((a, b) => String(fechaOrden(eventos[a])).localeCompare(String(fechaOrden(eventos[b]))));
-  let h = bloqueSolicitudesAdmin() + '<h2 class="text-base font-bold">Mis eventos</h2>';
+  let h = bloqueSolicitudesAdmin() + bloqueAvisosAdmin() + '<h2 class="text-base font-bold">Mis eventos</h2>';
   if (soyOrganizador || soyAdmin) h += '<div class="grid grid-cols-2 gap-2"><a href="#/crear" class="' + BTN + '">+ Nueva liga</a><a href="#/crear/torneo" class="' + BTN + '">+ Nuevo torneo</a></div>';
   h += mias.length ? '<div class="space-y-2">' + mias.map(id => {
     const ev = eventos[id];

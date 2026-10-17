@@ -12,6 +12,10 @@
   <link rel="icon" href="iconos/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="iconos/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
+  <!-- Instalable en el celular («Agregar a pantalla de inicio»): necesario para los avisos en iPhone -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Ligas">
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
     tailwind.config = { theme: { extend: {
@@ -26,6 +30,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
+  <!-- Avisos al celular del administrador (js/avisos.js y firebase-messaging-sw.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 </head>
 <body class="bg-zinc-900 text-zinc-100 min-h-screen font-sans">
   <div id="franjaPruebas" class="hidden bg-amber-600 text-zinc-950 text-center text-xs font-bold py-1">SITIO DE PRUEBAS · los datos no son reales</div>
@@ -48,16 +54,17 @@
   </div>
   <div id="avisos" class="fixed bottom-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-50 items-center"></div>
 
-  <script src="config.js?v=20261006f"></script>
+  <script src="config.js?v=20261017a"></script>
   <script src="js/base.js?v=20261007b"></script>
   <script src="js/calculo.js?v=20261006f"></script>
-  <script src="js/datos.js?v=20261006g"></script>
-  <script src="js/vistas.js?v=20261006f"></script>
+  <script src="js/datos.js?v=20261017a"></script>
+  <script src="js/vistas.js?v=20261017a"></script>
   <script src="js/gestion.js?v=20261006f"></script>
   <script src="js/jornada.js?v=20261006f"></script>
   <script src="js/equipo.js?v=20261006f"></script>
   <script src="js/torneo.js?v=20261006f"></script>
   <script src="js/comunidad.js?v=20261006f"></script>
-  <script src="js/arranque.js?v=20261007a"></script>
+  <script src="js/avisos.js?v=20261017a"></script>
+  <script src="js/arranque.js?v=20261017a"></script>
 </body>
 </html>

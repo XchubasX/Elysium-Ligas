@@ -3,16 +3,39 @@
 //  - Producción: Worker "elysium-ligas", rama main, comando de despliegue "npx wrangler deploy"
 //  - Pruebas:    Worker "elysium-ligas-uat", rama uat, comando de despliegue "npx wrangler deploy --env uat"
 // Comando de construcción en los dos: "bash cloudflare-publicar.sh" (pone el sitio en la carpeta "publicado").
+// El secreto FIREBASE_CUENTA_SERVICIO (llave de la cuenta de servicio) se guarda en Cloudflare
+// en CADA Worker (producción y pruebas tienen su propia llave), nunca aquí.
 {
   "name": "elysium-ligas",
   "compatibility_date": "2026-10-01",
+  // worker.js reenvía /__/auth/ (Entrar con Google desde el ícono del iPhone), atiende /api/
+  // y cada 5 minutos avisa al administrador de solicitudes nuevas para organizar
+  "main": "worker.js",
+  "vars": {
+    "FIREBASE_AUTH_HOST": "elysium-ligas.firebaseapp.com",
+    "FIREBASE_DB_URL": "https://elysium-ligas-default-rtdb.firebaseio.com",
+    "FIREBASE_API_KEY": "AIzaSyAZrRr3YVenmmnM9MqTL9bQ2w8y3TLTL0Y",
+    "SITIO": "https://ligas.eternalschedule.com"
+  },
+  "triggers": { "crons": ["*/5 * * * *"] },
+  // Guarda los mensajes del Worker (Cloudflare → elysium-ligas → Observability) para revisar los avisos
+  "observability": { "enabled": true },
   "assets": {
     "directory": "./publicado",
-    "not_found_handling": "404-page"
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/__/auth/*", "/api/*"]
   },
   "env": {
     "uat": {
-      "name": "elysium-ligas-uat"
+      "name": "elysium-ligas-uat",
+      "vars": {
+        "FIREBASE_AUTH_HOST": "elysium-ligas-uat.firebaseapp.com",
+        "FIREBASE_DB_URL": "https://elysium-ligas-uat-default-rtdb.firebaseio.com",
+        "FIREBASE_API_KEY": "AIzaSyARtJRCcLGW_lvXI0h0qm8ebplGmA-vWCw",
+        "SITIO": "https://uat-ligas.eternalschedule.com"
+      },
+      "triggers": { "crons": ["*/5 * * * *"] }
     }
   }
 }
