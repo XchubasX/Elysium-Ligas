@@ -31,6 +31,7 @@ function escucharSesion(alCambiar) {
     usuario = u || null; soyAdmin = false; soyOrganizador = false;
     if (usuario) { [soyAdmin, soyOrganizador] = await Promise.all([leerPropio('admins', usuario.uid), leerPropio('organizadores', usuario.uid)]); }
     await cargarSolicitudes(alCambiar);
+    reiniciarInscripciones(); // lo inscrito por otra cuenta no se mezcla (js/inscripciones.js)
     sesionLista = true;
     alCambiar('sesion');
     revisarAvisos(alCambiar); // ¿este aparato ya recibe avisos de solicitudes? (js/avisos.js)
@@ -89,6 +90,7 @@ async function borrarLiga(id) {
     // Las invitaciones pendientes se borran una por una (las reglas no dejan borrar la rama completa)
     const cambios = { ['eventos/' + id]: null };
     try { const s = await db.ref('invitaciones/' + id).get(); Object.keys(s.val() || {}).forEach(c => { cambios['invitaciones/' + id + '/' + c] = null; }); } catch (e) { /* sin invitaciones */ }
+    try { const s = await db.ref('inscripciones/' + id).get(); Object.keys(s.val() || {}).forEach(u => { cambios['inscripciones/' + id + '/' + u] = null; }); } catch (e) { /* sin inscripciones */ }
     await db.ref().update(cambios); aviso('Liga borrada'); return true;
   }
   catch (e) { aviso('No se pudo borrar la liga.', 'error'); return false; }

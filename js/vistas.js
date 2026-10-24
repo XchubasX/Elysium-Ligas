@@ -33,6 +33,7 @@ function tarjetaLiga(id, ev) {
     '<div class="text-lg font-bold text-wine-300">' + esc(ev.nombre) + '</div>' +
     '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), Object.keys(ev.jugadores || {}).length + ' jugadores', (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : '')].filter(Boolean).join(' · ') + '</div>' +
     (lider ? '<div class="text-[13px] text-zinc-400">Líder: <b class="text-zinc-100">' + esc(lider.nick) + '</b> · ' + lider.gw + ' GW · ' + lider.vp + ' VP</div>' : '') +
+    (inscripcionesAbiertas(ev) ? '<div class="text-[12px] font-bold text-emerald-300">📝 Inscripciones abiertas</div>' : '') +
     '</a>';
 }
 
@@ -48,7 +49,8 @@ function tarjetaTorneo(id, ev) {
   return '<a href="#/liga/' + esc(id) + '" class="' + CARD + ' hover:border-wine-500 transition">' +
     '<div class="flex items-center justify-between gap-2">' + cabeza + '<span class="' + PILL + ' bg-amber-950/50 text-amber-300 border border-amber-700/70">TORNEO</span></div>' +
     '<div class="text-lg font-bold text-wine-300">' + esc(ev.nombre) + '</div>' +
-    '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), esc(cuando(ev, ev.fecha, ev.hora)), esc(textoRondas(ev)), n ? n + ' jugadores' : ''].filter(Boolean).join(' · ') + '</div></a>';
+    '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), esc(cuando(ev, ev.fecha, ev.hora)), esc(textoRondas(ev)), n ? n + ' jugadores' : ''].filter(Boolean).join(' · ') + '</div>' +
+    (inscripcionesAbiertas(ev) ? '<div class="text-[12px] font-bold text-emerald-300">📝 Inscripciones abiertas</div>' : '') + '</a>';
 }
 function tarjetaEvento(id, ev) { return esTorneo(ev) ? tarjetaTorneo(id, ev) : tarjetaLiga(id, ev); }
 
@@ -149,7 +151,8 @@ function vistaLiga(id, pestana) {
       : [lugarHTML(ev), (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : ''), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]).filter(Boolean).join(' · ') + '</p>' +
     (otraZona(ev) ? '<p data-nota-zona class="text-[13px] text-sky-300">🕒 Los horarios se muestran en tu hora. El organizador está en hora de ' + esc(nombreZona(ev.zona)) + '.</p>' : '') +
     etiquetaCasual() +
-    (ev.archivada ? '<p class="text-[13px] text-amber-300">' + (torneo ? 'Torneo archivado' : 'Liga archivada') + ': ya no aparece en la portada.</p>' : '') + '</div>';
+    (ev.archivada ? '<p class="text-[13px] text-amber-300">' + (torneo ? 'Torneo archivado' : 'Liga archivada') + ': ya no aparece en la portada.</p>' : '') + '</div>' +
+    bloqueInscripcion(id, ev);
   h += '<nav class="flex gap-1.5 flex-wrap" aria-label="Secciones de la liga">' + pestanas.map(([k, t]) =>
     '<a href="#/liga/' + esc(id) + '/' + k + '" class="text-sm px-3 py-1.5 rounded-full ' + (k === pestana ? 'bg-wine-600 text-white font-semibold' : 'border border-zinc-700 text-zinc-400 hover:text-zinc-200') + '"' + (k === pestana ? ' aria-current="page"' : '') + '>' + t + '</a>').join('') + '</nav>';
   if (pestana === 'tabla') h += torneo ? seccionClasificacion(id, ev) : seccionTabla(id, ev);

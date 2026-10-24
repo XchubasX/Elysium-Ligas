@@ -1,7 +1,7 @@
 // =====================================================================
 // js/gestion.js — PESTAÑAS DEL EQUIPO DE LA LIGA
 // Calendario (organizador): agregar, cambiar fecha, cancelar jornadas.
-// Jugadores (organizador y ayudantes): anotar, renombrar, quitar, copiar.
+// Jugadores (organizador y ayudantes): inscripciones (js/inscripciones.js), anotar, pegar lista, renombrar, quitar, copiar.
 // Ajustes (organizador): datos de la liga, hazañas, archivar; borrar (superusuario).
 // =====================================================================
 const INP = 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-wine-500';
@@ -9,7 +9,7 @@ const BTN_CH = 'text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-zin
 const BTN_PELIGRO = 'text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-red-800 text-red-300 hover:bg-red-950 whitespace-nowrap';
 
 // Lo que se está editando en pantalla (no se guarda en la base)
-const ui = { editarJornada: null, agregarJornada: false, editarJugador: null, avisoCambio: null };
+const ui = { editarJornada: null, agregarJornada: false, editarJugador: null, avisoCambio: null, otroNick: null };
 
 function idLigaActual() { return rutaActual().id; }
 function ligaActual() { return eventos[idLigaActual()]; }
@@ -115,7 +115,7 @@ function cambiarEstadoJornada(jid, estado) {
 // ---------------- Jugadores
 function seccionJugadores(id, ev) {
   const js = jugadoresOrdenados(ev);
-  let h = '<form class="flex gap-2" onsubmit="agregarJugador(event)"><input id="nuevoNick" maxlength="30" placeholder="Nick del jugador" class="' + INP + '" autocomplete="off"><button class="' + BTN + '">Agregar</button></form>';
+  let h = tarjetaInscripciones(id, ev) + '<form class="flex gap-2" onsubmit="agregarJugador(event)"><input id="nuevoNick" maxlength="30" placeholder="Nick del jugador" class="' + INP + '" autocomplete="off"><button class="' + BTN + '">Agregar</button></form>' + bloquePegarLista();
   h += '<div class="bg-zinc-800 rounded-xl p-3 text-sm divide-y divide-zinc-700">';
   if (!js.length) h += '<p class="text-zinc-400 py-2">Todavía no hay jugadores. Anota sus nicks (no nombres completos: la lista es pública).</p>';
   js.forEach(p => {
