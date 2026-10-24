@@ -42,14 +42,14 @@ def correr(nav, g):
     g.caso('crear: dice la zona detectada «Santiago de Chile (detectada de tu aparato)»', 'Santiago de Chile' in zi and 'detectada de tu aparato' in zi, zi)
     pg.fill('#crNombre', 'Liga Virtual Uno'); pg.dispatch_event('#crNombre', 'input')
     # la ciudad se queda vacía: en línea no la pide
-    pg.fill('#crPlataforma', 'Discord + Tabletop Simulator')
+    pg.fill('#crPlataforma', 'Lackey')
     pg.fill('#crInicio', '2026-11-01'); pg.fill('#crFin', '2026-12-20')
     g.caso('crear: sin desborde horizontal a 390 px', H.sin_desborde(pg))
     pg.click('text=Crear liga'); pg.wait_for_timeout(300)
     ev = pg.evaluate("window.__store().eventos['liga-virtual-uno']") or {}
-    g.caso('se crea sin país ni ciudad, con modalidad, plataforma y zona', ev.get('modalidad') == 'en-linea' and ev.get('plataforma') == 'Discord + Tabletop Simulator' and ev.get('zona') == 'America/Santiago' and 'pais' not in ev and 'ciudad' not in ev, (ev, error(pg)))
+    g.caso('se crea sin país ni ciudad, con modalidad, plataforma y zona', ev.get('modalidad') == 'en-linea' and ev.get('plataforma') == 'Lackey' and ev.get('zona') == 'America/Santiago' and 'pais' not in ev and 'ciudad' not in ev, (ev, error(pg)))
     t = pg.inner_text('#app')
-    g.caso('su página dice «🌐 En línea · Discord + Tabletop Simulator»', '🌐 En línea · Discord + Tabletop Simulator' in t, t[:200])
+    g.caso('su página dice «🌐 En línea · Lackey»', '🌐 En línea · Lackey' in t, t[:200])
     ctx.close()
 
     # Plataforma vacía: no se guarda el campo

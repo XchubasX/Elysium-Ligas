@@ -247,7 +247,7 @@ function camposModalidad(p, ev, camposLugar) {
     '<div id="' + p + 'Presencial" class="space-y-3' + (enLinea ? ' hidden' : '') + '">' + camposLugar + '</div>' +
     '<div id="' + p + 'EnLinea" class="space-y-3' + (enLinea ? '' : ' hidden') + '">' +
       '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Plataforma (opcional)</span>' +
-        '<input id="' + p + 'Plataforma" maxlength="80" value="' + esc((ev && ev.plataforma) || '') + '" class="' + inp + '" placeholder="ej. Discord + Tabletop Simulator"></label>' +
+        '<input id="' + p + 'Plataforma" maxlength="80" value="' + esc((ev && ev.plataforma) || '') + '" class="' + inp + '" placeholder="ej. Lackey o Succubus Club"></label>' +
       '<p data-zona-info class="text-xs text-zinc-400">🕒 Zona horaria: <b class="text-zinc-200">' + esc(nombreZona(zonaDeModalidad(ev))) + '</b>' +
         (ev && esEnLinea(ev) && zonaValida(ev.zona) ? ' (la de la liga)' : ' (detectada de tu aparato)') + '. Las horas se capturan en esta zona y cada jugador las ve convertidas a su propia hora.</p></div>';
 }
