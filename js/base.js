@@ -87,7 +87,67 @@ function selectorPais(id, valor, alCambiar) {
 function listaCiudades(idLista, pais, salvoId) {
   return '<datalist id="' + idLista + '">' + ciudadesDe(pais, salvoId).map(c => '<option value="' + esc(c) + '">').join('') + '</datalist>';
 }
-function lugarTexto(ev) { return [ev.ciudad, ev.pais].filter(Boolean).join(', '); }
+function lugarTexto(ev) {
+  if (esEnLinea(ev)) return '🌐 En línea' + (ev.plataforma ? ' · ' + ev.plataforma : '');
+  return [ev.ciudad, ev.pais].filter(Boolean).join(', ');
+}
+
+// ---------------- Eventos En línea (24 oct 2026)
+// Un evento en línea guarda modalidad: 'en-linea', no tiene país ni ciudad, puede
+// tener plataforma (texto libre) y guarda la zona horaria del organizador (zona).
+// Fechas y horas se siguen guardando como «AAAA-MM-DD» y «HH:MM» en esa zona;
+// al mostrarlas, cada quien las ve convertidas a su propia hora.
+// Sin «modalidad» = presencial (así son todos los eventos creados antes).
+function esEnLinea(ev) { return !!(ev && ev.modalidad === 'en-linea'); }
+const ZONAS = [
+  ['America/Mexico_City', 'Ciudad de México'], ['America/Tijuana', 'Tijuana'], ['America/Cancun', 'Cancún'],
+  ['America/Bogota', 'Bogotá'], ['America/Lima', 'Lima'], ['America/Santiago', 'Santiago de Chile'],
+  ['America/Argentina/Buenos_Aires', 'Buenos Aires'], ['America/New_York', 'Nueva York'], ['America/Los_Angeles', 'Los Ángeles'],
+  ['Europe/Madrid', 'Madrid'], ['Atlantic/Canary', 'Canarias'], ['Europe/London', 'Londres']
+];
+function nombreZona(z) { const x = ZONAS.find(([k]) => k === z); return x ? x[1] : String(z || ''); }
+function zonaValida(z) { return ZONAS.some(([k]) => k === z); }
+function zonaNavegador() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } }
+// Zona sugerida al crear: la del aparato si está en la lista; si no, Ciudad de México
+function zonaSugerida() { const z = zonaNavegador(); return zonaValida(z) ? z : 'America/Mexico_City'; }
+function selectorZona(id, valor) {
+  return '<select id="' + id + '" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-wine-500">' +
+    ZONAS.map(([k, t]) => '<option value="' + k + '"' + (k === valor ? ' selected' : '') + '>' + t + '</option>').join('') + '</select>';
+}
+// Minutos que la zona z va adelante de la hora mundial (UTC) en el instante t
+function desfaseZona(z, t) {
+  const p = {}; new Intl.DateTimeFormat('en-US', { timeZone: z, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    .formatToParts(new Date(t)).forEach(x => { p[x.type] = x.value; });
+  return (Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute) - Math.floor(t / 60000) * 60000) / 60000;
+}
+// «2026-10-24» + «20:00» en la zona z → instante (milisegundos)
+function instanteEnZona(fecha, hora, z) {
+  const [a, m, d] = fecha.split('-').map(Number); const [hh, mm] = hora.split(':').map(Number);
+  const base = Date.UTC(a, m - 1, d, hh, mm);
+  let t = base - desfaseZona(z, base) * 60000;
+  t = base - desfaseZona(z, t) * 60000; // segunda vuelta por si cae en cambio de horario
+  return t;
+}
+// Fecha y hora para mostrar. Presencial: tal cual. En línea con hora: convertida a la
+// hora de quien mira; si cambia respecto a la del organizador, se marca «(tu hora)».
+// Devuelve texto (sin escapar): «sáb 24 oct · 20:00».
+function cuando(ev, fecha, hora, opciones) {
+  const o = opciones || {};
+  if (!fechaValida(fecha)) return '';
+  if (!hora || !esEnLinea(ev) || !zonaValida(ev.zona)) return fechaCorta(fecha) + (hora ? ' · ' + hora : '');
+  if (o.original) return fechaCorta(fecha) + ' · ' + hora + ' (hora de ' + nombreZona(ev.zona) + ')';
+  let t; try { t = instanteEnZona(fecha, hora, ev.zona); } catch (e) { return fechaCorta(fecha) + ' · ' + hora; }
+  const d = new Date(t); const p2 = (n) => String(n).padStart(2, '0');
+  const f2 = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); const h2 = p2(d.getHours()) + ':' + p2(d.getMinutes());
+  if (f2 === fecha && h2 === hora) return fechaCorta(fecha) + ' · ' + hora;
+  return fechaCorta(f2) + ' · ' + h2 + ' (tu hora)';
+}
+// ¿Quien mira está en otra zona que el organizador (en este momento)?
+function otraZona(ev) {
+  if (!esEnLinea(ev) || !zonaValida(ev.zona)) return false;
+  const ahora = Date.now();
+  try { return desfaseZona(ev.zona, ahora) !== -new Date(ahora).getTimezoneOffset(); } catch (e) { return false; }
+}
 
 // ---------------- Campos de fecha y hora en iPhone
 // Safari de iPhone no dibuja ícono ni «dd/mm/aaaa»: un campo vacío se ve como una

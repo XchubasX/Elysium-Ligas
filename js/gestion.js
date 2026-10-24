@@ -16,6 +16,7 @@ function ligaActual() { return eventos[idLigaActual()]; }
 
 // ---------------- Calendario: controles del organizador
 function seccionCalendarioEquipo(id, ev) {
+  const etiquetaZona = esEnLinea(ev) && zonaValida(ev.zona) ? ' · hora de ' + esc(nombreZona(ev.zona)) : '';
   const js = jornadasOrdenadas(ev); const admin = puedeAdministrar(ev);
   let h = '';
   if (ui.avisoCambio && ui.avisoCambio.liga === id) {
@@ -31,7 +32,7 @@ function seccionCalendarioEquipo(id, ev) {
     if (ui.editarJornada === j.id) {
       h += '<form class="py-2 space-y-2" onsubmit="guardarFechaJornada(event,\'' + esc(j.id) + '\')"><b>Jornada ' + esc(j.numero) + '</b>' +
         '<div class="grid grid-cols-2 gap-2"><label class="space-y-1"><span class="text-xs text-zinc-400">Nueva fecha</span><input id="jfFecha" type="date" required value="' + esc(j.fecha) + '" class="' + INP + '"></label>' +
-        '<label class="space-y-1"><span class="text-xs text-zinc-400">Hora (opcional)</span><input id="jfHora" type="time" value="' + esc(j.hora || '') + '" class="' + INP + '"></label></div>' +
+        '<label class="space-y-1"><span class="text-xs text-zinc-400">Hora (opcional)' + etiquetaZona + '</span><input id="jfHora" type="time" value="' + esc(j.hora || '') + '" class="' + INP + '"></label></div>' +
         '<p id="jfError" class="text-sm text-red-300 hidden" role="alert"></p>' +
         '<div class="flex gap-2"><button class="' + BTN + '">Guardar</button><button type="button" onclick="ui.editarJornada=null;dibujar(\'ruta\')" class="' + BTN2 + '">Cancelar</button></div></form>';
       return;
@@ -43,7 +44,7 @@ function seccionCalendarioEquipo(id, ev) {
       acciones.push('<button type="button" onclick="dosToques(this,()=>cambiarEstadoJornada(\'' + esc(j.id) + '\',\'cancelada\'))" class="' + BTN_PELIGRO + '">Cancelar</button>');
     }
     if (admin && j.estado === 'cancelada') acciones.push('<button type="button" onclick="reactivarJornada(\'' + esc(j.id) + '\')" class="' + BTN_CH + '">Reactivar</button>');
-    h += '<div data-jornada="' + esc(j.numero) + '" class="py-2 space-y-1.5"><div class="flex justify-between gap-2"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(fechaCorta(j.fecha)) + (j.hora ? ' · ' + esc(j.hora) : '') +
+    h += '<div data-jornada="' + esc(j.numero) + '" class="py-2 space-y-1.5"><div class="flex justify-between gap-2"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(cuando(ev, j.fecha, j.hora, { original: true })) +
       (j.fechaAnterior && j.estado !== 'cerrada' ? ' <span class="text-amber-300 text-[11px]">antes ' + esc(fechaCorta(j.fechaAnterior)) + '</span>' : '') + '</span>' +
       '<span class="' + e.clase + ' whitespace-nowrap">' + e.texto + (j.estado === 'cerrada' && n ? ' · ' + n + ' jug.' : '') + '</span></div>' +
       (acciones.length ? '<div class="flex gap-1.5 flex-wrap">' + acciones.join('') + '</div>' : '') + '</div>';
@@ -54,7 +55,7 @@ function seccionCalendarioEquipo(id, ev) {
       const prox = js.reduce((m, j) => Math.max(m, j.numero || 0), 0) + 1;
       h += '<form class="bg-zinc-800 border border-wine-600/50 rounded-xl p-3 space-y-2 text-sm" onsubmit="agregarJornada(event)"><b>Jornada ' + prox + '</b>' +
         '<div class="grid grid-cols-2 gap-2"><label class="space-y-1"><span class="text-xs text-zinc-400">Fecha</span><input id="jnFecha" type="date" required class="' + INP + '"></label>' +
-        '<label class="space-y-1"><span class="text-xs text-zinc-400">Hora (opcional)</span><input id="jnHora" type="time" class="' + INP + '"></label></div>' +
+        '<label class="space-y-1"><span class="text-xs text-zinc-400">Hora (opcional)' + etiquetaZona + '</span><input id="jnHora" type="time" class="' + INP + '"></label></div>' +
         '<p id="jnError" class="text-sm text-red-300 hidden" role="alert"></p>' +
         '<div class="flex gap-2"><button class="' + BTN + '">Agregar</button><button type="button" onclick="ui.agregarJornada=false;dibujar(\'ruta\')" class="' + BTN2 + '">Cancelar</button></div></form>';
     } else {
@@ -89,7 +90,7 @@ async function guardarFechaJornada(e, jid) {
   if (await guardar(id, cambios, 'Fecha guardada')) {
     ui.editarJornada = null;
     if (fecha !== j.fecha) {
-      ui.avisoCambio = { liga: id, texto: '📅 Cambio de fecha · ' + ev.nombre + '\nLa jornada ' + j.numero + ' pasa del ' + fechaCorta(j.fecha) + ' al ' + fechaCorta(fecha) + (hora ? ' a las ' + hora : '') + '.\n' + location.origin + '/#/liga/' + id + '/calendario' };
+      ui.avisoCambio = { liga: id, texto: '📅 Cambio de fecha · ' + ev.nombre + '\nLa jornada ' + j.numero + ' pasa del ' + fechaCorta(j.fecha) + ' al ' + fechaCorta(fecha) + (hora ? ' a las ' + hora + (esEnLinea(ev) && zonaValida(ev.zona) ? ' (hora de ' + nombreZona(ev.zona) + ')' : '') : '') + '.\n' + location.origin + '/#/liga/' + id + '/calendario' };
     }
     dibujar('ruta');
   }
@@ -192,9 +193,9 @@ function seccionAjustes(id, ev) {
   let h = '<form id="formAjustes" class="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 space-y-3" onsubmit="guardarAjustes(event)" oninput="this.dataset.sucio=1" onchange="this.dataset.sucio=1" novalidate>' +
     '<h3 class="font-bold">Datos de la liga</h3>' +
     campo('Nombre', '<input id="ajNombre" maxlength="80" value="' + esc(ev.nombre) + '" class="' + INP + '">') +
-    '<div class="grid grid-cols-[1fr_1.4fr] gap-2">' + campo('País *', selectorPais('ajPais', ev.pais || '', 'actualizarCiudades(\'ajPais\',\'ciudadesAj\',\'' + esc(id) + '\')')) +
+    camposModalidad('aj', ev, '<div class="grid grid-cols-[1fr_1.4fr] gap-2">' + campo('País *', selectorPais('ajPais', ev.pais || '', 'actualizarCiudades(\'ajPais\',\'ciudadesAj\',\'' + esc(id) + '\')')) +
       campo('Ciudad *', '<input id="ajCiudad" maxlength="60" list="ciudadesAj" autocomplete="off" value="' + esc(ev.ciudad || '') + '" class="' + INP + '">' + listaCiudades('ciudadesAj', ev.pais || '', id)) + '</div>' +
-    (ev.pais ? '' : '<p class="text-xs text-amber-300 -mt-1">Este evento no tiene país: elígelo y guarda.</p>') +
+      (ev.pais || esEnLinea(ev) ? '' : '<p class="text-xs text-amber-300 -mt-1">Este evento no tiene país: elígelo y guarda.</p>')) +
     campo('Nombre del organizador', '<input id="ajOrganizador" maxlength="40" value="' + esc(ev.organizadorNombre || '') + '" class="' + INP + '">') +
     (esTorneo(ev)
       ? '<div class="grid grid-cols-2 gap-2">' + campo('Fecha', '<input id="ajFecha" type="date" value="' + esc(ev.fecha || '') + '" class="' + INP + '">') + campo('Hora', '<input id="ajHora" type="time" value="' + esc(ev.hora || '') + '" class="' + INP + '">') + '</div>' +
@@ -237,8 +238,14 @@ async function guardarAjustes(e) {
   const nombre = $('ajNombre').value.trim();
   if (!nombre) return err('Escribe el nombre.');
   const pais = $('ajPais').value, ciudadEscrita = $('ajCiudad').value.trim();
-  if (!pais || !ciudadEscrita) return err('Elige el país y escribe la ciudad.');
-  const nuevo = { nombre, pais, ciudad: normalizarCiudad(pais, ciudadEscrita, id), organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
+  const mod = leerModalidad('aj');
+  // Presencial ↔ En línea: los campos del otro modo se borran (null)
+  const lugar = mod.enLinea
+    ? { modalidad: 'en-linea', zona: mod.zona, plataforma: mod.plataforma || null, pais: null, ciudad: null }
+    : { modalidad: null, zona: null, plataforma: null, pais, ciudad: normalizarCiudad(pais, ciudadEscrita, id) };
+  if (mod.enLinea && !zonaValida(mod.zona)) return err('Elige la zona horaria.');
+  if (!mod.enLinea && (!pais || !ciudadEscrita)) return err('Elige el país y escribe la ciudad.');
+  const nuevo = { nombre, organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
     hazanasModo: (document.querySelector('input[name="ajHazanas"]:checked') || {}).value || 'mencion', reglasTexto: $('ajReglas').value.trim() };
   const extra = {};
   if (esTorneo(ev)) {
@@ -263,6 +270,7 @@ async function guardarAjustes(e) {
   $('ajError').classList.add('hidden');
   const cambios = Object.assign({}, extra);
   Object.keys(nuevo).forEach(k => { if ((ev[k] === undefined ? '' : ev[k]) !== nuevo[k]) cambios[k] = nuevo[k]; });
+  Object.keys(lugar).forEach(k => { if ((ev[k] === undefined ? null : ev[k]) !== lugar[k]) cambios[k] = lugar[k]; });
   if (!Object.keys(cambios).length) return aviso('No hay cambios que guardar.');
   if (await guardar(id, cambios, 'Cambios guardados')) dibujar('ruta');
 }

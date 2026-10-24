@@ -16,7 +16,7 @@ function vistaJornada(id, jid) {
   const e = estadoJornada(j);
   let h = '<a href="#/liga/' + esc(id) + '/calendario" class="text-sm text-zinc-400 hover:text-zinc-200">← ' + esc(ev.nombre) + ' · Calendario</a>' +
     '<div class="flex justify-between items-start gap-2"><div><h2 class="text-xl font-extrabold text-wine-300">Jornada ' + esc(j.numero) + '</h2>' +
-    '<p class="text-[13px] text-zinc-400">' + esc(fechaCorta(j.fecha)) + (j.hora ? ' · ' + esc(j.hora) : '') + '</p></div>' +
+    '<p class="text-[13px] text-zinc-400">' + esc(cuando(ev, j.fecha, j.hora)) + '</p></div>' +
     '<span class="' + PILL + ' border border-zinc-700 ' + e.clase + '">' + e.texto + '</span></div>';
 
   if (j.estado === 'cancelada') return h + '<p class="text-zinc-400 text-sm py-6 text-center">Esta jornada se canceló.</p>';

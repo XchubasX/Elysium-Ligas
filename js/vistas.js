@@ -25,7 +25,7 @@ function tarjetaLiga(id, ev) {
   const lider = tabla[0];
   const cambio = prox && prox.fechaAnterior ? '<span class="text-[11px] font-bold text-amber-300 ml-1">CAMBIÓ DE FECHA</span>' : '';
   const cabeza = prox
-    ? '<span class="text-[13px] font-extrabold text-wine-300 uppercase">Próxima jornada: ' + esc(fechaCorta(prox.fecha)) + (prox.hora ? ' · ' + esc(prox.hora) : '') + cambio + '</span>'
+    ? '<span class="text-[13px] font-extrabold text-wine-300 uppercase">Próxima jornada: ' + esc(cuando(ev, prox.fecha, prox.hora)) + cambio + '</span>'
     : '<span class="text-[13px] font-extrabold text-zinc-400 uppercase">' + (ev.archivada ? 'Archivada' : 'Sin jornadas próximas') + '</span>';
   const pastilla = cuenta.total ? '<span class="' + PILL + ' bg-emerald-950/60 text-emerald-300 border border-emerald-700/70">Jornada ' + Math.min(cuenta.jugadas + 1, cuenta.total) + ' de ' + cuenta.total + '</span>' : '';
   return '<a href="#/liga/' + esc(id) + '" class="' + CARD + ' hover:border-wine-500 transition">' +
@@ -43,18 +43,19 @@ function tarjetaTorneo(id, ev) {
   else if (e.etapa === 'final') cabeza = '<span class="text-[13px] font-extrabold text-amber-300 uppercase">En curso · final</span>';
   else if (e.etapa === 'terminado') { const c = resultadoTorneo(ev)[0]; cabeza = '<span class="text-[13px] font-extrabold text-zinc-300 uppercase">Terminado' + (c ? ' · 🏆 ' + esc(c.nick) : '') + '</span>'; }
   else if (e.etapa === 'cancelado') cabeza = '<span class="text-[13px] font-extrabold text-zinc-500 uppercase">Cancelado</span>';
-  else cabeza = '<span class="text-[13px] font-extrabold text-wine-300 uppercase">' + esc(fechaCorta(ev.fecha)) + (ev.hora ? ' · ' + esc(ev.hora) : '') + '</span>';
+  else cabeza = '<span class="text-[13px] font-extrabold text-wine-300 uppercase">' + esc(cuando(ev, ev.fecha, ev.hora)) + '</span>';
   const n = Object.keys((j && j.presentes) || {}).length || Object.keys(ev.jugadores || {}).length;
   return '<a href="#/liga/' + esc(id) + '" class="' + CARD + ' hover:border-wine-500 transition">' +
     '<div class="flex items-center justify-between gap-2">' + cabeza + '<span class="' + PILL + ' bg-amber-950/50 text-amber-300 border border-amber-700/70">TORNEO</span></div>' +
     '<div class="text-lg font-bold text-wine-300">' + esc(ev.nombre) + '</div>' +
-    '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), esc(fechaCorta(ev.fecha)) + (ev.hora ? ' · ' + esc(ev.hora) : ''), esc(textoRondas(ev)), n ? n + ' jugadores' : ''].filter(Boolean).join(' · ') + '</div></a>';
+    '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), esc(cuando(ev, ev.fecha, ev.hora)), esc(textoRondas(ev)), n ? n + ' jugadores' : ''].filter(Boolean).join(' · ') + '</div></a>';
 }
 function tarjetaEvento(id, ev) { return esTorneo(ev) ? tarjetaTorneo(id, ev) : tarjetaLiga(id, ev); }
 
 // Filtros de la portada (no se guardan; viven mientras la página está abierta)
 const filtro = { texto: '', fecha: '', tipo: 'todos', pais: '', ciudad: '' };
-function lugarHTML(ev) { return ev.pais ? esc(lugarTexto(ev)) : '<span class="text-amber-300">Sin país</span>'; }
+function lugarHTML(ev) { return (ev.pais || esEnLinea(ev)) ? esc(lugarTexto(ev)) : '<span class="text-amber-300">Sin país</span>'; }
+const FILTRO_EN_LINEA = '__en-linea'; // valor del filtro de país para «🌐 En línea»
 function hayFiltro() { return !!(filtro.texto || filtro.fecha || filtro.tipo !== 'todos' || filtro.pais || filtro.ciudad); }
 function fechaOrden(ev) {
   if (esTorneo(ev)) { const e = etapaTorneo(ev).etapa; return (e === 'terminado' || e === 'cancelado') ? '9999-' + (ev.fecha || '') : (ev.fecha || '9999'); }
@@ -64,7 +65,8 @@ function sinAcentos(t) { return String(t || '').normalize('NFD').replace(/[\u030
 function pasaFiltro(ev) {
   if (filtro.tipo === 'ligas' && esTorneo(ev)) return false;
   if (filtro.tipo === 'torneos' && !esTorneo(ev)) return false;
-  if (filtro.pais && ev.pais !== filtro.pais) return false;
+  if (filtro.pais === FILTRO_EN_LINEA) { if (!esEnLinea(ev)) return false; }
+  else if (filtro.pais && (esEnLinea(ev) || ev.pais !== filtro.pais)) return false;
   if (filtro.ciudad && sinAcentos(ev.ciudad) !== sinAcentos(filtro.ciudad)) return false;
   if (filtro.texto) { const q = sinAcentos(filtro.texto).trim(); if (q && !sinAcentos(ev.nombre).includes(q)) return false; }
   if (filtro.fecha) {
@@ -96,9 +98,11 @@ function limpiarFiltros() { filtro.texto = ''; filtro.fecha = ''; filtro.tipo = 
 function cambiarPais(v) { filtro.pais = v; filtro.ciudad = ''; dibujar('ruta'); }
 function opcionesLugar(archivadas) {
   const evs = Object.values(eventos).filter(ev => !!ev.archivada === !!archivadas);
-  const paises = [...new Set(evs.map(ev => ev.pais).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
-  const ciudades = {}; evs.filter(ev => ev.ciudad && (!filtro.pais || ev.pais === filtro.pais)).forEach(ev => { ciudades[sinAcentos(ev.ciudad)] = ciudades[sinAcentos(ev.ciudad)] || ev.ciudad; });
-  return { paises, ciudades: Object.values(ciudades).sort((a, b) => a.localeCompare(b, 'es')) };
+  const presenciales = evs.filter(ev => !esEnLinea(ev));
+  const paises = [...new Set(presenciales.map(ev => ev.pais).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const ciudades = {};
+  if (filtro.pais !== FILTRO_EN_LINEA) presenciales.filter(ev => ev.ciudad && (!filtro.pais || ev.pais === filtro.pais)).forEach(ev => { ciudades[sinAcentos(ev.ciudad)] = ciudades[sinAcentos(ev.ciudad)] || ev.ciudad; });
+  return { paises, enLinea: evs.some(esEnLinea), ciudades: Object.values(ciudades).sort((a, b) => a.localeCompare(b, 'es')) };
 }
 
 function vistaPortada(archivadas) {
@@ -109,8 +113,9 @@ function vistaPortada(archivadas) {
     (archivadas ? '<a href="#/" class="text-sm text-wine-300 underline">← Eventos activos</a>' : '') + '</div>' + '<div class="-mt-2">' + etiquetaCasual() + '</div>';
   const op = opcionesLugar(archivadas);
   h += '<div class="space-y-2"><div class="grid grid-cols-2 gap-2">' +
-    '<select id="filtroPais" onchange="cambiarPais(this.value)" class="' + inp + '" aria-label="País"><option value="">Todos los países</option>' + op.paises.map(p => '<option' + (p === filtro.pais ? ' selected' : '') + '>' + esc(p) + '</option>').join('') + '</select>' +
-    '<select id="filtroCiudad" onchange="cambiarFiltro(\'ciudad\', this.value)" class="' + inp + '" aria-label="Ciudad"><option value="">Todas las ciudades</option>' + op.ciudades.map(c => '<option' + (sinAcentos(c) === sinAcentos(filtro.ciudad) ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></div>' +
+    '<select id="filtroPais" onchange="cambiarPais(this.value)" class="' + inp + '" aria-label="País"><option value="">Todos los países</option>' + op.paises.map(p => '<option' + (p === filtro.pais ? ' selected' : '') + '>' + esc(p) + '</option>').join('') +
+      (op.enLinea || filtro.pais === FILTRO_EN_LINEA ? '<option value="' + FILTRO_EN_LINEA + '"' + (filtro.pais === FILTRO_EN_LINEA ? ' selected' : '') + '>🌐 En línea</option>' : '') + '</select>' +
+    '<select id="filtroCiudad" onchange="cambiarFiltro(\'ciudad\', this.value)" class="' + inp + '" aria-label="Ciudad"' + (filtro.pais === FILTRO_EN_LINEA ? ' disabled' : '') + '><option value="">Todas las ciudades</option>' + op.ciudades.map(c => '<option' + (sinAcentos(c) === sinAcentos(filtro.ciudad) ? ' selected' : '') + '>' + esc(c) + '</option>').join('') + '</select></div>' +
     '<div class="grid grid-cols-[1fr_150px] gap-2">' +
     '<input id="filtroTexto" type="search" placeholder="🔍 Nombre" value="' + esc(filtro.texto) + '" oninput="cambiarFiltro(\'texto\', this.value)" class="' + inp + '" aria-label="Buscar por nombre">' +
     '<input id="filtroFecha" type="date" value="' + esc(filtro.fecha) + '" onchange="cambiarFiltro(\'fecha\', this.value)" class="' + inp + '" aria-label="Fecha"></div>' +
@@ -140,8 +145,9 @@ function vistaLiga(id, pestana) {
   let h = '<a href="#/" class="text-sm text-zinc-400 hover:text-zinc-200">← Ligas y torneos</a>' +
     '<div class="space-y-1"><div class="flex items-start justify-between gap-2"><h2 class="text-xl font-extrabold text-wine-300 leading-tight">' + esc(ev.nombre) + '</h2>' + rol + '</div>' +
     '<p class="text-[13px] text-zinc-400">' + (torneo
-      ? [lugarHTML(ev), esc(fechaCorta(ev.fecha)) + (ev.hora ? ' · ' + esc(ev.hora) : ''), esc(textoRondas(ev)), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]
+      ? [lugarHTML(ev), esc(cuando(ev, ev.fecha, ev.hora)), esc(textoRondas(ev)), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]
       : [lugarHTML(ev), (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : ''), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]).filter(Boolean).join(' · ') + '</p>' +
+    (otraZona(ev) ? '<p data-nota-zona class="text-[13px] text-sky-300">🕒 Los horarios se muestran en tu hora. El organizador está en hora de ' + esc(nombreZona(ev.zona)) + '.</p>' : '') +
     etiquetaCasual() +
     (ev.archivada ? '<p class="text-[13px] text-amber-300">' + (torneo ? 'Torneo archivado' : 'Liga archivada') + ': ya no aparece en la portada.</p>' : '') + '</div>';
   h += '<nav class="flex gap-1.5 flex-wrap" aria-label="Secciones de la liga">' + pestanas.map(([k, t]) =>
@@ -182,7 +188,7 @@ function seccionCalendario(id, ev) {
   return '<div class="bg-zinc-800 rounded-xl p-3 text-sm divide-y divide-zinc-700">' + js.map(j => {
     const e = estadoJornada(j); const s = sumaJornada(j); const n = Object.keys(s).length;
     const conMesas = j.estado === 'cerrada' || j.estado === 'abierta';
-    return '<' + (conMesas ? 'a href="#/liga/' + esc(id) + '/jornada/' + esc(j.id) + '"' : 'div') + ' class="flex justify-between gap-2 py-2' + (conMesas ? ' hover:bg-zinc-700/40' : '') + '"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(fechaCorta(j.fecha)) + (j.hora ? ' · ' + esc(j.hora) : '') +
+    return '<' + (conMesas ? 'a href="#/liga/' + esc(id) + '/jornada/' + esc(j.id) + '"' : 'div') + ' class="flex justify-between gap-2 py-2' + (conMesas ? ' hover:bg-zinc-700/40' : '') + '"><span><b>Jornada ' + esc(j.numero) + '</b> · ' + esc(cuando(ev, j.fecha, j.hora)) +
       (j.fechaAnterior && j.estado !== 'cerrada' ? ' <span class="text-amber-300 text-[11px]">antes ' + esc(fechaCorta(j.fechaAnterior)) + '</span>' : '') + '</span>' +
       '<span class="' + e.clase + '">' + e.texto + (j.estado === 'cerrada' && n ? ' · ' + n + ' jugadores' : '') + (conMesas ? ' ›' : '') + '</span></' + (conMesas ? 'a' : 'div') + '>';
   }).join('') + '</div>';
@@ -212,7 +218,7 @@ function vistaMisEventos() {
     const ev = eventos[id];
     const etiquetas = (esTorneo(ev) ? ' <span class="text-[11px] font-bold text-amber-300">TORNEO</span>' : '') + (ev.ownerUid === usuario.uid ? '' : ' <span class="text-[11px] font-bold text-violet-300">AYUDANTE</span>');
     let sub;
-    if (esTorneo(ev)) { const e = etapaTorneo(ev).etapa; sub = { pendiente: fechaCorta(ev.fecha) + (ev.hora ? ' · ' + ev.hora : ''), ronda: 'En curso', final: 'En la final', terminado: 'Terminado', cancelado: 'Cancelado' }[e]; }
+    if (esTorneo(ev)) { const e = etapaTorneo(ev).etapa; sub = { pendiente: cuando(ev, ev.fecha, ev.hora), ronda: 'En curso', final: 'En la final', terminado: 'Terminado', cancelado: 'Cancelado' }[e]; }
     else { const prox = proximaJornada(ev); sub = prox ? 'Jornada ' + prox.numero + ' el ' + fechaCorta(prox.fecha) : (ev.archivada ? 'Archivada' : 'Sin jornadas próximas'); }
     return '<a href="#/liga/' + esc(id) + '" class="flex justify-between items-center bg-zinc-800 rounded-lg px-3 py-2.5 hover:bg-zinc-700/70"><span><b>' + esc(ev.nombre) + '</b>' + etiquetas +
       '<br><span class="text-xs text-zinc-400">' + esc(sub) + '</span></span><span class="text-sm font-bold text-wine-300">Abrir ›</span></a>';
@@ -224,6 +230,32 @@ function vistaMisEventos() {
 function copiarUid() {
   const t = usuario ? usuario.uid : '';
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => aviso('Identificador copiado')).catch(() => aviso('Mantén presionado el texto para copiarlo', 'error'));
+}
+
+// ---------------- Presencial / En línea (al crear y en Ajustes; p = prefijo de los campos: 'cr' o 'aj')
+// camposLugar = los campos de país y ciudad de siempre (solo se ven en presencial)
+function camposModalidad(p, ev, camposLugar) {
+  const enLinea = esEnLinea(ev);
+  const inp = 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-wine-500';
+  const opcion = (v, t) => '<label class="flex-1 flex gap-2 items-center justify-center text-sm border border-zinc-700 rounded-lg px-3 py-2 cursor-pointer has-[:checked]:border-wine-500 has-[:checked]:bg-wine-900/40">' +
+    '<input type="radio" name="' + p + 'Modalidad" value="' + v + '"' + ((v === 'en-linea') === enLinea ? ' checked' : '') + ' onchange="cambiarModalidad(\'' + p + '\')" class="accent-wine-500"> ' + t + '</label>';
+  return '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">¿Dónde se juega?</legend>' +
+    '<div class="flex gap-2">' + opcion('presencial', '📍 Presencial') + opcion('en-linea', '🌐 En línea') + '</div></fieldset>' +
+    '<div id="' + p + 'Presencial" class="space-y-3' + (enLinea ? ' hidden' : '') + '">' + camposLugar + '</div>' +
+    '<div id="' + p + 'EnLinea" class="space-y-3' + (enLinea ? '' : ' hidden') + '">' +
+      '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Plataforma (opcional)</span>' +
+        '<input id="' + p + 'Plataforma" maxlength="80" value="' + esc((ev && ev.plataforma) || '') + '" class="' + inp + '" placeholder="ej. Discord + Tabletop Simulator"></label>' +
+      '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Zona horaria del organizador</span>' + selectorZona(p + 'Zona', (ev && zonaValida(ev.zona)) ? ev.zona : zonaSugerida()) +
+        '<span class="block text-xs text-zinc-500">Las horas se capturan en esta zona. Cada jugador las ve convertidas a su propia hora.</span></label></div>';
+}
+function cambiarModalidad(p) {
+  const enLinea = (document.querySelector('input[name="' + p + 'Modalidad"]:checked') || {}).value === 'en-linea';
+  $(p + 'Presencial').classList.toggle('hidden', enLinea);
+  $(p + 'EnLinea').classList.toggle('hidden', !enLinea);
+}
+function leerModalidad(p) {
+  const enLinea = (document.querySelector('input[name="' + p + 'Modalidad"]:checked') || {}).value === 'en-linea';
+  return { enLinea, plataforma: enLinea ? $(p + 'Plataforma').value.trim().slice(0, 80) : '', zona: enLinea ? $(p + 'Zona').value : '' };
 }
 
 // ---------------- Crear liga o torneo (#/crear · #/crear/torneo)
@@ -239,8 +271,8 @@ function vistaCrear(tipo) {
     '<h2 class="text-lg font-bold text-wine-300">' + (torneo ? 'Nuevo torneo' : 'Nueva liga') + '</h2>' +
     campo('Nombre', '<input id="crNombre" maxlength="80" required class="' + inp + '" placeholder="' + (torneo ? 'ej. Torneo de Otoño' : 'ej. Liga CDMX · Temporada 1') + '" oninput="sugerirEnlace()">') +
     campo('Enlace', '<div class="flex items-center gap-1 text-sm"><span class="text-zinc-500">#/liga/</span><input id="crEnlace" maxlength="40" class="' + inp + '" placeholder="' + (torneo ? 'torneo-otono' : 'liga-cdmx-1') + '" oninput="this.dataset.tocado=1"></div>', 'Solo minúsculas, números y guiones. No se puede cambiar después.') +
-    '<div class="grid grid-cols-[1fr_1.4fr] gap-2">' + campo('País *', selectorPais('crPais', 'México', 'actualizarCiudades(\'crPais\',\'ciudadesCr\')')) +
-      campo('Ciudad *', '<input id="crCiudad" maxlength="60" list="ciudadesCr" autocomplete="off" class="' + inp + '" placeholder="ej. Ciudad de México">' + listaCiudades('ciudadesCr', 'México')) + '</div>' +
+    camposModalidad('cr', null, '<div class="grid grid-cols-[1fr_1.4fr] gap-2">' + campo('País *', selectorPais('crPais', 'México', 'actualizarCiudades(\'crPais\',\'ciudadesCr\')')) +
+      campo('Ciudad *', '<input id="crCiudad" maxlength="60" list="ciudadesCr" autocomplete="off" class="' + inp + '" placeholder="ej. Ciudad de México">' + listaCiudades('ciudadesCr', 'México')) + '</div>') +
     campo('Nombre del organizador', '<input id="crOrganizador" maxlength="40" class="' + inp + '" value="' + esc(nombreUsuario()) + '">');
   if (torneo) {
     h += '<div class="grid grid-cols-2 gap-2">' + campo('Fecha', '<input id="crFecha" type="date" class="' + inp + '">') + campo('Hora (opcional)', '<input id="crHora" type="time" class="' + inp + '">') + '</div>' +
@@ -274,7 +306,8 @@ async function enviarCrear(ev) {
   if (!enlaceValido(id)) return err('El enlace debe tener de 3 a 40 letras minúsculas, números o guiones.');
   if (eventos[id]) return err('Ese enlace ya lo usa otro evento. Elige otro.');
   const pais = $('crPais').value, ciudadEscrita = $('crCiudad').value.trim();
-  const datos = { nombre, pais, ciudad: normalizarCiudad(pais, ciudadEscrita), organizadorNombre: $('crOrganizador').value.trim() || nombreUsuario(),
+  const mod = leerModalidad('cr');
+  const datos = { nombre, organizadorNombre: $('crOrganizador').value.trim() || nombreUsuario(),
     hazanasModo: (document.querySelector('input[name="crHazanas"]:checked') || {}).value || 'mencion' };
   if (torneo) {
     const fecha = $('crFecha').value, hora = $('crHora').value;
@@ -289,7 +322,13 @@ async function enviarCrear(ev) {
     if (fin < inicio) return err('La fecha de fin es anterior al inicio.');
     if (inicio) datos.inicio = inicio; if (fin) datos.fin = fin;
   }
-  if (!pais || !ciudadEscrita) return err('Elige el país y escribe la ciudad.');
+  if (mod.enLinea) {
+    if (!zonaValida(mod.zona)) return err('Elige la zona horaria.');
+    datos.modalidad = 'en-linea'; datos.zona = mod.zona; if (mod.plataforma) datos.plataforma = mod.plataforma;
+  } else {
+    if (!pais || !ciudadEscrita) return err('Elige el país y escribe la ciudad.');
+    datos.pais = pais; datos.ciudad = normalizarCiudad(pais, ciudadEscrita);
+  }
   const reglas = $('crReglas').value.trim(); if (reglas) datos.reglasTexto = reglas;
   try { await crearLiga(id, datos, torneo ? 'torneo' : 'liga'); aviso(torneo ? '¡Torneo creado!' : '¡Liga creada!'); window.location.hash = '#/liga/' + id; }
   catch (e) { console.warn(e); err('No se pudo crear. Revisa tu conexión o pide al administrador que confirme tu permiso de organizador.'); }
