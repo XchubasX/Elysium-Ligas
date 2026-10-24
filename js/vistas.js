@@ -245,17 +245,19 @@ function camposModalidad(p, ev, camposLugar) {
     '<div id="' + p + 'EnLinea" class="space-y-3' + (enLinea ? '' : ' hidden') + '">' +
       '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Plataforma (opcional)</span>' +
         '<input id="' + p + 'Plataforma" maxlength="80" value="' + esc((ev && ev.plataforma) || '') + '" class="' + inp + '" placeholder="ej. Discord + Tabletop Simulator"></label>' +
-      '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Zona horaria del organizador</span>' + selectorZona(p + 'Zona', (ev && zonaValida(ev.zona)) ? ev.zona : zonaSugerida()) +
-        '<span class="block text-xs text-zinc-500">Las horas se capturan en esta zona. Cada jugador las ve convertidas a su propia hora.</span></label></div>';
+      '<p data-zona-info class="text-xs text-zinc-400">🕒 Zona horaria: <b class="text-zinc-200">' + esc(nombreZona(zonaDeModalidad(ev))) + '</b>' +
+        (ev && esEnLinea(ev) && zonaValida(ev.zona) ? ' (la de la liga)' : ' (detectada de tu aparato)') + '. Las horas se capturan en esta zona y cada jugador las ve convertidas a su propia hora.</p></div>';
 }
 function cambiarModalidad(p) {
   const enLinea = (document.querySelector('input[name="' + p + 'Modalidad"]:checked') || {}).value === 'en-linea';
   $(p + 'Presencial').classList.toggle('hidden', enLinea);
   $(p + 'EnLinea').classList.toggle('hidden', !enLinea);
 }
-function leerModalidad(p) {
+// La zona de un evento en línea: la que ya tiene, o la del aparato si es nuevo (o pasa de presencial a en línea)
+function zonaDeModalidad(ev) { return (ev && esEnLinea(ev) && zonaValida(ev.zona)) ? ev.zona : zonaDelAparato(); }
+function leerModalidad(p, ev) {
   const enLinea = (document.querySelector('input[name="' + p + 'Modalidad"]:checked') || {}).value === 'en-linea';
-  return { enLinea, plataforma: enLinea ? $(p + 'Plataforma').value.trim().slice(0, 80) : '', zona: enLinea ? $(p + 'Zona').value : '' };
+  return { enLinea, plataforma: enLinea ? $(p + 'Plataforma').value.trim().slice(0, 80) : '', zona: enLinea ? zonaDeModalidad(ev) : '' };
 }
 
 // ---------------- Crear liga o torneo (#/crear · #/crear/torneo)
@@ -306,7 +308,7 @@ async function enviarCrear(ev) {
   if (!enlaceValido(id)) return err('El enlace debe tener de 3 a 40 letras minúsculas, números o guiones.');
   if (eventos[id]) return err('Ese enlace ya lo usa otro evento. Elige otro.');
   const pais = $('crPais').value, ciudadEscrita = $('crCiudad').value.trim();
-  const mod = leerModalidad('cr');
+  const mod = leerModalidad('cr', null);
   const datos = { nombre, organizadorNombre: $('crOrganizador').value.trim() || nombreUsuario(),
     hazanasModo: (document.querySelector('input[name="crHazanas"]:checked') || {}).value || 'mencion' };
   if (torneo) {
@@ -323,7 +325,6 @@ async function enviarCrear(ev) {
     if (inicio) datos.inicio = inicio; if (fin) datos.fin = fin;
   }
   if (mod.enLinea) {
-    if (!zonaValida(mod.zona)) return err('Elige la zona horaria.');
     datos.modalidad = 'en-linea'; datos.zona = mod.zona; if (mod.plataforma) datos.plataforma = mod.plataforma;
   } else {
     if (!pais || !ciudadEscrita) return err('Elige el país y escribe la ciudad.');

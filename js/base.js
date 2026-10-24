@@ -94,7 +94,8 @@ function lugarTexto(ev) {
 
 // ---------------- Eventos En línea (24 oct 2026)
 // Un evento en línea guarda modalidad: 'en-linea', no tiene país ni ciudad, puede
-// tener plataforma (texto libre) y guarda la zona horaria del organizador (zona).
+// tener plataforma (texto libre) y guarda la zona horaria del organizador (zona),
+// que se detecta sola del aparato de quien lo crea y ya no cambia.
 // Fechas y horas se siguen guardando como «AAAA-MM-DD» y «HH:MM» en esa zona;
 // al mostrarlas, cada quien las ve convertidas a su propia hora.
 // Sin «modalidad» = presencial (así son todos los eventos creados antes).
@@ -105,15 +106,16 @@ const ZONAS = [
   ['America/Argentina/Buenos_Aires', 'Buenos Aires'], ['America/New_York', 'Nueva York'], ['America/Los_Angeles', 'Los Ángeles'],
   ['Europe/Madrid', 'Madrid'], ['Atlantic/Canary', 'Canarias'], ['Europe/London', 'Londres']
 ];
-function nombreZona(z) { const x = ZONAS.find(([k]) => k === z); return x ? x[1] : String(z || ''); }
-function zonaValida(z) { return ZONAS.some(([k]) => k === z); }
-function zonaNavegador() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } }
-// Zona sugerida al crear: la del aparato si está en la lista; si no, Ciudad de México
-function zonaSugerida() { const z = zonaNavegador(); return zonaValida(z) ? z : 'America/Mexico_City'; }
-function selectorZona(id, valor) {
-  return '<select id="' + id + '" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-wine-500">' +
-    ZONAS.map(([k, t]) => '<option value="' + k + '"' + (k === valor ? ' selected' : '') + '>' + t + '</option>').join('') + '</select>';
+// Nombre para mostrar: el de la lista, o el último pedazo de la zona («America/Monterrey» → «Monterrey»)
+function nombreZona(z) { const x = ZONAS.find(([k]) => k === z); return x ? x[1] : String(z || '').split('/').pop().replace(/_/g, ' '); }
+// Cualquier zona horaria que el navegador reconozca (no solo las de la lista)
+function zonaValida(z) {
+  if (typeof z !== 'string' || z.length < 3 || z.length > 40) return false;
+  try { new Intl.DateTimeFormat('en-US', { timeZone: z }); return true; } catch (e) { return false; }
 }
+function zonaNavegador() { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } }
+// Zona del aparato (se detecta sola al crear); si el navegador no la da, Ciudad de México
+function zonaDelAparato() { const z = zonaNavegador(); return zonaValida(z) ? z : 'America/Mexico_City'; }
 // Minutos que la zona z va adelante de la hora mundial (UTC) en el instante t
 function desfaseZona(z, t) {
   const p = {}; new Intl.DateTimeFormat('en-US', { timeZone: z, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })

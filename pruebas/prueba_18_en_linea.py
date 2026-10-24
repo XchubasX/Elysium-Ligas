@@ -32,17 +32,17 @@ def correr(nav, g):
     err = []
 
     # ---------------- Crear una liga en línea
-    ctx, pg, e = H.abrir(nav, seed, '#/crear', usuario=H.ANA); err += e
+    ctx, pg, e = H.abrir(nav, seed, '#/crear', usuario=H.ANA, timezone_id='America/Santiago'); err += e
     g.caso('crear: hay selector «Presencial / En línea», con Presencial marcado', pg.is_checked('input[name=crModalidad][value=presencial]') and pg.is_visible('text=🌐 En línea'))
     g.caso('crear: en Presencial se ven país y ciudad', pg.is_visible('#crPais') and pg.is_visible('#crCiudad') and not pg.is_visible('#crPlataforma'))
     pg.check('input[name=crModalidad][value=en-linea]'); pg.wait_for_timeout(50)
     g.caso('crear: al elegir En línea desaparecen país y ciudad', not pg.is_visible('#crPais') and not pg.is_visible('#crCiudad'))
-    g.caso('crear: en En línea salen «Plataforma (opcional)» y la zona horaria', pg.is_visible('#crPlataforma') and pg.is_visible('#crZona'))
-    g.caso('crear: la zona sugerida es la del aparato (Ciudad de México)', pg.input_value('#crZona') == 'America/Mexico_City', pg.input_value('#crZona'))
+    g.caso('crear: en En línea sale «Plataforma (opcional)» y no hay selector de zona', pg.is_visible('#crPlataforma') and pg.locator('select[id$=Zona]').count() == 0)
+    zi = pg.inner_text('[data-zona-info]') if pg.is_visible('[data-zona-info]') else ''
+    g.caso('crear: dice la zona detectada «Santiago de Chile (detectada de tu aparato)»', 'Santiago de Chile' in zi and 'detectada de tu aparato' in zi, zi)
     pg.fill('#crNombre', 'Liga Virtual Uno'); pg.dispatch_event('#crNombre', 'input')
     # la ciudad se queda vacía: en línea no la pide
     pg.fill('#crPlataforma', 'Discord + Tabletop Simulator')
-    pg.select_option('#crZona', 'America/Santiago')
     pg.fill('#crInicio', '2026-11-01'); pg.fill('#crFin', '2026-12-20')
     g.caso('crear: sin desborde horizontal a 390 px', H.sin_desborde(pg))
     pg.click('text=Crear liga'); pg.wait_for_timeout(300)
@@ -121,12 +121,13 @@ def correr(nav, g):
     ctx.close()
 
     # ---------------- Ajustes: cambiar de modalidad
-    ctx, pg, e = H.abrir(nav, seed, '#/liga/liga-online/ajustes', usuario=H.ANA); err += e
-    g.caso('ajustes de una liga en línea: En línea marcado, sin país ni ciudad', pg.is_checked('input[name=ajModalidad][value=en-linea]') and not pg.is_visible('#ajPais') and pg.input_value('#ajZona') == 'America/Mexico_City')
+    ctx, pg, e = H.abrir(nav, seed, '#/liga/liga-online/ajustes', usuario=H.ANA, timezone_id=MADRID); err += e
+    g.caso('ajustes de una liga en línea: En línea marcado, sin país ni ciudad', pg.is_checked('input[name=ajModalidad][value=en-linea]') and not pg.is_visible('#ajPais') and 'Ciudad de México (la de la liga)' in pg.inner_text('[data-zona-info]'))
     g.caso('ajustes: no sale el aviso «Este evento no tiene país»', 'no tiene país' not in pg.inner_text('#app'))
     pg.fill('#ajPlataforma', 'Lackey'); pg.click('text=Guardar cambios'); pg.wait_for_timeout(300)
     ev = pg.evaluate("window.__store().eventos['liga-online']")
     g.caso('ajustes: se puede poner o cambiar la plataforma', ev.get('plataforma') == 'Lackey', ev)
+    g.caso('ajustes desde Madrid: la liga conserva su zona (Ciudad de México)', ev.get('zona') == 'America/Mexico_City', ev)
     pg.check('input[name=ajModalidad][value=presencial]')
     pg.click('text=Guardar cambios'); pg.wait_for_timeout(150)
     g.caso('pasar a Presencial sin ciudad → pide país y ciudad', 'escribe la ciudad' in error(pg, '#ajError'), error(pg, '#ajError'))
@@ -136,11 +137,11 @@ def correr(nav, g):
     g.caso('pasar a Presencial: guarda país y ciudad y borra modalidad, zona y plataforma', ev.get('pais') == 'Chile' and ev.get('ciudad') == 'Valparaíso' and not any(k in ev for k in ('modalidad', 'zona', 'plataforma')), ev)
     ctx.close()
 
-    ctx, pg, e = H.abrir(nav, seed, '#/liga/liga-a/ajustes', usuario=H.ANA); err += e
-    pg.check('input[name=ajModalidad][value=en-linea]'); pg.select_option('#ajZona', 'Europe/Madrid')
+    ctx, pg, e = H.abrir(nav, seed, '#/liga/liga-a/ajustes', usuario=H.ANA, timezone_id=MADRID); err += e
+    pg.check('input[name=ajModalidad][value=en-linea]')
     pg.click('text=Guardar cambios'); pg.wait_for_timeout(300)
     ev = pg.evaluate("window.__store().eventos['liga-a']")
-    g.caso('pasar a En línea: borra país y ciudad y guarda la zona', ev.get('modalidad') == 'en-linea' and ev.get('zona') == 'Europe/Madrid' and 'pais' not in ev and 'ciudad' not in ev and 'plataforma' not in ev, ev)
+    g.caso('pasar a En línea: borra país y ciudad y guarda la zona del aparato (Madrid)', ev.get('modalidad') == 'en-linea' and ev.get('zona') == 'Europe/Madrid' and 'pais' not in ev and 'ciudad' not in ev and 'plataforma' not in ev, ev)
     ctx.close()
 
     # Aviso de cambio de fecha (WhatsApp) con la zona

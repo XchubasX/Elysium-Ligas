@@ -238,12 +238,11 @@ async function guardarAjustes(e) {
   const nombre = $('ajNombre').value.trim();
   if (!nombre) return err('Escribe el nombre.');
   const pais = $('ajPais').value, ciudadEscrita = $('ajCiudad').value.trim();
-  const mod = leerModalidad('aj');
+  const mod = leerModalidad('aj', ev);
   // Presencial ↔ En línea: los campos del otro modo se borran (null)
   const lugar = mod.enLinea
     ? { modalidad: 'en-linea', zona: mod.zona, plataforma: mod.plataforma || null, pais: null, ciudad: null }
     : { modalidad: null, zona: null, plataforma: null, pais, ciudad: normalizarCiudad(pais, ciudadEscrita, id) };
-  if (mod.enLinea && !zonaValida(mod.zona)) return err('Elige la zona horaria.');
   if (!mod.enLinea && (!pais || !ciudadEscrita)) return err('Elige el país y escribe la ciudad.');
   const nuevo = { nombre, organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
     hazanasModo: (document.querySelector('input[name="ajHazanas"]:checked') || {}).value || 'mencion', reglasTexto: $('ajReglas').value.trim() };
