@@ -150,7 +150,9 @@ function avisosMesa(m) {
 function jugadorUsado(ev, jid) {
   return lista(ev && ev.jornadas).some(j => (j.presentes && j.presentes[jid]) ||
     Object.values(j.rondas || {}).some(r => mesaDe(r, jid)) ||
-    Object.values(j.hazanas || {}).some(h => h && h.jugador === jid));
+    Object.values(j.hazanas || {}).some(h => h && h.jugador === jid)) ||
+    // Partidas libres: si reportó una partida o salió como rival en una
+    lista(ev && ev.partidas).some(p => p && (p.jugador === jid || (p.rivales && p.rivales[jid])));
 }
 function hazanaUsada(ev, hid) {
   return lista(ev && ev.jornadas).some(j => Object.values(j.hazanas || {}).some(h => h && h.hazana === hid));
@@ -254,4 +256,58 @@ function problemaFechaJornada(ev, fecha, jid) {
 // Jornadas (no canceladas) que quedarían fuera de una temporada nueva
 function jornadasFuera(ev, inicio, fin) {
   return jornadasOrdenadas(ev).filter(j => j.estado !== 'cancelada' && ((inicio && j.fecha < inicio) || (fin && j.fecha > fin)));
+}
+
+// =====================================================================
+// LIGAS DE «PARTIDAS LIBRES» (26 oct 2026) — solo ligas en línea
+// Temporada continua: cada jugador reporta sus propias partidas (o el equipo por él).
+// Partida: eventos/{id}/partidas/{pid} = { jugador, fecha, vp, mesa (4|5), rivales?, invitados?, por, creada }
+// Clasificación (sistema de La Jyhad Eterna, con VP):
+//   P = VP totales, N = partidas, M = media de VP por partida de toda la liga
+//   A = (P + 3M) / (N + 3)   ·   R = 100 × A / M   ·   Q = 100 × mín(N / 12, 1)
+//   Total = 0.70 × R + 0.30 × Q
+// Menos de 3 partidas = provisional. Desempates: R, VP totales, media bruta, partidas.
+// =====================================================================
+const LIBRE_RELLENO = 3, LIBRE_META = 12, LIBRE_PESO_R = 0.7, LIBRE_PESO_Q = 0.3, LIBRE_MIN = 3;
+
+function esLibre(ev) { return !!ev && ev.tipo !== 'torneo' && ev.formato === 'libre'; }
+function temporadaCerrada(ev) { return !!ev && ev.temporada === 'cerrada'; }
+function vpValido(vp, mesa) { return typeof vp === 'number' && vp >= 0 && vp <= mesa && Number.isInteger(vp * 2); }
+
+// Partidas ordenadas de la más nueva a la más vieja: [{ id, jugador, fecha, vp, mesa, ... }]
+function partidasLiga(ev) {
+  return lista(ev && ev.partidas).filter(p => p && p.jugador && typeof p.vp === 'number')
+    .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || (b.creada || 0) - (a.creada || 0));
+}
+function mediaLiga(ev) {
+  const ps = partidasLiga(ev);
+  return ps.length ? ps.reduce((s, p) => s + p.vp, 0) / ps.length : 0;
+}
+
+// Tabla: [{ jid, nick, partidas, vp, media, ajustada, rendimiento, participacion, total, provisional }]
+function tablaLibre(ev) {
+  const jug = (ev && ev.jugadores) || {}; const M = mediaLiga(ev); const t = {};
+  partidasLiga(ev).forEach(p => {
+    const f = (t[p.jugador] = t[p.jugador] || { jid: p.jugador, nick: (jug[p.jugador] || {}).nick || '(jugador borrado)', partidas: 0, vp: 0 });
+    f.partidas += 1; f.vp += p.vp;
+  });
+  const filas = Object.values(t).map(f => {
+    const A = (f.vp + LIBRE_RELLENO * M) / (f.partidas + LIBRE_RELLENO);
+    const R = M > 0 ? 100 * A / M : 100; // sin ningún VP en la liga, todos están «en la media»
+    const Q = 100 * Math.min(f.partidas / LIBRE_META, 1);
+    return Object.assign(f, { media: f.vp / f.partidas, ajustada: A, rendimiento: R, participacion: Q,
+      total: LIBRE_PESO_R * R + LIBRE_PESO_Q * Q, provisional: f.partidas < LIBRE_MIN });
+  });
+  const dif = (x, y) => (Math.abs(x - y) < 1e-9 ? 0 : x - y);
+  return filas.sort((a, b) => dif(b.total, a.total) || dif(b.rendimiento, a.rendimiento) || dif(b.vp, a.vp) ||
+    dif(b.media, a.media) || (b.partidas - a.partidas) || a.nick.localeCompare(b.nick, 'es'));
+}
+
+// Un decimal, sin «.0» de sobra: 131 → «131», 115.45 → «115.5»
+function num1(x) { const r = Math.round(x * 10) / 10; return Number.isInteger(r) ? String(r) : r.toFixed(1); }
+function num2(x) { const r = Math.round(x * 100) / 100; return String(r); }
+
+// Partidas que quedarían fuera de una temporada nueva
+function partidasFuera(ev, inicio, fin) {
+  return partidasLiga(ev).filter(p => (inicio && p.fecha < inicio) || (fin && p.fecha > fin));
 }

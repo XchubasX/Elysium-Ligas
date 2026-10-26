@@ -58,7 +58,12 @@ function bloqueInscripcion(id, ev) {
   const mia = usuario ? miInscripcion[id] : null;
   if (usuario && mia === undefined) return '';
   const jugador = mia && mia.estado === 'aceptada' && mia.jid && ev.jugadores && ev.jugadores[mia.jid];
-  if (jugador) return caja('<p class="font-bold text-emerald-300">✅ Estás inscrito como «' + esc(jugador.nick) + '»</p>', 'border-emerald-700/60');
+  if (jugador) {
+    // Partidas libres: el jugador inscrito reporta sus propias partidas
+    const reportar = esLibre(ev) && !temporadaCerrada(ev) && rutaActual().pestana !== 'partidas'
+      ? '<a href="#/liga/' + esc(id) + '/partidas" class="' + BTN + ' w-full">🎲 Reportar partida</a>' : '';
+    return caja('<p class="font-bold text-emerald-300">✅ Estás inscrito como «' + esc(jugador.nick) + '»</p>' + reportar, 'border-emerald-700/60');
+  }
   if (mia && mia.estado === 'pendiente') {
     return caja('<p class="font-bold text-emerald-300">✓ Inscripción enviada como «' + esc(mia.nick) + '»</p>' +
       '<p class="text-zinc-300">El organizador la tiene que confirmar. Aquí te avisamos cuando estés dentro.</p>' +

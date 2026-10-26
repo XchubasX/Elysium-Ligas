@@ -9,7 +9,7 @@ const BTN_CH = 'text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-zin
 const BTN_PELIGRO = 'text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-red-800 text-red-300 hover:bg-red-950 whitespace-nowrap';
 
 // Lo que se está editando en pantalla (no se guarda en la base)
-const ui = { editarJornada: null, agregarJornada: false, editarJugador: null, avisoCambio: null, otroNick: null };
+const ui = { editarJornada: null, agregarJornada: false, editarJugador: null, avisoCambio: null, otroNick: null, reporte: null, editarPartida: null };
 
 function idLigaActual() { return rutaActual().id; }
 function ligaActual() { return eventos[idLigaActual()]; }
@@ -128,7 +128,7 @@ function seccionJugadores(id, ev) {
       '<button type="button" onclick="ui.editarJugador=\'' + esc(p.id) + '\';dibujar(\'ruta\')" class="' + BTN_CH + '">Cambiar nick</button>' +
       '<button type="button" onclick="dosToques(this,()=>quitarJugador(\'' + esc(p.id) + '\'))" class="' + BTN_PELIGRO + '">Quitar</button></span></div>';
   });
-  h += '</div><p class="text-xs text-zinc-500">' + js.length + ' jugadores. Quien ya jugó alguna jornada no se puede quitar (sí se le puede cambiar el nick).</p>';
+  h += '</div><p class="text-xs text-zinc-500">' + js.length + ' jugadores. Quien ya ' + (esLibre(ev) ? 'tiene partidas reportadas' : 'jugó alguna jornada') + ' no se puede quitar (sí se le puede cambiar el nick).</p>';
   const otras = Object.keys(eventos).filter(k => k !== id && puedeCapturar(eventos[k]) && Object.keys(eventos[k].jugadores || {}).length);
   if (otras.length) {
     h += '<div class="bg-zinc-800 border border-zinc-700 rounded-xl p-3 space-y-2 text-sm"><p class="font-semibold">Copiar jugadores de otra liga tuya</p>' +
@@ -169,7 +169,7 @@ async function renombrarJugador(e, jid) {
 
 function quitarJugador(jid) {
   const ev = ligaActual();
-  if (jugadorUsado(ev, jid)) return aviso('Ya jugó en alguna jornada: no se puede quitar. Puedes cambiarle el nick.', 'error');
+  if (jugadorUsado(ev, jid)) return aviso(esLibre(ev) ? 'Ya tiene partidas reportadas: no se puede quitar. Puedes cambiarle el nick.' : 'Ya jugó en alguna jornada: no se puede quitar. Puedes cambiarle el nick.', 'error');
   return guardar(idLigaActual(), { ['jugadores/' + jid]: null }, 'Jugador quitado');
 }
 
@@ -203,14 +203,15 @@ function seccionAjustes(id, ev) {
         [2, 3].map(n => '<label class="flex gap-2 items-center text-sm border border-zinc-700 rounded-full px-3 py-1.5"><input type="radio" name="ajRondas" value="' + n + '"' + ((ev.rondasPlan || 3) === n ? ' checked' : '') + ' class="accent-wine-500"> ' + n + ' rondas</label>').join('') + '</div></fieldset>' +
         '<label class="flex gap-2 items-center text-sm"><input id="ajFinal" type="checkbox"' + (ev.conFinal ? ' checked' : '') + ' class="accent-wine-500"> Final de 5 con los mejores clasificados</label>'
       : '<div class="grid grid-cols-2 gap-2">' + campo('Inicio', '<input id="ajInicio" type="date" value="' + esc(ev.inicio || '') + '" class="' + INP + '">') + campo('Fin', '<input id="ajFin" type="date" value="' + esc(ev.fin || '') + '" class="' + INP + '">') + '</div>') +
-    '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Hazañas</legend>' +
+    (esLibre(ev) ? '<p class="text-xs text-zinc-400">🎲 Liga de partidas libres (no se puede cambiar).</p>' : '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Hazañas</legend>' +
     [['mencion', 'Solo mención'], ['desempate', 'Desempatan después de VP'], ['no', 'Sin hazañas']].map(([v, t]) =>
-      '<label class="flex gap-2 items-center text-sm"><input type="radio" name="ajHazanas" value="' + v + '"' + ((ev.hazanasModo || 'mencion') === v ? ' checked' : '') + ' class="accent-wine-500"> ' + t + '</label>').join('') + '</fieldset>' +
+      '<label class="flex gap-2 items-center text-sm"><input type="radio" name="ajHazanas" value="' + v + '"' + ((ev.hazanasModo || 'mencion') === v ? ' checked' : '') + ' class="accent-wine-500"> ' + t + '</label>').join('') + '</fieldset>') +
     campo('Reglas o notas', '<textarea id="ajReglas" maxlength="1500" rows="3" class="' + INP + '">' + esc(ev.reglasTexto || '') + '</textarea>') +
     '<p id="ajError" class="text-sm text-red-300 hidden" role="alert"></p>' +
     '<button class="' + BTN + ' w-full">Guardar cambios</button></form>';
 
-  if (ev.hazanasModo !== 'no') {
+  if (esLibre(ev)) h += bloqueTemporada(id, ev);
+  if (ev.hazanasModo !== 'no' && !esLibre(ev)) {
     const cat = lista(ev.hazanasCatalogo).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es'));
     h += '<div class="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 space-y-2 text-sm"><h3 class="font-bold">Hazañas que se pueden otorgar</h3>' +
       (cat.length ? cat.map(x => '<div data-hazana="' + esc(x.nombre) + '" class="flex justify-between items-center gap-2"><span>🏅 ' + esc(x.nombre) + '</span>' +
@@ -245,7 +246,7 @@ async function guardarAjustes(e) {
     : { modalidad: null, zona: null, plataforma: null, pais, ciudad: normalizarCiudad(pais, ciudadEscrita, id) };
   if (!mod.enLinea && (!pais || !ciudadEscrita)) return err('Elige el país y escribe la ciudad.');
   const nuevo = { nombre, organizadorNombre: $('ajOrganizador').value.trim() || ev.organizadorNombre || nombreUsuario(),
-    hazanasModo: (document.querySelector('input[name="ajHazanas"]:checked') || {}).value || 'mencion', reglasTexto: $('ajReglas').value.trim() };
+    hazanasModo: esLibre(ev) ? (ev.hazanasModo || 'no') : ((document.querySelector('input[name="ajHazanas"]:checked') || {}).value || 'mencion'), reglasTexto: $('ajReglas').value.trim() };
   const extra = {};
   if (esTorneo(ev)) {
     const fecha = $('ajFecha').value, hora = $('ajHora').value;
@@ -262,6 +263,8 @@ async function guardarAjustes(e) {
     const inicio = $('ajInicio').value, fin = $('ajFin').value;
     if (!fechaValida(inicio) || !fechaValida(fin)) return err('Las fechas de inicio y fin son obligatorias.');
     if (fin < inicio) return err('La fecha de fin es anterior al inicio.');
+    const pfuera = partidasFuera(ev, inicio, fin);
+    if (pfuera.length) return err((pfuera.length === 1 ? 'Hay 1 partida' : 'Hay ' + pfuera.length + ' partidas') + ' fuera de esas fechas (' + pfuera.slice(0, 3).map(p => fechaCorta(p.fecha)).join(', ') + '). Primero corrígela' + (pfuera.length === 1 ? '' : 's') + ' o bórrala' + (pfuera.length === 1 ? '' : 's') + '.');
     const fuera = jornadasFuera(ev, inicio, fin);
     if (fuera.length) return err((fuera.length === 1 ? 'La jornada ' : 'Las jornadas ') + fuera.map(j => j.numero + ' (' + fechaCorta(j.fecha) + ')').join(', ') + (fuera.length === 1 ? ' queda' : ' quedan') + ' fuera de la temporada. Primero cámbiale la fecha o cancélala.');
     if (inicio) nuevo.inicio = inicio; if (fin) nuevo.fin = fin;

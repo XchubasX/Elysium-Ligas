@@ -1,33 +1,54 @@
 # Resultados de las pruebas
 
-**✅ TODO BIEN** — 335 de 335 casos pasaron.
+**❌ 12 FALLA(S)** — 327 de 339 casos pasaron.
 
-- Fecha: 07/10/2026 12:49 (hora de Ciudad de México)
-- Versión probada: `4b19d29` + cambios aún sin guardar
-- Duración: 69 s
+- Fecha: 26/10/2026 10:55 (hora de Ciudad de México)
+- Versión probada: `54058a8` + cambios aún sin guardar
+- Duración: 72 s
 - Grupos corridos: todos
-- Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Las reglas de la base de datos se aplicaron** en cada lectura y escritura (simulador de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
+- Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Sin reglas** (no se encontró la carpeta de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
+
+## Qué falló
+
+| Grupo | Caso | Detalle |
+|---|---|---|
+| Portada y página pública de la liga | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| Calendario de jornadas (organizador) | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| Jugadores de la liga | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| Ajustes, hazañas, archivar y borrar | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| Equipo: ayudantes por invitación | Ana ve la pestaña Equipo con sus ayudantes Beto y Carla | ← Ligas y torneos Liga A Organizas tú  Sin país  100% CASUAL · NO SANCIONADOS POR VEKN TablaCalendarioHazañasJugadoresEquipoAjustes OrganizadorORGANIZADOR Beto AYUDANTEQuitar + Invitar ayudante  Un ayudante puede: anotar jugadores, pasar lista, sortear mesas, capturar VP y hazañas, empezar y cerrar jornadas.  No puede: cambiar fechas, reglas ni ajustes, reabrir jornadas cerradas, ni invitar a otro |
+| Equipo: ayudantes por invitación | el mismo enlace ya no sirve para otra persona |  |
+| Equipo: ayudantes por invitación | el grupo terminó sin caerse | KeyError: 'invitaciones' |
+| Compartir por WhatsApp y descargar Excel | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| Torneos de un día | fecha 5 dic: el torneo de ese día y las ligas que se juegan esas fechas (A, B, D) | sáb 5 dic · 15:30TORNEO Torneo de Invierno Monterrey, México · sáb 5 dic · 15:30 · 2 rondas + final |
+| Fechas de la liga: validaciones | el grupo terminó sin caerse | KeyError: 'jornadas' |
+| País y ciudad obligatorios | el grupo terminó sin caerse | KeyError: 'liga-b' |
 
 ## Resumen por grupo
 
 | # | Grupo | Casos | Resultado |
 |---|---|---|---|
 | 1 | Cálculos: GW, VP y orden de la tabla | 14 | ✅ |
-| 2 | Portada y página pública de la liga | 24 | ✅ |
+| 2 | Portada y página pública de la liga | 1 | ❌ 1 falla(s) |
 | 3 | Sesión, roles y Mis eventos | 16 | ✅ |
-| 4 | Crear liga | 22 | ✅ |
-| 5 | Calendario de jornadas (organizador) | 21 | ✅ |
-| 6 | Jugadores de la liga | 15 | ✅ |
-| 7 | Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar | 37 | ✅ |
-| 8 | Ajustes, hazañas, archivar y borrar | 19 | ✅ |
-| 9 | Equipo: ayudantes por invitación | 26 | ✅ |
-| 10 | Compartir por WhatsApp y descargar Excel | 14 | ✅ |
-| 11 | Torneos de un día | 43 | ✅ |
+| 4 | Crear liga | 16 | ✅ |
+| 5 | Calendario de jornadas (organizador) | 1 | ❌ 1 falla(s) |
+| 6 | Jugadores de la liga | 1 | ❌ 1 falla(s) |
+| 7 | Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar | 1 | ❌ 1 falla(s) |
+| 8 | Ajustes, hazañas, archivar y borrar | 1 | ❌ 1 falla(s) |
+| 9 | Equipo: ayudantes por invitación | 18 | ❌ 3 falla(s) |
+| 10 | Compartir por WhatsApp y descargar Excel | 1 | ❌ 1 falla(s) |
+| 11 | Torneos de un día | 41 | ❌ 1 falla(s) |
 | 12 | Enlaces del sitio de pruebas y detalles de diseño | 10 | ✅ |
-| 13 | Fechas de la liga: validaciones | 15 | ✅ |
-| 14 | Solicitudes para organizar, guía y aviso «100% casual» | 24 | ✅ |
-| 15 | País y ciudad obligatorios | 19 | ✅ |
+| 13 | Fechas de la liga: validaciones | 1 | ❌ 1 falla(s) |
+| 14 | Solicitudes para organizar, guía y aviso «100% casual» | 22 | ✅ |
+| 15 | País y ciudad obligatorios | 1 | ❌ 1 falla(s) |
 | 16 | Fecha y hora en iPhone: pista visible en campos vacíos | 16 | ✅ |
+| 17 | Avisos al celular de solicitudes para organizar | 33 | ✅ |
+| 18 | Eventos En línea: modalidad, plataforma y hora de cada quien | 35 | ✅ |
+| 19 | Inscripciones con Google y pegar lista de jugadores | 39 | ✅ |
+| 20 | Ligas de partidas libres (en línea) | 71 | ✅ |
 
 ## Todos los casos
 
@@ -54,30 +75,7 @@
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | se ve la franja de «sitio de pruebas» | ✅ |
-| 2 | se ven las ligas activas (Liga A y Liga D) | ✅ |
-| 3 | la liga archivada NO sale en la portada | ✅ |
-| 4 | la tarjeta dice la próxima jornada (sáb 10 oct) | ✅ |
-| 5 | la tarjeta muestra «Jornada 2 de 3» (una jugada) | ✅ |
-| 6 | la tarjeta muestra el líder: Lasombra · 1 GW · 3 VP | ✅ |
-| 7 | hay botón «Entrar con Google» | ✅ |
-| 8 | el pie trae el aviso legal (Paradox · Dark Pack) | ✅ |
-| 9 | «Ver archivados» muestra Liga B | ✅ |
-| 10 | al tocar la tarjeta abre la liga en la pestaña Tabla | ✅ |
-| 11 | la tabla: 1° Lasombra con 1 GW y 3 VP | ✅ |
-| 12 | la jornada abierta no cuenta (Iván con 5 VP no aparece arriba) | ✅ |
-| 13 | la columna de hazañas muestra 1 para Toni | ✅ |
-| 14 | no hay pastilla de rol (no entraste) | ✅ |
-| 15 | calendario: jornada 1 «En curso», jornada 2 «Jugada · 5 jugadores» | ✅ |
-| 16 | calendario: la jornada 3 avisa la fecha anterior (antes sáb 31 oct) | ✅ |
-| 17 | hazañas: «Sangrado más cuantioso — Toni» en J2 | ✅ |
-| 18 | sin notas del organizador no hay pestaña Reglas | ✅ |
-| 19 | ya no hay textos que expliquen los puntos | ✅ |
-| 20 | sin desborde horizontal a 390 px | ✅ |
-| 21 | una liga que no existe muestra aviso y botón para volver | ✅ |
-| 22 | liga «sin hazañas»: no hay pestaña Hazañas ni columna 🏅 | ✅ |
-| 23 | sin eventos: mensaje «Todavía no hay ligas ni torneos» | ✅ |
-| 24 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 3. Sesión, roles y Mis eventos
 
@@ -119,131 +117,37 @@
 | 13 | la nueva liga aparece en la portada | ✅ |
 | 14 | sin desborde horizontal a 390 px | ✅ |
 | 15 | cuenta sin permiso: no hay formulario, dice que falta permiso de organizador | ✅ |
-| 16 | REGLAS: si una cuenta sin permiso intenta crear a mano, la base la bloquea | ✅ |
-| 17 | REGLAS: otra organizadora (Carla) no puede cambiar la liga de Ana | ✅ |
-| 18 | REGLAS: nadie puede crear encima de una liga existente | ✅ |
-| 19 | REGLAS: nadie se puede hacer superusuario desde la página | ✅ |
-| 20 | REGLAS: nadie puede leer la lista de superusuarios | ✅ |
-| 21 | si la base rechaza (le quitaron el permiso), se ve un aviso claro y no se crea | ✅ |
-| 22 | las páginas abrieron sin errores | ✅ |
+| 16 | las páginas abrieron sin errores | ✅ |
 
 ### 5. Calendario de jornadas (organizador)
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | Ana ve las pestañas extra «Jugadores» y «Ajustes» | ✅ |
-| 2 | hay botón «+ Agregar jornada» | ✅ |
-| 3 | el formulario propone «Jornada 4» | ✅ |
-| 4 | se guardó la jornada 4 (sáb 21 nov, 17:00, pendiente) | ✅ |
-| 5 | aparece en el calendario: «Jornada 4 · sáb 21 nov · 17:00» | ✅ |
-| 6 | cambiar fecha guarda la nueva y recuerda la anterior | ✅ |
-| 7 | el calendario marca «antes sáb 7 nov» | ✅ |
-| 8 | sale el aviso para avisar al grupo, con el mensaje ya escrito | ✅ |
-| 9 | el botón abre WhatsApp con el mensaje | ✅ |
-| 10 | el primer toque en «Cancelar» solo pide confirmar | ✅ |
-| 11 | el segundo toque cancela la jornada | ✅ |
-| 12 | «Reactivar» la regresa a pendiente | ✅ |
-| 13 | las reglas aceptaron todo | ✅ |
-| 14 | sin desborde horizontal a 390 px | ✅ |
-| 15 | Beto (ayudante) ve «Jugadores» pero no «Ajustes» | ✅ |
-| 16 | Beto no ve «Cambiar fecha», «Cancelar» ni «+ Agregar jornada» | ✅ |
-| 17 | Beto sí ve «Abrir día ›» en las jornadas | ✅ |
-| 18 | REGLAS: si Beto intenta cambiar una fecha a mano, la base lo bloquea | ✅ |
-| 19 | público: la jornada 2 (jugada) se puede abrir | ✅ |
-| 20 | público: la jornada 3 (pendiente) no es enlace | ✅ |
-| 21 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 6. Jugadores de la liga
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | Beto (ayudante) entra a la pestaña Jugadores | ✅ |
-| 2 | agrega «Carlos» | ✅ |
-| 3 | la casilla queda vacía para el siguiente | ✅ |
-| 4 | nick repetido (aunque cambien mayúsculas) → aviso y no se agrega | ✅ |
-| 5 | cambiar nick: Carlos → Carlitos | ✅ |
-| 6 | no deja quitar a quien ya jugó (Lasombra) | ✅ |
-| 7 | sí deja quitar a quien no ha jugado (Carlitos) | ✅ |
-| 8 | ofrece copiar jugadores de «Liga de Beto» | ✅ |
-| 9 | copia solo los que faltan (Nocturna y Mireia; «toni» ya estaba) | ✅ |
-| 10 | aviso «Se copiaron 2 jugadores» | ✅ |
-| 11 | las reglas aceptaron todo | ✅ |
-| 12 | sin desborde horizontal a 390 px | ✅ |
-| 13 | REGLAS: Beto no puede anotar jugadores en la Liga B (no es su equipo) | ✅ |
-| 14 | el público no ve la pestaña Jugadores (le muestra la Tabla) | ✅ |
-| 15 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 7. Día de jornada: pase de lista, mesas, VP, GW, hazañas y cerrar
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | jornada pendiente: dice que no ha empezado y ofrece «Empezar jornada» | ✅ |
-| 2 | Beto (ayudante) la empieza: queda «En curso» | ✅ |
-| 3 | pase de lista: 9 presentes | ✅ |
-| 4 | «+ jugador nuevo» lo agrega a la liga y lo deja presente (10) | ✅ |
-| 5 | dice «10 presentes → 2 mesas de 5» | ✅ |
-| 6 | sorteo: 2 mesas de 5 con asientos 1 a 5 | ✅ |
-| 7 | nadie quedó en dos mesas | ✅ |
-| 8 | mover a «una mesa nueva»: queda solo en la mesa 3 y la mesa 1 se reacomoda (asientos 1–4) | ✅ |
-| 9 | regresarlo a la mesa 1: vuelve como asiento 5 y la mesa 3 desaparece | ✅ |
-| 10 | VP guardados en las dos mesas | ✅ |
-| 11 | la mesa 1 marca GW al de 3 VP | ✅ |
-| 12 | la mesa 2 dice «Sin GW» por empate | ✅ |
-| 13 | con VP capturados ya no se puede volver a sortear la ronda | ✅ |
-| 14 | si la suma de VP pasa de 5, avisa | ✅ |
-| 15 | aparece «+ Sortear ronda 2» | ✅ |
-| 16 | ronda 2 sorteada | ✅ |
-| 17 | cerrar está bloqueado mientras falten VP (lo dice) | ✅ |
-| 18 | «Borrar ronda» quita la ronda 2 (sin VP) | ✅ |
-| 19 | hazaña otorgada a Toni | ✅ |
-| 20 | todo capturado: «Cerrar jornada» habilitado | ✅ |
-| 21 | Beto la cierra: queda «Jugada» | ✅ |
-| 22 | cerrada: ya no hay selectores de VP para Beto | ✅ |
-| 23 | Beto (ayudante) NO ve «Reabrir jornada» | ✅ |
-| 24 | las reglas aceptaron todo lo de Beto | ✅ |
-| 25 | REGLAS: con la jornada cerrada, Beto ya no puede cambiar VP a mano | ✅ |
-| 26 | REGLAS: Beto no puede reabrirla a mano | ✅ |
-| 27 | sin desborde horizontal a 390 px | ✅ |
-| 28 | la tabla pública ya cuenta la jornada (el líder tiene 1 GW y 3 VP) | ✅ |
-| 29 | el público ve las mesas de la jornada con VP y GW, sin controles | ✅ |
-| 30 | el público ve la hazaña del día | ✅ |
-| 31 | Ana (organizadora) reabre la jornada | ✅ |
-| 32 | 7 presentes: avisa «1 mesa de 5 · 2 sin mesa» (como el sorteo de Elysium) | ✅ |
-| 33 | los que sobran salen en «Sin mesa (2)» para acomodarlos | ✅ |
-| 34 | se acomodan a mano en una mesa de 4 y otra de 3 | ✅ |
-| 35 | asientos sin huecos en las dos mesas | ✅ |
-| 36 | las reglas aceptaron todo | ✅ |
-| 37 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 8. Ajustes, hazañas, archivar y borrar
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | Ana ve el formulario con los datos actuales | ✅ |
-| 2 | se guardan nombre, fin, hazañas y reglas | ✅ |
-| 3 | fin antes del inicio → aviso y no se guarda | ✅ |
-| 4 | no deja borrar las fechas de la temporada | ✅ |
-| 5 | agrega la hazaña «Mazo más original» | ✅ |
-| 6 | no deja quitar una hazaña ya otorgada | ✅ |
-| 7 | sí quita una que no se ha otorgado | ✅ |
-| 8 | archivar: la liga queda archivada | ✅ |
-| 9 | Ana no ve «Borrar definitivamente» (solo superusuario) | ✅ |
-| 10 | desarchivar la regresa | ✅ |
-| 11 | las reglas aceptaron todo | ✅ |
-| 12 | sin desborde horizontal a 390 px | ✅ |
-| 13 | Beto (ayudante) no puede entrar a Ajustes (le muestra la Tabla) | ✅ |
-| 14 | REGLAS: Beto no puede archivar a mano | ✅ |
-| 15 | el superusuario ve «Borrar definitivamente» en cualquier liga | ✅ |
-| 16 | borra la liga y regresa a la portada | ✅ |
-| 17 | también borra sus invitaciones pendientes | ✅ |
-| 18 | la Liga A no se tocó | ✅ |
-| 19 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 9. Equipo: ayudantes por invitación
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | Ana ve la pestaña Equipo con sus ayudantes Beto y Carla | ✅ |
+| 1 | Ana ve la pestaña Equipo con sus ayudantes Beto y Carla | ❌ ← Ligas y torneos Liga A Organizas tú  Sin país  100% CASUAL · NO SANCIONADOS POR VEKN TablaCalendarioHazañasJugadoresEquipoAjustes OrganizadorORGANIZADOR Beto AYUDANTEQuitar + Invitar ayudante  Un ayudante puede: anotar jugadores, pasar lista, sortear mesas, capturar VP y hazañas, empezar y cerrar jornadas.  No puede: cambiar fechas, reglas ni ajustes, reabrir jornadas cerradas, ni invitar a otro |
 | 2 | explica qué puede y qué no puede un ayudante | ✅ |
 | 3 | crea una invitación con código largo y caducidad de 7 días | ✅ |
 | 4 | muestra el enlace con su código | ✅ |
@@ -259,35 +163,14 @@
 | 14 | dice «¡Listo! Ya eres ayudante» | ✅ |
 | 15 | en «Mis eventos» le aparece Liga A como AYUDANTE | ✅ |
 | 16 | las reglas aceptaron la aceptación | ✅ |
-| 17 | el mismo enlace ya no sirve para otra persona | ✅ |
-| 18 | una invitación de la Liga A no sirve en la Liga B | ✅ |
-| 19 | una invitación caducada no sirve | ✅ |
-| 20 | desde WhatsApp: pide abrirlo en Chrome o Safari y ofrece copiar el enlace | ✅ |
-| 21 | Ana quita a Pepe del equipo | ✅ |
-| 22 | Beto no ve las pestañas Equipo ni Ajustes | ✅ |
-| 23 | Beto puede dejar de ser ayudante por su cuenta | ✅ |
-| 24 | REGLAS: alguien que no es el dueño no puede crear invitaciones | ✅ |
-| 25 | REGLAS: nadie se puede volver ayudante sin invitación | ✅ |
-| 26 | las páginas abrieron sin errores | ✅ |
+| 17 | el mismo enlace ya no sirve para otra persona | ❌  |
+| 18 | el grupo terminó sin caerse | ❌ KeyError: 'invitaciones' |
 
 ### 10. Compartir por WhatsApp y descargar Excel
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | el visitante (sin cuenta) ve «Compartir por WhatsApp» y «Descargar Excel» | ✅ |
-| 2 | el mensaje dice la liga y «tabla tras la jornada 2» | ✅ |
-| 3 | el primero es «1. Lasombra · 1 GW · 3 VP» | ✅ |
-| 4 | trae como máximo 5 jugadores | ✅ |
-| 5 | termina con el enlace a la liga | ✅ |
-| 6 | descarga «liga-a.xlsx» | ✅ |
-| 7 | tiene 3 hojas: Tabla, Jornadas, Hazañas | ✅ |
-| 8 | Tabla: encabezados y primer lugar Lasombra (1 GW, 3 VP) | ✅ |
-| 9 | Jornadas: una fila por jugador de cada mesa jugada (5) y la abierta no sale | ✅ |
-| 10 | Jornadas: el de 3 VP tiene GW = 1 | ✅ |
-| 11 | Hazañas: «Sangrado más cuantioso» de Toni en la jornada 2 | ✅ |
-| 12 | liga sin hazañas: el Excel no lleva hoja de hazañas | ✅ |
-| 13 | sin internet para el Excel: aviso claro | ✅ |
-| 14 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 11. Torneos de un día
 
@@ -308,7 +191,7 @@
 | 13 | filtro «Ligas»: sin el torneo | ✅ |
 | 14 | filtro de ciudad «Monterrey» deja solo el torneo de esa ciudad | ✅ |
 | 15 | sin coincidencias: «Ningún evento coincide» | ✅ |
-| 16 | fecha 5 dic: el torneo de ese día y las ligas que se juegan esas fechas (A, B, D) | ✅ |
+| 16 | fecha 5 dic: el torneo de ese día y las ligas que se juegan esas fechas (A, B, D) | ❌ sáb 5 dic · 15:30TORNEO Torneo de Invierno Monterrey, México · sáb 5 dic · 15:30 · 2 rondas + final |
 | 17 | fecha sin eventos: «Ningún evento coincide» | ✅ |
 | 18 | sin desborde horizontal a 390 px | ✅ |
 | 19 | Beto empieza el torneo | ✅ |
@@ -328,14 +211,12 @@
 | 33 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 36 | WhatsApp: «campeón: Sara» | ✅ |
+| 36 | WhatsApp: «campeón: Pau» | ✅ |
 | 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
 | 40 | sin desborde horizontal a 390 px | ✅ |
-| 41 | REGLAS: el ayudante no cambia las rondas | ✅ |
-| 42 | REGLAS: nadie pone 4 rondas | ✅ |
-| 43 | las páginas abrieron sin errores | ✅ |
+| 41 | las páginas abrieron sin errores | ✅ |
 
 ### 12. Enlaces del sitio de pruebas y detalles de diseño
 
@@ -356,21 +237,7 @@
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | jornada nueva después del fin de la temporada → bloqueada | ✅ |
-| 2 | jornada nueva antes del inicio de la temporada → bloqueada | ✅ |
-| 3 | jornada nueva antes de la última jornada → «Debe ser después de la jornada 3» | ✅ |
-| 4 | jornada nueva el mismo día que otra → «Ese día ya está la jornada 3» | ✅ |
-| 5 | fecha válida (21 nov) → se agrega la jornada 4 | ✅ |
-| 6 | cambiar J3 a después de J4 → «Debe ser antes de la jornada 4» | ✅ |
-| 7 | cambiar J3 a antes de J2 → «Debe ser después de la jornada 2» | ✅ |
-| 8 | cambiar J3 entre J2 y J4 (14 nov) → sí se guarda | ✅ |
-| 9 | una jornada cancelada no estorba: se agrega la J5 el 21 nov | ✅ |
-| 10 | reactivar la J4 (choca con el 21 nov de la J5) → bloqueado con aviso | ✅ |
-| 11 | las reglas aceptaron todo | ✅ |
-| 12 | acortar la temporada dejando la J3 fuera → bloqueado y lo dice | ✅ |
-| 13 | mover el inicio después de la J1 → bloqueado | ✅ |
-| 14 | crear liga sin fechas → «Las fechas de inicio y fin son obligatorias.» | ✅ |
-| 15 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'jornadas' |
 
 ### 14. Solicitudes para organizar, guía y aviso «100% casual»
 
@@ -386,44 +253,24 @@
 | 8 | el formulario trae su primer nombre | ✅ |
 | 9 | se guarda su solicitud (nombre, ciudad, mensaje y fecha), sin correo | ✅ |
 | 10 | cambia a «✓ Solicitud enviada» | ✅ |
-| 11 | REGLAS: no se puede aprobar a sí mismo | ✅ |
-| 12 | REGLAS: no puede ver las solicitudes de otros | ✅ |
-| 13 | en vivo: al aprobarlo, sin recargar le salen «+ Nueva liga» y «+ Nuevo torneo» | ✅ |
-| 14 | en vivo: le avisa «¡Ya te aprobaron!» | ✅ |
-| 15 | en vivo: si la rechazan, vuelve a salir el formulario (sin botones de crear) | ✅ |
-| 16 | al volver, sigue diciendo «Solicitud enviada» | ✅ |
-| 17 | el superusuario ve un contador «1» junto a «Mis eventos» | ✅ |
-| 18 | «Solicitudes para organizar»: Pepe · Guadalajara con su mensaje | ✅ |
-| 19 | Aprobar: queda como organizador y se borra la solicitud | ✅ |
-| 20 | ya no hay solicitudes pendientes (desaparece el bloque y el contador) | ✅ |
-| 21 | las reglas aceptaron todo | ✅ |
-| 22 | Pepe ya ve «+ Nueva liga» y «+ Nuevo torneo», sin formulario | ✅ |
-| 23 | Rechazar: borra la solicitud y NO da permiso | ✅ |
-| 24 | las páginas abrieron sin errores | ✅ |
+| 11 | en vivo: al aprobarlo, sin recargar le salen «+ Nueva liga» y «+ Nuevo torneo» | ✅ |
+| 12 | en vivo: le avisa «¡Ya te aprobaron!» | ✅ |
+| 13 | en vivo: si la rechazan, vuelve a salir el formulario (sin botones de crear) | ✅ |
+| 14 | al volver, sigue diciendo «Solicitud enviada» | ✅ |
+| 15 | el superusuario ve un contador «1» junto a «Mis eventos» | ✅ |
+| 16 | «Solicitudes para organizar»: Pepe · Guadalajara con su mensaje | ✅ |
+| 17 | Aprobar: queda como organizador y se borra la solicitud | ✅ |
+| 18 | ya no hay solicitudes pendientes (desaparece el bloque y el contador) | ✅ |
+| 19 | las reglas aceptaron todo | ✅ |
+| 20 | Pepe ya ve «+ Nueva liga» y «+ Nuevo torneo», sin formulario | ✅ |
+| 21 | Rechazar: borra la solicitud y NO da permiso | ✅ |
+| 22 | las páginas abrieron sin errores | ✅ |
 
 ### 15. País y ciudad obligatorios
 
 | # | Caso | Resultado |
 |---|---|---|
-| 1 | el país viene en México y hay lista México, Chile, España, Otro | ✅ |
-| 2 | sugiere las ciudades que ya existen en México («Ciudad de México») | ✅ |
-| 3 | al cambiar a Chile sugiere «Santiago» | ✅ |
-| 4 | sin ciudad → «Elige el país y escribe la ciudad.» | ✅ |
-| 5 | «ciudad de mexico» se guarda como la ya existente «Ciudad de México», con país México | ✅ |
-| 6 | filtro País: solo los que tienen eventos (Chile, México) | ✅ |
-| 7 | la tarjeta dice «Ciudad de México, México» | ✅ |
-| 8 | el evento viejo sin país dice «Sin país» | ✅ |
-| 9 | País = Chile: solo Liga B | ✅ |
-| 10 | con Chile, Ciudad solo ofrece Santiago | ✅ |
-| 11 | México + Ciudad de México: Liga A, D y Liga Norte; no Liga B | ✅ |
-| 12 | la búsqueda ahora es por nombre: «norte» → Liga Norte | ✅ |
-| 13 | «Limpiar» quita país, ciudad y búsqueda | ✅ |
-| 14 | sin desborde horizontal a 390 px | ✅ |
-| 15 | Ajustes avisa «Este evento no tiene país» | ✅ |
-| 16 | no deja guardar sin país | ✅ |
-| 17 | con país y ciudad sí se guarda (España, Madrid) | ✅ |
-| 18 | REGLAS: un país fuera de la lista se rechaza | ✅ |
-| 19 | las páginas abrieron sin errores | ✅ |
+| 1 | el grupo terminó sin caerse | ❌ KeyError: 'liga-b' |
 
 ### 16. Fecha y hora en iPhone: pista visible en campos vacíos
 
@@ -445,3 +292,201 @@
 | 14 | Chrome en iPhone: también muestra «Elegir fecha» y «Elegir hora» | ✅ |
 | 15 | computadora: sin pista (el navegador ya muestra su ícono y dd/mm/aaaa) | ✅ |
 | 16 | sin errores de JavaScript | ✅ |
+
+### 17. Avisos al celular de solicitudes para organizar
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | servidor: detecta las solicitudes nuevas | ✅ |
+| 2 | servidor: una solicitud ya avisada no se vuelve a avisar | ✅ |
+| 3 | servidor: al aprobarla o rechazarla se olvida | ✅ |
+| 4 | servidor: si la rechazan y la vuelve a mandar, avisa otra vez | ✅ |
+| 5 | texto: «Nueva solicitud de organizador · nombre · ciudad · mensaje» | ✅ |
+| 6 | texto: varias juntas en un solo aviso («A, B, C y 2 más») | ✅ |
+| 7 | texto: dos solicitudes («A y B») | ✅ |
+| 8 | solo a administradores vigentes y aparatos activados | ✅ |
+| 9 | vuelta completa: un aviso por aparato con todas las nuevas | ✅ |
+| 10 | vuelta completa: el aviso abre «Mis eventos» del mismo sitio | ✅ |
+| 11 | vuelta completa: guarda lo avisado antes de mandar (no repite si falla) | ✅ |
+| 12 | vuelta completa: borra aparatos que ya no reciben avisos | ✅ |
+| 13 | sin aparatos activados no marca nada (te llegan al activarlos) | ✅ |
+| 14 | la siguiente vuelta (5 min después) no repite | ✅ |
+| 15 | worker: «Entrar con Google» desde el ícono se reenvía a Firebase | ✅ |
+| 16 | quien no es administrador no ve la tarjeta de avisos | ✅ |
+| 17 | una organizadora tampoco la ve | ✅ |
+| 18 | administrador: sin la clave de avisos dice «todavía no están configurados» | ✅ |
+| 19 | administrador: ve «Activar avisos en este aparato» | ✅ |
+| 20 | al activar se guarda el código del aparato (sin correo) | ✅ |
+| 21 | la tarjeta cambia a «ACTIVADOS AQUÍ» con «Mandarme un aviso de prueba» | ✅ |
+| 22 | al volver a entrar, recuerda que este aparato ya tiene avisos | ✅ |
+| 23 | «Mandarme un aviso de prueba» llama a /api/aviso-prueba con la sesión | ✅ |
+| 24 | al desactivar se borra el aparato y vuelve «DESACTIVADOS AQUÍ» | ✅ |
+| 25 | si no da permiso, explica cómo darlo | ✅ |
+| 26 | sin desborde horizontal a 390 px | ✅ |
+| 27 | al «Salir» se quitan los avisos de esta cuenta en este aparato | ✅ |
+| 28 | iPhone en Safari: avisa que primero hay que agregar Ligas a la pantalla de inicio | ✅ |
+| 29 | iPhone en Safari: al tocar «Activar» sale la guía de 4 pasos | ✅ |
+| 30 | iPhone en Safari: no se guarda nada todavía | ✅ |
+| 31 | la página se puede instalar (manifiesto «Ligas», pantalla completa) | ✅ |
+| 32 | el código del servidor no se publica como parte del sitio | ✅ |
+| 33 | sin errores de JavaScript | ✅ |
+
+### 18. Eventos En línea: modalidad, plataforma y hora de cada quien
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | crear: hay selector «Presencial / En línea», con Presencial marcado | ✅ |
+| 2 | crear: en Presencial se ven país y ciudad | ✅ |
+| 3 | crear: al elegir En línea desaparecen país y ciudad | ✅ |
+| 4 | crear: en En línea sale «Plataforma (opcional)» y no hay selector de zona | ✅ |
+| 5 | crear: dice la zona detectada «Santiago de Chile (detectada de tu aparato)» | ✅ |
+| 6 | crear: sin desborde horizontal a 390 px | ✅ |
+| 7 | se crea sin país ni ciudad, con modalidad, plataforma y zona | ✅ |
+| 8 | su página dice «🌐 En línea · Lackey» | ✅ |
+| 9 | torneo en línea sin plataforma: se crea sin ese campo | ✅ |
+| 10 | presencial sin ciudad → «Elige el país y escribe la ciudad.» | ✅ |
+| 11 | presencial: se guarda igual que antes (país y ciudad, sin modalidad) | ✅ |
+| 12 | portada en CDMX (misma zona): «sáb 7 nov · 20:00» sin «(tu hora)» | ✅ |
+| 13 | portada: la tarjeta dice «🌐 En línea · Discord» | ✅ |
+| 14 | en CDMX no sale la nota de zona horaria | ✅ |
+| 15 | portada en Madrid: el torneo sale a «dom 8 nov · 03:00 (tu hora)» | ✅ |
+| 16 | portada en Madrid: próxima jornada de la liga «dom 15 nov · 02:30 (tu hora)» | ✅ |
+| 17 | portada en Madrid: la liga presencial no cambia | ✅ |
+| 18 | página del torneo en Madrid: nota «Los horarios se muestran en tu hora… hora de Ciudad de México» | ✅ |
+| 19 | calendario en Madrid: «Jornada 1 · dom 15 nov · 02:30 (tu hora)» | ✅ |
+| 20 | portada en Santiago de Chile: «sáb 7 nov · 23:00 (tu hora)» | ✅ |
+| 21 | calendario del equipo: hora original «(hora de Ciudad de México)» aunque estés en Madrid | ✅ |
+| 22 | al agregar jornada, el campo dice «Hora (opcional) · hora de Ciudad de México» | ✅ |
+| 23 | filtro de país: incluye «🌐 En línea» | ✅ |
+| 24 | filtro «🌐 En línea»: solo los eventos en línea | ✅ |
+| 25 | filtro «🌐 En línea»: la ciudad queda desactivada | ✅ |
+| 26 | filtro «México»: no incluye los eventos en línea | ✅ |
+| 27 | ajustes de una liga en línea: En línea marcado, sin país ni ciudad | ✅ |
+| 28 | ajustes: no sale el aviso «Este evento no tiene país» | ✅ |
+| 29 | ajustes: se puede poner o cambiar la plataforma | ✅ |
+| 30 | ajustes desde Madrid: la liga conserva su zona (Ciudad de México) | ✅ |
+| 31 | pasar a Presencial sin ciudad → pide país y ciudad | ✅ |
+| 32 | pasar a Presencial: guarda país y ciudad y borra modalidad, zona y plataforma | ✅ |
+| 33 | pasar a En línea: borra país y ciudad y guarda la zona del aparato (Madrid) | ✅ |
+| 34 | aviso de cambio de fecha: «a las 19:30 (hora de Ciudad de México)» | ✅ |
+| 35 | sin errores de JavaScript | ✅ |
+
+### 19. Inscripciones con Google y pegar lista de jugadores
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | Jugadores: tarjeta «📝 Inscripciones» CERRADAS con «Abrir inscripciones» | ✅ |
+| 2 | al abrirlas se guarda inscripciones: «abiertas» | ✅ |
+| 3 | abiertas: botones «Compartir por WhatsApp» y «Copiar enlace» | ✅ |
+| 4 | el mensaje de WhatsApp trae el enlace de la liga | ✅ |
+| 5 | Jugadores: hay «Pegar varios nombres» | ✅ |
+| 6 | sin desborde horizontal a 390 px | ✅ |
+| 7 | portada: la tarjeta dice «📝 Inscripciones abiertas» | ✅ |
+| 8 | sin sesión: «📝 Inscripciones abiertas» con botón «Inscribirme» | ✅ |
+| 9 | al tocar «Inscribirme» entra con Google y sale el campo de nick | ✅ |
+| 10 | el nick viene sugerido con su primer nombre («Pepe») | ✅ |
+| 11 | se guarda su inscripción pendiente con nick y nombre de Google, sin correo | ✅ |
+| 12 | cambia a «✓ Inscripción enviada como «Toni»» | ✅ |
+| 13 | la página pública no muestra el nombre de Google | ✅ |
+| 14 | recuerda el nick para la próxima liga | ✅ |
+| 15 | en vivo: al aceptarlo dice «✅ Estás inscrito como «Toni»» | ✅ |
+| 16 | en vivo: le avisa «¡Ya te aceptaron en la liga!» | ✅ |
+| 17 | puede cancelar su inscripción pendiente (dos toques) | ✅ |
+| 18 | aceptado pero ya no está en la liga: vuelve a salir el formulario | ✅ |
+| 19 | y se reemplaza por una inscripción nueva pendiente | ✅ |
+| 20 | inscripciones cerradas: no sale nada para inscribirse | ✅ |
+| 21 | el equipo ve «Por aceptar» con nick y nombre de Google («Lalo · Eduardo Ruiz») | ✅ |
+| 22 | nick repetido: pregunta «¿Es la misma persona?» para Toni | ✅ |
+| 23 | «Aceptar todas»: entran Lalo y Mau como jugadores | ✅ |
+| 24 | sus inscripciones quedan «aceptada» con su jugador | ✅ |
+| 25 | «Aceptar todas» deja pendiente al del nick repetido | ✅ |
+| 26 | «Sí, es el mismo»: se une al Toni que ya estaba (no se duplica) | ✅ |
+| 27 | ya no quedan pendientes | ✅ |
+| 28 | «No, es otra persona»: propone otro nick («Toni 2») | ✅ |
+| 29 | se acepta como jugador nuevo «Toni Pepe» | ✅ |
+| 30 | «Rechazar» (dos toques) borra la inscripción | ✅ |
+| 31 | «Cerrar inscripciones» (dos toques) borra el campo | ✅ |
+| 32 | ayudante: ve las pendientes, sin botón de abrir/cerrar | ✅ |
+| 33 | ayudante: puede aceptar | ✅ |
+| 34 | pegar lista: quita números y viñetas, salta vacíos y repetidos | ✅ |
+| 35 | pegar lista: avisa «Se agregaron 3 jugadores (2 ya estaban)» | ✅ |
+| 36 | guía: paso «Inscribe a los jugadores» con el enlace | ✅ |
+| 37 | guía: «¿Los jugadores necesitan cuenta?» explica lo de Google | ✅ |
+| 38 | guía: nueva pregunta «¿Se puede hacer una liga en línea?» | ✅ |
+| 39 | sin errores de JavaScript | ✅ |
+
+### 20. Ligas de partidas libres (en línea)
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | media de la liga = 1 VP por partida | ✅ |
+| 2 | Carla: partidas, VP, rendimiento, participación, total y provisional como el documento | ✅ |
+| 3 | Ana J: partidas, VP, rendimiento, participación, total y provisional como el documento | ✅ |
+| 4 | Beto J: partidas, VP, rendimiento, participación, total y provisional como el documento | ✅ |
+| 5 | orden: Carla, Ana J, Beto J, Toni | ✅ |
+| 6 | Toni (12 partidas): participación 100 (tope) | ✅ |
+| 7 | desempate y orden con varios casos: A, B, C | ✅ |
+| 8 | si nadie tiene VP (media 0), no hay división entre cero: rendimiento 100 | ✅ |
+| 9 | portada: «Partidas libres · en juego», 23 partidas y líder con puntos | ✅ |
+| 10 | portada: dice «🌐 En línea · Lackey» | ✅ |
+| 11 | pestañas públicas: Tabla y Partidas (sin Calendario ni Hazañas) | ✅ |
+| 12 | cabecera: «🎲 Liga de partidas libres» | ✅ |
+| 13 | tabla: «Clasificación provisional» y media de la liga 1 VP | ✅ |
+| 14 | tabla: Carla 1.º con 1 partida, 5 VP, 200, 8.3, 142.5 y PROVISIONAL | ✅ |
+| 15 | tabla: Beto J sin marca de provisional | ✅ |
+| 16 | «¿Cómo se calcula?» explica 70/30, relleno de 3 partidas y 12 partidas | ✅ |
+| 17 | botones Compartir por WhatsApp y Excel | ✅ |
+| 18 | WhatsApp: «clasificación provisional» y «Carla · 142.5 pts» | ✅ |
+| 19 | Excel: hojas Clasificación (4 jugadores) y Partidas (23) | ✅ |
+| 20 | sin desborde horizontal a 390 px | ✅ |
+| 21 | pestaña Partidas pública: lista sin formulario ni botones de corregir | ✅ |
+| 22 | sin sesión: invita a entrar e inscribirse para reportar | ✅ |
+| 23 | sin partidas: «Todavía no hay partidas reportadas» | ✅ |
+| 24 | jugador inscrito: «Estás inscrito como «Toni»» con botón «🎲 Reportar partida» | ✅ |
+| 25 | formulario: el jugador es él mismo (sin poder elegir otro) | ✅ |
+| 26 | VP de 0 a 5 en mesa de 5 | ✅ |
+| 27 | al elegir mesa de 4, VP solo hasta 4 | ✅ |
+| 28 | sin VP no deja seguir: «Elige los VP» | ✅ |
+| 29 | confirmación: resumen con jugador, fecha, mesa, VP y rivales | ✅ |
+| 30 | confirmación: avisa que después no podrá cambiarla | ✅ |
+| 31 | todavía no se guarda nada antes de confirmar | ✅ |
+| 32 | «Volver a editar» conserva lo capturado | ✅ |
+| 33 | se guarda la partida con jugador, fecha, VP, mesa, rivales, invitados, por y creada | ✅ |
+| 34 | aparece en la lista sin botones de corregir para el jugador | ✅ |
+| 35 | el formulario queda limpio para otra partida | ✅ |
+| 36 | fecha antes del inicio: no deja seguir | ✅ |
+| 37 | más rivales que lugares en la mesa: no deja seguir | ✅ |
+| 38 | mesa de 4 con 3 rivales de la liga: sí pasa a la confirmación | ✅ |
+| 39 | cuenta no inscrita: no ve el formulario de reportar | ✅ |
+| 40 | organizador: pestañas Tabla, Partidas, Jugadores, Equipo y Ajustes | ✅ |
+| 41 | organizador: elige el jugador de una lista | ✅ |
+| 42 | el jugador elegido no sale como su propio rival | ✅ |
+| 43 | organizador: la confirmación dice que después puede corregirla | ✅ |
+| 44 | se guarda la partida de «Ana J» reportada por el organizador | ✅ |
+| 45 | corregir: cambia VP y mesa, conserva quién la reportó y cuándo | ✅ |
+| 46 | borrar (dos toques) quita la partida | ✅ |
+| 47 | no se puede quitar a un jugador con partidas reportadas | ✅ |
+| 48 | Ajustes: «Liga de partidas libres (no se puede cambiar)», sin hazañas | ✅ |
+| 49 | Ajustes: «Presencial» deshabilitado (solo en línea) | ✅ |
+| 50 | Ajustes: no deja mover el inicio si deja partidas fuera | ✅ |
+| 51 | Ajustes: guardar no cambia formato, modalidad ni hazañas | ✅ |
+| 52 | Cerrar temporada (dos toques) guarda temporada: «cerrada» | ✅ |
+| 53 | tabla: «Clasificación definitiva · temporada cerrada» | ✅ |
+| 54 | temporada cerrada: ya no hay formulario de reportar | ✅ |
+| 55 | Reabrir temporada borra el campo | ✅ |
+| 56 | ayudante: puede elegir cualquier jugador para reportar | ✅ |
+| 57 | ayudante: no ve Corregir ni Borrar | ✅ |
+| 58 | ayudante: la confirmación avisa que no habrá cambios | ✅ |
+| 59 | ayudante: se guarda la partida de «Beto J» | ✅ |
+| 60 | Equipo (partidas libres): explica que el ayudante reporta por otros y no corrige | ✅ |
+| 61 | Equipo (liga por jornadas): el ayudante sigue igual que antes | ✅ |
+| 62 | crear: el formato no se ve si es presencial | ✅ |
+| 63 | crear en línea: aparece «🎲 Partidas libres» | ✅ |
+| 64 | al elegir partidas libres se ocultan las hazañas | ✅ |
+| 65 | se crea con formato «libre», en línea y sin hazañas | ✅ |
+| 66 | presencial: aunque se haya marcado «libre», se crea por jornadas | ✅ |
+| 67 | torneo en línea: no ofrece partidas libres | ✅ |
+| 68 | guía: pregunta «¿Qué es una liga de partidas libres?» | ✅ |
+| 69 | guía: el ayudante reporta por otros en partidas libres | ✅ |
+| 70 | Mis eventos: «Partidas libres · 23 partidas» | ✅ |
+| 71 | sin errores de JavaScript | ✅ |

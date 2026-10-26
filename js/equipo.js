@@ -56,8 +56,13 @@ function seccionEquipo(id, ev) {
       }).join('') + '</div>';
     }
   }
-  h += '<div class="text-xs text-zinc-400 space-y-1"><p><b class="text-zinc-300">Un ayudante puede:</b> anotar jugadores, pasar lista, sortear mesas, capturar VP y hazañas, empezar y cerrar jornadas.</p>' +
-    '<p><b class="text-zinc-300">No puede:</b> cambiar fechas, reglas ni ajustes, reabrir jornadas cerradas, ni invitar a otros. Sigue siendo ayudante hasta que lo quites.</p></div>';
+  if (esLibre(ev)) {
+    h += '<div class="text-xs text-zinc-400 space-y-1"><p><b class="text-zinc-300">Un ayudante puede:</b> anotar jugadores, aceptar inscripciones y reportar partidas por cualquier jugador de la liga.</p>' +
+      '<p><b class="text-zinc-300">No puede:</b> corregir ni borrar partidas, cambiar fechas, reglas ni ajustes, cerrar la temporada, ni invitar a otros. Sigue siendo ayudante hasta que lo quites.</p></div>';
+  } else {
+    h += '<div class="text-xs text-zinc-400 space-y-1"><p><b class="text-zinc-300">Un ayudante puede:</b> anotar jugadores, pasar lista, sortear mesas, capturar VP y hazañas, empezar y cerrar jornadas.</p>' +
+      '<p><b class="text-zinc-300">No puede:</b> cambiar fechas, reglas ni ajustes, reabrir jornadas cerradas, ni invitar a otros. Sigue siendo ayudante hasta que lo quites.</p></div>';
+  }
   return h;
 }
 
@@ -124,6 +129,7 @@ async function aceptarInvitacion(id, codigo) {
 
 // ---------------- Compartir la tabla por WhatsApp (top 5 + enlace)
 function textoCompartirTabla(id, ev) {
+  if (esLibre(ev)) return textoCompartirLibre(id, ev);
   if (esTorneo(ev)) {
     const e = etapaTorneo(ev); const terminado = e.etapa === 'terminado';
     const t = (terminado || e.etapa === 'final') ? resultadoTorneo(ev) : clasificacionTorneo(ev);
@@ -160,6 +166,7 @@ function hojasExcelTorneo(ev) {
 
 function hojasExcel(ev) {
   if (esTorneo(ev)) return hojasExcelTorneo(ev);
+  if (esLibre(ev)) return hojasExcelLibre(ev);
   const nick = (pid) => ((ev.jugadores || {})[pid] || {}).nick || '(jugador borrado)';
   const conHaz = ev.hazanasModo !== 'no';
   const tabla = [['#', 'Jugador', 'GW', 'VP'].concat(conHaz ? ['Hazañas'] : []).concat(['Jornadas jugadas'])];

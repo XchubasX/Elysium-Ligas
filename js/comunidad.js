@@ -73,7 +73,7 @@ function solicitudesPendientes() { return soyAdmin ? Object.keys(solicitudes || 
 function vistaAyuda() {
   const pasos = [
     ['Pide permiso de organizador', 'Entra con Google → «Mis eventos» → «Quiero organizar».'],
-    ['Crea tu liga o torneo', 'Liga: temporada con jornadas. Torneo: un día, 2 o 3 rondas y final opcional. Presencial o 🌐 en línea.'],
+    ['Crea tu liga o torneo', 'Liga: temporada con jornadas. Torneo: un día, 2 o 3 rondas y final opcional. Presencial o 🌐 en línea. Una liga en línea también puede ser de 🎲 partidas libres.'],
     ['Inscribe a los jugadores', 'Abre inscripciones y comparte el enlace: cada quien entra con Google, escribe su nick y tú lo aceptas. También puedes anotarlos a mano, pegar una lista o copiarlos de otra liga tuya.'],
     ['El día del evento', 'Pase de lista → sortear mesas → capturar VP. El GW se calcula solo.'],
     ['Comparte', 'Tabla por WhatsApp y Excel para todos. Invita ayudantes para capturar contigo.']];
@@ -81,7 +81,8 @@ function vistaAyuda() {
     ['¿Cuenta para el ranking de VEKN?', 'No. Son ligas y torneos 100% casuales, no sancionados por VEKN: para juego casual o eventos fuera del calendario oficial.'],
     ['¿Los jugadores necesitan cuenta?', 'Para ver tablas y calendario, no. Para inscribirse solos con el enlace, sí: entran con Google. El organizador ve su nombre de Google para saber quién es; en la página solo sale su nick.'],
     ['¿Se puede hacer una liga en línea?', 'Sí. Al crearla elige 🌐 En línea: no pide país ni ciudad, y cada jugador ve los horarios convertidos a su propia hora.'],
-    ['¿Qué puede hacer un ayudante?', 'Anotar jugadores, pasar lista, sortear mesas y capturar resultados. No cambia fechas ni ajustes.'],
+    ['¿Qué es una liga de partidas libres?', 'Una liga en línea sin jornadas: cada quien juega cuando puede, con jugadores de la liga o invitados, y reporta sus VP desde la página. Antes de guardar confirma los datos; después solo el organizador corrige. La tabla da 70% al rendimiento (promedio de VP ajustado) y 30% a la participación (12 partidas = máximo). Al final de la temporada el organizador la cierra y la clasificación queda definitiva.'],
+    ['¿Qué puede hacer un ayudante?', 'Anotar jugadores, pasar lista, sortear mesas y capturar resultados. En una liga de partidas libres, reportar partidas por otros jugadores. No cambia fechas ni ajustes.'],
     ['Me equivoqué en un resultado', 'El organizador puede reabrir la jornada o el torneo y corregir.']];
   return '<a href="#/" class="text-sm text-zinc-400 hover:text-zinc-200">← Ligas y torneos</a>' +
     '<div class="bg-zinc-800 border border-wine-600/50 rounded-2xl p-4 space-y-3 text-sm"><h2 class="text-lg font-extrabold text-wine-300">Cómo funciona</h2>' + etiquetaCasual() +

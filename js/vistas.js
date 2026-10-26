@@ -20,7 +20,20 @@ function problemaConexion() {
 }
 
 // ---------------- Portada
+function tarjetaLibre(id, ev) {
+  const t = tablaLibre(ev); const lider = t[0]; const n = partidasLiga(ev).length;
+  const cabeza = '<span class="text-[13px] font-extrabold uppercase ' + (temporadaCerrada(ev) ? 'text-zinc-300">Temporada cerrada' : 'text-wine-300">Partidas libres · en juego') + '</span>';
+  return '<a href="#/liga/' + esc(id) + '" class="' + CARD + ' hover:border-wine-500 transition">' +
+    '<div class="flex items-center justify-between gap-2">' + cabeza + '<span class="' + PILL + ' bg-emerald-950/60 text-emerald-300 border border-emerald-700/70">' + n + (n === 1 ? ' partida' : ' partidas') + '</span></div>' +
+    '<div class="text-lg font-bold text-wine-300">' + esc(ev.nombre) + '</div>' +
+    '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), Object.keys(ev.jugadores || {}).length + ' jugadores', (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : '')].filter(Boolean).join(' · ') + '</div>' +
+    (lider ? '<div class="text-[13px] text-zinc-400">Líder: <b class="text-zinc-100">' + esc(lider.nick) + '</b> · ' + num1(lider.total) + ' pts</div>' : '') +
+    (inscripcionesAbiertas(ev) ? '<div class="text-[12px] font-bold text-emerald-300">📝 Inscripciones abiertas</div>' : '') +
+    '</a>';
+}
+
 function tarjetaLiga(id, ev) {
+  if (esLibre(ev)) return tarjetaLibre(id, ev);
   const prox = proximaJornada(ev); const cuenta = contarJornadas(ev); const tabla = tablaLiga(ev);
   const lider = tabla[0];
   const cambio = prox && prox.fechaAnterior ? '<span class="text-[11px] font-bold text-amber-300 ml-1">CAMBIÓ DE FECHA</span>' : '';
@@ -61,6 +74,7 @@ const FILTRO_EN_LINEA = '__en-linea'; // valor del filtro de país para «🌐 E
 function hayFiltro() { return !!(filtro.texto || filtro.fecha || filtro.tipo !== 'todos' || filtro.pais || filtro.ciudad); }
 function fechaOrden(ev) {
   if (esTorneo(ev)) { const e = etapaTorneo(ev).etapa; return (e === 'terminado' || e === 'cancelado') ? '9999-' + (ev.fecha || '') : (ev.fecha || '9999'); }
+  if (esLibre(ev)) return temporadaCerrada(ev) ? '9999' : (ev.inicio || '9999');
   const p = proximaJornada(ev); return p ? p.fecha : '9999';
 }
 function sinAcentos(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
@@ -135,8 +149,9 @@ function vistaLiga(id, pestana) {
   const ev = eventos[id];
   if (!ev) return '<div class="text-center py-8 space-y-3"><p class="text-zinc-300">Esta liga no existe o fue borrada.</p><a href="#/" class="' + BTN2 + '">Ir a las ligas</a></div>';
   const torneo = esTorneo(ev);
-  const pestanas = torneo ? [['tabla', 'Clasificación'], ['mesas', 'Mesas']] : [['tabla', 'Tabla'], ['calendario', 'Calendario']];
-  if (ev.hazanasModo !== 'no') pestanas.push(['hazanas', 'Hazañas']);
+  const libre = esLibre(ev);
+  const pestanas = torneo ? [['tabla', 'Clasificación'], ['mesas', 'Mesas']] : (libre ? [['tabla', 'Tabla'], ['partidas', 'Partidas']] : [['tabla', 'Tabla'], ['calendario', 'Calendario']]);
+  if (ev.hazanasModo !== 'no' && !libre) pestanas.push(['hazanas', 'Hazañas']);
   if (ev.reglasTexto) pestanas.push(['reglas', 'Reglas']);
   if (puedeCapturar(ev)) pestanas.push(['jugadores', 'Jugadores']);
   if (puedeAdministrar(ev)) pestanas.push(['equipo', 'Equipo'], ['ajustes', 'Ajustes']);
@@ -150,12 +165,14 @@ function vistaLiga(id, pestana) {
       ? [lugarHTML(ev), esc(cuando(ev, ev.fecha, ev.hora)), esc(textoRondas(ev)), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]
       : [lugarHTML(ev), (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : ''), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]).filter(Boolean).join(' · ') + '</p>' +
     (otraZona(ev) ? '<p data-nota-zona class="text-[13px] text-sky-300">🕒 Los horarios se muestran en tu hora. El organizador está en hora de ' + esc(nombreZona(ev.zona)) + '.</p>' : '') +
+    (libre ? '<p class="text-[13px] text-zinc-300">🎲 Liga de partidas libres: cada quien juega cuando puede y reporta su partida.</p>' : '') +
     etiquetaCasual() +
     (ev.archivada ? '<p class="text-[13px] text-amber-300">' + (torneo ? 'Torneo archivado' : 'Liga archivada') + ': ya no aparece en la portada.</p>' : '') + '</div>' +
     bloqueInscripcion(id, ev);
   h += '<nav class="flex gap-1.5 flex-wrap" aria-label="Secciones de la liga">' + pestanas.map(([k, t]) =>
     '<a href="#/liga/' + esc(id) + '/' + k + '" class="text-sm px-3 py-1.5 rounded-full ' + (k === pestana ? 'bg-wine-600 text-white font-semibold' : 'border border-zinc-700 text-zinc-400 hover:text-zinc-200') + '"' + (k === pestana ? ' aria-current="page"' : '') + '>' + t + '</a>').join('') + '</nav>';
-  if (pestana === 'tabla') h += torneo ? seccionClasificacion(id, ev) : seccionTabla(id, ev);
+  if (pestana === 'tabla') h += torneo ? seccionClasificacion(id, ev) : (libre ? seccionTablaLibre(id, ev) : seccionTabla(id, ev));
+  else if (pestana === 'partidas') h += seccionPartidas(id, ev);
   else if (pestana === 'mesas') h += seccionMesasTorneo(id, ev);
   else if (pestana === 'calendario') h += puedeCapturar(ev) ? seccionCalendarioEquipo(id, ev) : seccionCalendario(id, ev);
   else if (pestana === 'jugadores') h += seccionJugadores(id, ev);
@@ -222,6 +239,7 @@ function vistaMisEventos() {
     const etiquetas = (esTorneo(ev) ? ' <span class="text-[11px] font-bold text-amber-300">TORNEO</span>' : '') + (ev.ownerUid === usuario.uid ? '' : ' <span class="text-[11px] font-bold text-violet-300">AYUDANTE</span>');
     let sub;
     if (esTorneo(ev)) { const e = etapaTorneo(ev).etapa; sub = { pendiente: cuando(ev, ev.fecha, ev.hora), ronda: 'En curso', final: 'En la final', terminado: 'Terminado', cancelado: 'Cancelado' }[e]; }
+    else if (esLibre(ev)) { const n = partidasLiga(ev).length; sub = 'Partidas libres · ' + n + (n === 1 ? ' partida' : ' partidas') + (temporadaCerrada(ev) ? ' · temporada cerrada' : ''); }
     else { const prox = proximaJornada(ev); sub = prox ? 'Jornada ' + prox.numero + ' el ' + fechaCorta(prox.fecha) : (ev.archivada ? 'Archivada' : 'Sin jornadas próximas'); }
     return '<a href="#/liga/' + esc(id) + '" class="flex justify-between items-center bg-zinc-800 rounded-lg px-3 py-2.5 hover:bg-zinc-700/70"><span><b>' + esc(ev.nombre) + '</b>' + etiquetas +
       '<br><span class="text-xs text-zinc-400">' + esc(sub) + '</span></span><span class="text-sm font-bold text-wine-300">Abrir ›</span></a>';
@@ -237,25 +255,43 @@ function copiarUid() {
 
 // ---------------- Presencial / En línea (al crear y en Ajustes; p = prefijo de los campos: 'cr' o 'aj')
 // camposLugar = los campos de país y ciudad de siempre (solo se ven en presencial)
-function camposModalidad(p, ev, camposLugar) {
-  const enLinea = esEnLinea(ev);
+function camposModalidad(p, ev, camposLugar, extraEnLinea) {
+  const soloEnLinea = esLibre(ev); // las ligas de partidas libres son solo en línea
+  const enLinea = esEnLinea(ev) || soloEnLinea;
   const inp = 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-wine-500';
   const opcion = (v, t) => '<label class="flex-1 flex gap-2 items-center justify-center text-sm border border-zinc-700 rounded-lg px-3 py-2 cursor-pointer has-[:checked]:border-wine-500 has-[:checked]:bg-wine-900/40">' +
-    '<input type="radio" name="' + p + 'Modalidad" value="' + v + '"' + ((v === 'en-linea') === enLinea ? ' checked' : '') + ' onchange="cambiarModalidad(\'' + p + '\')" class="accent-wine-500"> ' + t + '</label>';
+    '<input type="radio" name="' + p + 'Modalidad" value="' + v + '"' + ((v === 'en-linea') === enLinea ? ' checked' : '') + (soloEnLinea && v !== 'en-linea' ? ' disabled' : '') + ' onchange="cambiarModalidad(\'' + p + '\')" class="accent-wine-500"> ' + t + '</label>';
   return '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">¿Dónde se juega?</legend>' +
-    '<div class="flex gap-2">' + opcion('presencial', '📍 Presencial') + opcion('en-linea', '🌐 En línea') + '</div></fieldset>' +
+    '<div class="flex gap-2">' + opcion('presencial', '📍 Presencial') + opcion('en-linea', '🌐 En línea') + '</div>' +
+    (soloEnLinea ? '<p class="text-xs text-zinc-500">Las ligas de partidas libres son solo en línea.</p>' : '') + '</fieldset>' +
     '<div id="' + p + 'Presencial" class="space-y-3' + (enLinea ? ' hidden' : '') + '">' + camposLugar + '</div>' +
     '<div id="' + p + 'EnLinea" class="space-y-3' + (enLinea ? '' : ' hidden') + '">' +
       '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Plataforma (opcional)</span>' +
         '<input id="' + p + 'Plataforma" maxlength="80" value="' + esc((ev && ev.plataforma) || '') + '" class="' + inp + '" placeholder="ej. Lackey o Succubus Club"></label>' +
       '<p data-zona-info class="text-xs text-zinc-400">🕒 Zona horaria: <b class="text-zinc-200">' + esc(nombreZona(zonaDeModalidad(ev))) + '</b>' +
-        (ev && esEnLinea(ev) && zonaValida(ev.zona) ? ' (la de la liga)' : ' (detectada de tu aparato)') + '. Las horas se capturan en esta zona y cada jugador las ve convertidas a su propia hora.</p></div>';
+        (ev && esEnLinea(ev) && zonaValida(ev.zona) ? ' (la de la liga)' : ' (detectada de tu aparato)') + '. Las horas se capturan en esta zona y cada jugador las ve convertidas a su propia hora.</p>' + (extraEnLinea || '') + '</div>';
 }
 function cambiarModalidad(p) {
   const enLinea = (document.querySelector('input[name="' + p + 'Modalidad"]:checked') || {}).value === 'en-linea';
   $(p + 'Presencial').classList.toggle('hidden', enLinea);
   $(p + 'EnLinea').classList.toggle('hidden', !enLinea);
+  if (p === 'cr') cambiarFormato();
 }
+// Formato de una liga en línea (solo al crear; después no cambia)
+function camposFormato() {
+  const opcion = (v, t, d, c) => '<label class="flex gap-2 items-start text-sm border border-zinc-700 rounded-lg px-3 py-2 cursor-pointer has-[:checked]:border-wine-500 has-[:checked]:bg-wine-900/40">' +
+    '<input type="radio" name="crFormato" value="' + v + '"' + (c ? ' checked' : '') + ' onchange="cambiarFormato()" class="accent-wine-500 mt-0.5"> <span><b>' + t + '</b><br><span class="text-xs text-zinc-400">' + d + '</span></span></label>';
+  return '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">¿Cómo se juega la liga?</legend>' +
+    opcion('jornadas', 'Por jornadas', 'Todos juegan el mismo día; el equipo sortea mesas y captura VP.', true) +
+    opcion('libre', '🎲 Partidas libres', 'Cada quien juega cuando puede, con jugadores de la liga o invitados, y reporta sus VP. Tabla: 70% rendimiento + 30% participación.') +
+    '<p class="text-xs text-zinc-500">No se puede cambiar después de crear la liga.</p></fieldset>';
+}
+function formatoElegido() {
+  const enLinea = (document.querySelector('input[name="crModalidad"]:checked') || {}).value === 'en-linea';
+  return enLinea && (document.querySelector('input[name="crFormato"]:checked') || {}).value === 'libre' ? 'libre' : 'jornadas';
+}
+// En partidas libres no hay hazañas (se otorgan en las jornadas)
+function cambiarFormato() { const f = $('crHazanasSet'); if (f) f.classList.toggle('hidden', formatoElegido() === 'libre'); }
 // La zona de un evento en línea: la que ya tiene, o la del aparato si es nuevo (o pasa de presencial a en línea)
 function zonaDeModalidad(ev) { return (ev && esEnLinea(ev) && zonaValida(ev.zona)) ? ev.zona : zonaDelAparato(); }
 function leerModalidad(p, ev) {
@@ -277,7 +313,7 @@ function vistaCrear(tipo) {
     campo('Nombre', '<input id="crNombre" maxlength="80" required class="' + inp + '" placeholder="' + (torneo ? 'ej. Torneo de Otoño' : 'ej. Liga CDMX · Temporada 1') + '" oninput="sugerirEnlace()">') +
     campo('Enlace', '<div class="flex items-center gap-1 text-sm"><span class="text-zinc-500">#/liga/</span><input id="crEnlace" maxlength="40" class="' + inp + '" placeholder="' + (torneo ? 'torneo-otono' : 'liga-cdmx-1') + '" oninput="this.dataset.tocado=1"></div>', 'Solo minúsculas, números y guiones. No se puede cambiar después.') +
     camposModalidad('cr', null, '<div class="grid grid-cols-[1fr_1.4fr] gap-2">' + campo('País *', selectorPais('crPais', 'México', 'actualizarCiudades(\'crPais\',\'ciudadesCr\')')) +
-      campo('Ciudad *', '<input id="crCiudad" maxlength="60" list="ciudadesCr" autocomplete="off" class="' + inp + '" placeholder="ej. Ciudad de México">' + listaCiudades('ciudadesCr', 'México')) + '</div>') +
+      campo('Ciudad *', '<input id="crCiudad" maxlength="60" list="ciudadesCr" autocomplete="off" class="' + inp + '" placeholder="ej. Ciudad de México">' + listaCiudades('ciudadesCr', 'México')) + '</div>', torneo ? '' : camposFormato()) +
     campo('Nombre del organizador', '<input id="crOrganizador" maxlength="40" class="' + inp + '" value="' + esc(nombreUsuario()) + '">');
   if (torneo) {
     h += '<div class="grid grid-cols-2 gap-2">' + campo('Fecha', '<input id="crFecha" type="date" class="' + inp + '">') + campo('Hora (opcional)', '<input id="crHora" type="time" class="' + inp + '">') + '</div>' +
@@ -286,9 +322,9 @@ function vistaCrear(tipo) {
       '<label class="flex gap-2 items-center text-sm"><input id="crFinal" type="checkbox" checked class="accent-wine-500"> Final de 5 con los mejores clasificados</label>';
   } else {
     h += '<div class="grid grid-cols-2 gap-2">' + campo('Inicio', '<input id="crInicio" type="date" class="' + inp + '">') + campo('Fin', '<input id="crFin" type="date" class="' + inp + '">') + '</div>' +
-      '<p class="text-xs text-zinc-500 -mt-1">Las fechas se pueden cambiar después; las jornadas deben caer dentro de la temporada.</p>';
+      '<p class="text-xs text-zinc-500 -mt-1">Las fechas se pueden cambiar después; las jornadas (o las partidas libres) deben caer dentro de la temporada.</p>';
   }
-  h += '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Hazañas</legend>' +
+  h += '<fieldset id="crHazanasSet" class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">Hazañas</legend>' +
     [['mencion', 'Solo mención', true], ['desempate', 'Desempatan después de VP'], ['no', 'Sin hazañas']].map(([v, t, c]) =>
       '<label class="flex gap-2 items-center text-sm"><input type="radio" name="crHazanas" value="' + v + '"' + (c ? ' checked' : '') + ' class="accent-wine-500"> ' + t + '</label>').join('') + '</fieldset>' +
     campo('Reglas o notas (opcional)', '<textarea id="crReglas" maxlength="1500" rows="3" class="' + inp + '" placeholder="ej. Formato V5, se juega en Tienda El Dragón"></textarea>') +
@@ -329,6 +365,7 @@ async function enviarCrear(ev) {
   }
   if (mod.enLinea) {
     datos.modalidad = 'en-linea'; datos.zona = mod.zona; if (mod.plataforma) datos.plataforma = mod.plataforma;
+    if (!torneo && formatoElegido() === 'libre') { datos.formato = 'libre'; datos.hazanasModo = 'no'; }
   } else {
     if (!pais || !ciudadEscrita) return err('Elige el país y escribe la ciudad.');
     datos.pais = pais; datos.ciudad = normalizarCiudad(pais, ciudadEscrita);
