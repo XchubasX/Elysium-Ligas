@@ -59,9 +59,9 @@ function bloqueInscripcion(id, ev) {
   if (usuario && mia === undefined) return '';
   const jugador = mia && mia.estado === 'aceptada' && mia.jid && ev.jugadores && ev.jugadores[mia.jid];
   if (jugador) {
-    // Partidas libres: el jugador inscrito reporta sus propias partidas
+    // Partidas libres: el jugador inscrito reporta las mesas que juega
     const reportar = esLibre(ev) && !temporadaCerrada(ev) && rutaActual().pestana !== 'partidas'
-      ? '<a href="#/liga/' + esc(id) + '/partidas" class="' + BTN + ' w-full">🎲 Reportar partida</a>' : '';
+      ? '<a href="#/liga/' + esc(id) + '/partidas" class="' + BTN + ' w-full">🎲 Reportar mesa</a>' : '';
     return caja('<p class="font-bold text-emerald-300">✅ Estás inscrito como «' + esc(jugador.nick) + '»</p>' + reportar, 'border-emerald-700/60');
   }
   if (mia && mia.estado === 'pendiente') {

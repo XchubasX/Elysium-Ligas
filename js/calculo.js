@@ -151,8 +151,8 @@ function jugadorUsado(ev, jid) {
   return lista(ev && ev.jornadas).some(j => (j.presentes && j.presentes[jid]) ||
     Object.values(j.rondas || {}).some(r => mesaDe(r, jid)) ||
     Object.values(j.hazanas || {}).some(h => h && h.jugador === jid)) ||
-    // Partidas libres: si reportó una partida o salió como rival en una
-    lista(ev && ev.partidas).some(p => p && (p.jugador === jid || (p.rivales && p.rivales[jid])));
+    // Partidas libres: si aparece en alguna mesa reportada
+    lista(ev && ev.mesas).some(m => m && m.jugadores && m.jugadores[jid] !== undefined);
 }
 function hazanaUsada(ev, hid) {
   return lista(ev && ev.jornadas).some(j => Object.values(j.hazanas || {}).some(h => h && h.hazana === hid));
@@ -260,8 +260,9 @@ function jornadasFuera(ev, inicio, fin) {
 
 // =====================================================================
 // LIGAS DE «PARTIDAS LIBRES» (26 oct 2026) — solo ligas en línea
-// Temporada continua: cada jugador reporta sus propias partidas (o el equipo por él).
-// Partida: eventos/{id}/partidas/{pid} = { jugador, fecha, vp, mesa (4|5), rivales?, invitados?, por, creada }
+// Temporada continua: un jugador que estuvo en la mesa la reporta COMPLETA (o el equipo).
+// Mesa: eventos/{id}/mesas/{mid} = { fecha, mesa (4|5), jugadores: { jid: vp }, invitados?, por, creada }
+// Cada jugador de la liga en la mesa suma una partida con sus VP; los invitados no tienen VP.
 // Clasificación (sistema de La Jyhad Eterna, con VP):
 //   P = VP totales, N = partidas, M = media de VP por partida de toda la liga
 //   A = (P + 3M) / (N + 3)   ·   R = 100 × A / M   ·   Q = 100 × mín(N / 12, 1)
@@ -274,11 +275,20 @@ function esLibre(ev) { return !!ev && ev.tipo !== 'torneo' && ev.formato === 'li
 function temporadaCerrada(ev) { return !!ev && ev.temporada === 'cerrada'; }
 function vpValido(vp, mesa) { return typeof vp === 'number' && vp >= 0 && vp <= mesa && Number.isInteger(vp * 2); }
 
-// Partidas ordenadas de la más nueva a la más vieja: [{ id, jugador, fecha, vp, mesa, ... }]
-function partidasLiga(ev) {
-  return lista(ev && ev.partidas).filter(p => p && p.jugador && typeof p.vp === 'number')
-    .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || (b.creada || 0) - (a.creada || 0));
+// Mesas de la más nueva a la más vieja: [{ id, fecha, mesa, jugadores: [{ jid, vp }], invitados, por, creada }]
+function mesasLiga(ev) {
+  return lista(ev && ev.mesas).filter(m => m && m.jugadores && typeof m.jugadores === 'object').map(m => Object.assign({}, m, {
+    jugadores: Object.keys(m.jugadores).filter(j => typeof m.jugadores[j] === 'number').map(j => ({ jid: j, vp: m.jugadores[j] })).sort((a, b) => b.vp - a.vp)
+  })).sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || (b.creada || 0) - (a.creada || 0));
 }
+// Una partida por jugador de la liga en cada mesa: [{ jugador, vp, fecha, mesa, mid }]
+function partidasLiga(ev) {
+  const out = [];
+  mesasLiga(ev).forEach(m => m.jugadores.forEach(x => out.push({ jugador: x.jid, vp: x.vp, fecha: m.fecha, mesa: m.mesa, mid: m.id })));
+  return out;
+}
+// Nombres de invitados escritos en un texto («Pedro, Lucía y Toño» → 3)
+function invitadosDe(texto) { return String(texto || '').split(/,|\sy\s/).map(x => x.trim()).filter(Boolean); }
 function mediaLiga(ev) {
   const ps = partidasLiga(ev);
   return ps.length ? ps.reduce((s, p) => s + p.vp, 0) / ps.length : 0;
@@ -307,7 +317,7 @@ function tablaLibre(ev) {
 function num1(x) { const r = Math.round(x * 10) / 10; return Number.isInteger(r) ? String(r) : r.toFixed(1); }
 function num2(x) { const r = Math.round(x * 100) / 100; return String(r); }
 
-// Partidas que quedarían fuera de una temporada nueva
-function partidasFuera(ev, inicio, fin) {
-  return partidasLiga(ev).filter(p => (inicio && p.fecha < inicio) || (fin && p.fecha > fin));
+// Mesas que quedarían fuera de una temporada nueva
+function mesasFuera(ev, inicio, fin) {
+  return mesasLiga(ev).filter(m => (inicio && m.fecha < inicio) || (fin && m.fecha > fin));
 }

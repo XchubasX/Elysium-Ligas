@@ -57,8 +57,8 @@ function seccionEquipo(id, ev) {
     }
   }
   if (esLibre(ev)) {
-    h += '<div class="text-xs text-zinc-400 space-y-1"><p><b class="text-zinc-300">Un ayudante puede:</b> anotar jugadores, aceptar inscripciones y reportar partidas por cualquier jugador de la liga.</p>' +
-      '<p><b class="text-zinc-300">No puede:</b> corregir ni borrar partidas, cambiar fechas, reglas ni ajustes, cerrar la temporada, ni invitar a otros. Sigue siendo ayudante hasta que lo quites.</p></div>';
+    h += '<div class="text-xs text-zinc-400 space-y-1"><p><b class="text-zinc-300">Un ayudante puede:</b> anotar jugadores, aceptar inscripciones y reportar mesas aunque no las haya jugado (por ejemplo, con jugadores ficticios para una demostración).</p>' +
+      '<p><b class="text-zinc-300">No puede:</b> corregir ni borrar mesas, cambiar fechas, reglas ni ajustes, cerrar la temporada, ni invitar a otros. Sigue siendo ayudante hasta que lo quites.</p></div>';
   } else {
     h += '<div class="text-xs text-zinc-400 space-y-1"><p><b class="text-zinc-300">Un ayudante puede:</b> anotar jugadores, pasar lista, sortear mesas, capturar VP y hazañas, empezar y cerrar jornadas.</p>' +
       '<p><b class="text-zinc-300">No puede:</b> cambiar fechas, reglas ni ajustes, reabrir jornadas cerradas, ni invitar a otros. Sigue siendo ayudante hasta que lo quites.</p></div>';

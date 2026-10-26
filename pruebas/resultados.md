@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**❌ 12 FALLA(S)** — 353 de 365 casos pasaron.
+**❌ 12 FALLA(S)** — 361 de 373 casos pasaron.
 
-- Fecha: 26/10/2026 15:51 (hora de Ciudad de México)
-- Versión probada: `1ccd545` + cambios aún sin guardar
-- Duración: 73 s
+- Fecha: 26/10/2026 17:12 (hora de Ciudad de México)
+- Versión probada: `e4cddaf` + cambios aún sin guardar
+- Duración: 81 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Sin reglas** (no se encontró la carpeta de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -48,7 +48,7 @@
 | 17 | Avisos al celular de solicitudes para organizar | 33 | ✅ |
 | 18 | Eventos En línea: modalidad, plataforma y hora de cada quien | 35 | ✅ |
 | 19 | Inscripciones con Google y pegar lista de jugadores | 39 | ✅ |
-| 20 | Ligas de partidas libres (en línea) | 71 | ✅ |
+| 20 | Ligas de partidas libres (en línea) | 79 | ✅ |
 | 21 | Organizadores: lista, quitar permiso y transferir (superusuario) | 26 | ✅ |
 
 ## Todos los casos
@@ -212,7 +212,7 @@
 | 33 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 36 | WhatsApp: «campeón: Sara» | ✅ |
+| 36 | WhatsApp: «campeón: Pau» | ✅ |
 | 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -426,71 +426,79 @@
 | 4 | Beto J: partidas, VP, rendimiento, participación, total y provisional como el documento | ✅ |
 | 5 | orden: Carla, Ana J, Beto J, Toni | ✅ |
 | 6 | Toni (12 partidas): participación 100 (tope) | ✅ |
-| 7 | desempate y orden con varios casos: A, B, C | ✅ |
+| 7 | una mesa con 2 jugadores de la liga cuenta una partida para cada uno | ✅ |
 | 8 | si nadie tiene VP (media 0), no hay división entre cero: rendimiento 100 | ✅ |
-| 9 | portada: «Partidas libres · en juego», 23 partidas y líder con puntos | ✅ |
-| 10 | portada: dice «🌐 En línea · Lackey» | ✅ |
-| 11 | pestañas públicas: Tabla y Partidas (sin Calendario ni Hazañas) | ✅ |
-| 12 | cabecera: «🎲 Liga de partidas libres» | ✅ |
-| 13 | tabla: «Clasificación provisional» y media de la liga 1 VP | ✅ |
-| 14 | tabla: Carla 1.º con 1 partida, 5 VP, 200, 8.3, 142.5 y PROVISIONAL | ✅ |
-| 15 | tabla: Beto J sin marca de provisional | ✅ |
-| 16 | «¿Cómo se calcula?» explica 70/30, relleno de 3 partidas y 12 partidas | ✅ |
-| 17 | botones Compartir por WhatsApp y Excel | ✅ |
+| 9 | invitados: «Pedro, Lucía y Toño» son 3 | ✅ |
+| 10 | portada: «Partidas libres · en juego», 23 mesas y líder con puntos | ✅ |
+| 11 | portada: dice «🌐 En línea · Lackey» | ✅ |
+| 12 | pestañas públicas: Tabla y Mesas (sin Calendario ni Hazañas) | ✅ |
+| 13 | cabecera: un jugador de la mesa la reporta completa | ✅ |
+| 14 | tabla: «Clasificación provisional», media 1 VP y 23 mesas | ✅ |
+| 15 | tabla: Carla 1.º con 1 partida, 5 VP, 200, 8.3, 142.5 y PROVISIONAL | ✅ |
+| 16 | tabla: Beto J sin marca de provisional | ✅ |
+| 17 | «¿Cómo se calcula?» explica 70/30, relleno de 3 partidas, 12 partidas y que cada mesa cuenta para todos | ✅ |
 | 18 | WhatsApp: «clasificación provisional» y «Carla · 142.5 pts» | ✅ |
-| 19 | Excel: hojas Clasificación (4 jugadores) y Partidas (23) | ✅ |
+| 19 | Excel: hojas Clasificación (4 jugadores) y Mesas (23 renglones) | ✅ |
 | 20 | sin desborde horizontal a 390 px | ✅ |
-| 21 | pestaña Partidas pública: lista sin formulario ni botones de corregir | ✅ |
-| 22 | sin sesión: invita a entrar e inscribirse para reportar | ✅ |
-| 23 | sin partidas: «Todavía no hay partidas reportadas» | ✅ |
-| 24 | jugador inscrito: «Estás inscrito como «Toni»» con botón «🎲 Reportar partida» | ✅ |
-| 25 | formulario: el jugador es él mismo (sin poder elegir otro) | ✅ |
-| 26 | VP de 0 a 5 en mesa de 5 | ✅ |
-| 27 | al elegir mesa de 4, VP solo hasta 4 | ✅ |
-| 28 | sin VP no deja seguir: «Elige los VP» | ✅ |
-| 29 | confirmación: resumen con jugador, fecha, mesa, VP y rivales | ✅ |
-| 30 | confirmación: avisa que después no podrá cambiarla | ✅ |
-| 31 | todavía no se guarda nada antes de confirmar | ✅ |
-| 32 | «Volver a editar» conserva lo capturado | ✅ |
-| 33 | se guarda la partida con jugador, fecha, VP, mesa, rivales, invitados, por y creada | ✅ |
-| 34 | aparece en la lista sin botones de corregir para el jugador | ✅ |
-| 35 | el formulario queda limpio para otra partida | ✅ |
-| 36 | fecha antes del inicio: no deja seguir | ✅ |
-| 37 | más rivales que lugares en la mesa: no deja seguir | ✅ |
-| 38 | mesa de 4 con 3 rivales de la liga: sí pasa a la confirmación | ✅ |
-| 39 | cuenta no inscrita: no ve el formulario de reportar | ✅ |
-| 40 | organizador: pestañas Tabla, Partidas, Jugadores, Equipo y Ajustes | ✅ |
-| 41 | organizador: elige el jugador de una lista | ✅ |
-| 42 | el jugador elegido no sale como su propio rival | ✅ |
-| 43 | organizador: la confirmación dice que después puede corregirla | ✅ |
-| 44 | se guarda la partida de «Ana J» reportada por el organizador | ✅ |
-| 45 | corregir: cambia VP y mesa, conserva quién la reportó y cuándo | ✅ |
-| 46 | borrar (dos toques) quita la partida | ✅ |
-| 47 | no se puede quitar a un jugador con partidas reportadas | ✅ |
-| 48 | Ajustes: «Liga de partidas libres (no se puede cambiar)», sin hazañas | ✅ |
-| 49 | Ajustes: «Presencial» deshabilitado (solo en línea) | ✅ |
-| 50 | Ajustes: no deja mover el inicio si deja partidas fuera | ✅ |
-| 51 | Ajustes: guardar no cambia formato, modalidad ni hazañas | ✅ |
-| 52 | Cerrar temporada (dos toques) guarda temporada: «cerrada» | ✅ |
-| 53 | tabla: «Clasificación definitiva · temporada cerrada» | ✅ |
-| 54 | temporada cerrada: ya no hay formulario de reportar | ✅ |
-| 55 | Reabrir temporada borra el campo | ✅ |
-| 56 | ayudante: puede elegir cualquier jugador para reportar | ✅ |
-| 57 | ayudante: no ve Corregir ni Borrar | ✅ |
-| 58 | ayudante: la confirmación avisa que no habrá cambios | ✅ |
-| 59 | ayudante: se guarda la partida de «Beto J» | ✅ |
-| 60 | Equipo (partidas libres): explica que el ayudante reporta por otros y no corrige | ✅ |
-| 61 | Equipo (liga por jornadas): el ayudante sigue igual que antes | ✅ |
-| 62 | crear: el formato no se ve si es presencial | ✅ |
-| 63 | crear en línea: aparece «🎲 Partidas libres» | ✅ |
-| 64 | al elegir partidas libres se ocultan las hazañas | ✅ |
-| 65 | se crea con formato «libre», en línea y sin hazañas | ✅ |
-| 66 | presencial: aunque se haya marcado «libre», se crea por jornadas | ✅ |
-| 67 | torneo en línea: no ofrece partidas libres | ✅ |
-| 68 | guía: pregunta «¿Qué es una liga de partidas libres?» | ✅ |
-| 69 | guía: el ayudante reporta por otros en partidas libres | ✅ |
-| 70 | Mis eventos: «Partidas libres · 23 partidas» | ✅ |
-| 71 | sin errores de JavaScript | ✅ |
+| 21 | pestaña Mesas pública: lista sin formulario ni botones de corregir | ✅ |
+| 22 | cada mesa muestra jugadores con VP, invitados y la suma | ✅ |
+| 23 | sin sesión: invita a entrar e inscribirse para reportar | ✅ |
+| 24 | sin mesas: «Todavía no hay mesas reportadas» | ✅ |
+| 25 | jugador inscrito: «Estás inscrito como «Toni»» con botón «🎲 Reportar mesa» | ✅ |
+| 26 | formulario: explica que una sola persona reporta la mesa completa | ✅ |
+| 27 | él mismo ya está marcado en la mesa y no se puede quitar | ✅ |
+| 28 | VP de 0 a 5 en mesa de 5 | ✅ |
+| 29 | cuenta en vivo: suma 7 de 5 y lugares 5 de 5 | ✅ |
+| 30 | EL CASO DE LA PRUEBA: suma de 7 VP en mesa de 5 no deja guardar | ✅ |
+| 31 | confirmación: fecha, mesa, cada jugador con sus VP e invitados | ✅ |
+| 32 | confirmación: avisa que después no podrá cambiarla | ✅ |
+| 33 | sin mesas parecidas: no avisa de repetida | ✅ |
+| 34 | todavía no se guarda nada antes de confirmar | ✅ |
+| 35 | «Volver a editar» conserva lo capturado | ✅ |
+| 36 | se guarda UNA mesa con los 3 jugadores y sus VP, invitados, por y creada | ✅ |
+| 37 | la mesa cuenta como partida para los 3 jugadores de la liga | ✅ |
+| 38 | aparece en la lista sin botones de corregir para el jugador | ✅ |
+| 39 | mismo día y 2 jugadores en común: avisa «¿Es una mesa repetida?» con los jugadores de esa mesa | ✅ |
+| 40 | el aviso deja guardar («Es otra mesa: guardar») | ✅ |
+| 41 | si es otra mesa, se guarda | ✅ |
+| 42 | mismo día pero solo 1 jugador en común: no avisa de repetida | ✅ |
+| 43 | más personas que lugares (2 + 3 invitados en mesa de 4): no deja seguir | ✅ |
+| 44 | fecha antes del inicio: no deja seguir | ✅ |
+| 45 | falta elegir VP de un jugador: dice de quién | ✅ |
+| 46 | un jugador no puede reportar una mesa en la que no jugó | ✅ |
+| 47 | cuenta no inscrita: no ve el formulario de reportar | ✅ |
+| 48 | organizador: pestañas Tabla, Mesas, Jugadores, Equipo y Ajustes | ✅ |
+| 49 | organizador: nadie viene marcado (puede reportar mesas que no jugó) | ✅ |
+| 50 | organizador: la confirmación dice que después puede corregirla | ✅ |
+| 51 | se guarda la mesa reportada por el organizador | ✅ |
+| 52 | corregir: abre la mesa con sus datos | ✅ |
+| 53 | corregir: cambia VP y jugadores, conserva quién la reportó y cuándo | ✅ |
+| 54 | borrar (dos toques) quita la mesa | ✅ |
+| 55 | no se puede quitar a un jugador que aparece en una mesa | ✅ |
+| 56 | Ajustes: «Liga de partidas libres (no se puede cambiar)», sin hazañas | ✅ |
+| 57 | Ajustes: «Presencial» deshabilitado (solo en línea) | ✅ |
+| 58 | Ajustes: no deja mover el inicio si deja mesas fuera | ✅ |
+| 59 | Ajustes: guardar no cambia formato, modalidad ni hazañas | ✅ |
+| 60 | Cerrar temporada (dos toques) guarda temporada: «cerrada» | ✅ |
+| 61 | tabla: «Clasificación definitiva · temporada cerrada» | ✅ |
+| 62 | temporada cerrada: ya no hay formulario de reportar | ✅ |
+| 63 | Reabrir temporada borra el campo | ✅ |
+| 64 | ayudante: ve el formulario para reportar | ✅ |
+| 65 | ayudante: no ve Corregir ni Borrar | ✅ |
+| 66 | ayudante: la confirmación avisa que no habrá cambios | ✅ |
+| 67 | ayudante: se guarda la mesa | ✅ |
+| 68 | Equipo (partidas libres): el ayudante reporta mesas aunque no las haya jugado y no corrige | ✅ |
+| 69 | Equipo (liga por jornadas): el ayudante sigue igual que antes | ✅ |
+| 70 | crear: el formato no se ve si es presencial | ✅ |
+| 71 | crear en línea: aparece «🎲 Partidas libres» | ✅ |
+| 72 | al elegir partidas libres se ocultan las hazañas | ✅ |
+| 73 | se crea con formato «libre», en línea y sin hazañas | ✅ |
+| 74 | presencial: aunque se haya marcado «libre», se crea por jornadas | ✅ |
+| 75 | torneo en línea: no ofrece partidas libres | ✅ |
+| 76 | guía: «¿Qué es una liga de partidas libres?» explica la mesa completa | ✅ |
+| 77 | guía: el ayudante reporta mesas en partidas libres | ✅ |
+| 78 | Mis eventos: «Partidas libres · 23 mesas» | ✅ |
+| 79 | sin errores de JavaScript | ✅ |
 
 ### 21. Organizadores: lista, quitar permiso y transferir (superusuario)
 

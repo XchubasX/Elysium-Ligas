@@ -128,7 +128,7 @@ function seccionJugadores(id, ev) {
       '<button type="button" onclick="ui.editarJugador=\'' + esc(p.id) + '\';dibujar(\'ruta\')" class="' + BTN_CH + '">Cambiar nick</button>' +
       '<button type="button" onclick="dosToques(this,()=>quitarJugador(\'' + esc(p.id) + '\'))" class="' + BTN_PELIGRO + '">Quitar</button></span></div>';
   });
-  h += '</div><p class="text-xs text-zinc-500">' + js.length + ' jugadores. Quien ya ' + (esLibre(ev) ? 'tiene partidas reportadas' : 'jugó alguna jornada') + ' no se puede quitar (sí se le puede cambiar el nick).</p>';
+  h += '</div><p class="text-xs text-zinc-500">' + js.length + ' jugadores. Quien ya ' + (esLibre(ev) ? 'aparece en alguna mesa reportada' : 'jugó alguna jornada') + ' no se puede quitar (sí se le puede cambiar el nick).</p>';
   const otras = Object.keys(eventos).filter(k => k !== id && puedeCapturar(eventos[k]) && Object.keys(eventos[k].jugadores || {}).length);
   if (otras.length) {
     h += '<div class="bg-zinc-800 border border-zinc-700 rounded-xl p-3 space-y-2 text-sm"><p class="font-semibold">Copiar jugadores de otra liga tuya</p>' +
@@ -169,7 +169,7 @@ async function renombrarJugador(e, jid) {
 
 function quitarJugador(jid) {
   const ev = ligaActual();
-  if (jugadorUsado(ev, jid)) return aviso(esLibre(ev) ? 'Ya tiene partidas reportadas: no se puede quitar. Puedes cambiarle el nick.' : 'Ya jugó en alguna jornada: no se puede quitar. Puedes cambiarle el nick.', 'error');
+  if (jugadorUsado(ev, jid)) return aviso(esLibre(ev) ? 'Ya aparece en alguna mesa reportada: no se puede quitar. Puedes cambiarle el nick.' : 'Ya jugó en alguna jornada: no se puede quitar. Puedes cambiarle el nick.', 'error');
   return guardar(idLigaActual(), { ['jugadores/' + jid]: null }, 'Jugador quitado');
 }
 
@@ -263,8 +263,8 @@ async function guardarAjustes(e) {
     const inicio = $('ajInicio').value, fin = $('ajFin').value;
     if (!fechaValida(inicio) || !fechaValida(fin)) return err('Las fechas de inicio y fin son obligatorias.');
     if (fin < inicio) return err('La fecha de fin es anterior al inicio.');
-    const pfuera = partidasFuera(ev, inicio, fin);
-    if (pfuera.length) return err((pfuera.length === 1 ? 'Hay 1 partida' : 'Hay ' + pfuera.length + ' partidas') + ' fuera de esas fechas (' + pfuera.slice(0, 3).map(p => fechaCorta(p.fecha)).join(', ') + '). Primero corrígela' + (pfuera.length === 1 ? '' : 's') + ' o bórrala' + (pfuera.length === 1 ? '' : 's') + '.');
+    const mfuera = mesasFuera(ev, inicio, fin);
+    if (mfuera.length) return err((mfuera.length === 1 ? 'Hay 1 mesa' : 'Hay ' + mfuera.length + ' mesas') + ' fuera de esas fechas (' + mfuera.slice(0, 3).map(m => fechaCorta(m.fecha)).join(', ') + '). Primero corrígela' + (mfuera.length === 1 ? '' : 's') + ' o bórrala' + (mfuera.length === 1 ? '' : 's') + '.');
     const fuera = jornadasFuera(ev, inicio, fin);
     if (fuera.length) return err((fuera.length === 1 ? 'La jornada ' : 'Las jornadas ') + fuera.map(j => j.numero + ' (' + fechaCorta(j.fecha) + ')').join(', ') + (fuera.length === 1 ? ' queda' : ' quedan') + ' fuera de la temporada. Primero cámbiale la fecha o cancélala.');
     if (inicio) nuevo.inicio = inicio; if (fin) nuevo.fin = fin;

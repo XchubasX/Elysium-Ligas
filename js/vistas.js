@@ -21,10 +21,10 @@ function problemaConexion() {
 
 // ---------------- Portada
 function tarjetaLibre(id, ev) {
-  const t = tablaLibre(ev); const lider = t[0]; const n = partidasLiga(ev).length;
+  const t = tablaLibre(ev); const lider = t[0]; const n = mesasLiga(ev).length;
   const cabeza = '<span class="text-[13px] font-extrabold uppercase ' + (temporadaCerrada(ev) ? 'text-zinc-300">Temporada cerrada' : 'text-wine-300">Partidas libres · en juego') + '</span>';
   return '<a href="#/liga/' + esc(id) + '" class="' + CARD + ' hover:border-wine-500 transition">' +
-    '<div class="flex items-center justify-between gap-2">' + cabeza + '<span class="' + PILL + ' bg-emerald-950/60 text-emerald-300 border border-emerald-700/70">' + n + (n === 1 ? ' partida' : ' partidas') + '</span></div>' +
+    '<div class="flex items-center justify-between gap-2">' + cabeza + '<span class="' + PILL + ' bg-emerald-950/60 text-emerald-300 border border-emerald-700/70">' + n + (n === 1 ? ' mesa' : ' mesas') + '</span></div>' +
     '<div class="text-lg font-bold text-wine-300">' + esc(ev.nombre) + '</div>' +
     '<div class="text-[13px] text-zinc-300">' + [lugarHTML(ev), Object.keys(ev.jugadores || {}).length + ' jugadores', (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : '')].filter(Boolean).join(' · ') + '</div>' +
     (lider ? '<div class="text-[13px] text-zinc-400">Líder: <b class="text-zinc-100">' + esc(lider.nick) + '</b> · ' + num1(lider.total) + ' pts</div>' : '') +
@@ -150,7 +150,7 @@ function vistaLiga(id, pestana) {
   if (!ev) return '<div class="text-center py-8 space-y-3"><p class="text-zinc-300">Esta liga no existe o fue borrada.</p><a href="#/" class="' + BTN2 + '">Ir a las ligas</a></div>';
   const torneo = esTorneo(ev);
   const libre = esLibre(ev);
-  const pestanas = torneo ? [['tabla', 'Clasificación'], ['mesas', 'Mesas']] : (libre ? [['tabla', 'Tabla'], ['partidas', 'Partidas']] : [['tabla', 'Tabla'], ['calendario', 'Calendario']]);
+  const pestanas = torneo ? [['tabla', 'Clasificación'], ['mesas', 'Mesas']] : (libre ? [['tabla', 'Tabla'], ['partidas', 'Mesas']] : [['tabla', 'Tabla'], ['calendario', 'Calendario']]);
   if (ev.hazanasModo !== 'no' && !libre) pestanas.push(['hazanas', 'Hazañas']);
   if (ev.reglasTexto) pestanas.push(['reglas', 'Reglas']);
   if (puedeCapturar(ev)) pestanas.push(['jugadores', 'Jugadores']);
@@ -165,7 +165,7 @@ function vistaLiga(id, pestana) {
       ? [lugarHTML(ev), esc(cuando(ev, ev.fecha, ev.hora)), esc(textoRondas(ev)), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]
       : [lugarHTML(ev), (ev.inicio && ev.fin ? esc(fechaLarga(ev.inicio)) + ' – ' + esc(fechaLarga(ev.fin)) : ''), (ev.organizadorNombre ? 'organiza ' + esc(ev.organizadorNombre) : '')]).filter(Boolean).join(' · ') + '</p>' +
     (otraZona(ev) ? '<p data-nota-zona class="text-[13px] text-sky-300">🕒 Los horarios se muestran en tu hora. El organizador está en hora de ' + esc(nombreZona(ev.zona)) + '.</p>' : '') +
-    (libre ? '<p class="text-[13px] text-zinc-300">🎲 Liga de partidas libres: cada quien juega cuando puede y reporta su partida.</p>' : '') +
+    (libre ? '<p class="text-[13px] text-zinc-300">🎲 Liga de partidas libres: cada quien juega cuando puede; un jugador de la mesa la reporta completa.</p>' : '') +
     etiquetaCasual() +
     (ev.archivada ? '<p class="text-[13px] text-amber-300">' + (torneo ? 'Torneo archivado' : 'Liga archivada') + ': ya no aparece en la portada.</p>' : '') + '</div>' +
     bloqueInscripcion(id, ev);
@@ -239,7 +239,7 @@ function vistaMisEventos() {
     const etiquetas = (esTorneo(ev) ? ' <span class="text-[11px] font-bold text-amber-300">TORNEO</span>' : '') + (ev.ownerUid === usuario.uid ? '' : ' <span class="text-[11px] font-bold text-violet-300">AYUDANTE</span>');
     let sub;
     if (esTorneo(ev)) { const e = etapaTorneo(ev).etapa; sub = { pendiente: cuando(ev, ev.fecha, ev.hora), ronda: 'En curso', final: 'En la final', terminado: 'Terminado', cancelado: 'Cancelado' }[e]; }
-    else if (esLibre(ev)) { const n = partidasLiga(ev).length; sub = 'Partidas libres · ' + n + (n === 1 ? ' partida' : ' partidas') + (temporadaCerrada(ev) ? ' · temporada cerrada' : ''); }
+    else if (esLibre(ev)) { const n = mesasLiga(ev).length; sub = 'Partidas libres · ' + n + (n === 1 ? ' mesa' : ' mesas') + (temporadaCerrada(ev) ? ' · temporada cerrada' : ''); }
     else { const prox = proximaJornada(ev); sub = prox ? 'Jornada ' + prox.numero + ' el ' + fechaCorta(prox.fecha) : (ev.archivada ? 'Archivada' : 'Sin jornadas próximas'); }
     return '<a href="#/liga/' + esc(id) + '" class="flex justify-between items-center bg-zinc-800 rounded-lg px-3 py-2.5 hover:bg-zinc-700/70"><span><b>' + esc(ev.nombre) + '</b>' + etiquetas +
       '<br><span class="text-xs text-zinc-400">' + esc(sub) + '</span></span><span class="text-sm font-bold text-wine-300">Abrir ›</span></a>';
@@ -283,7 +283,7 @@ function camposFormato() {
     '<input type="radio" name="crFormato" value="' + v + '"' + (c ? ' checked' : '') + ' onchange="cambiarFormato()" class="accent-wine-500 mt-0.5"> <span><b>' + t + '</b><br><span class="text-xs text-zinc-400">' + d + '</span></span></label>';
   return '<fieldset class="space-y-1.5"><legend class="text-xs font-semibold text-zinc-400 mb-1">¿Cómo se juega la liga?</legend>' +
     opcion('jornadas', 'Por jornadas', 'Todos juegan el mismo día; el equipo sortea mesas y captura VP.', true) +
-    opcion('libre', '🎲 Partidas libres', 'Cada quien juega cuando puede, con jugadores de la liga o invitados, y reporta sus VP. Tabla: 70% rendimiento + 30% participación.') +
+    opcion('libre', '🎲 Partidas libres', 'Cada quien juega cuando puede, con jugadores de la liga o invitados; un jugador de la mesa la reporta completa. Tabla: 70% rendimiento + 30% participación.') +
     '<p class="text-xs text-zinc-500">No se puede cambiar después de crear la liga.</p></fieldset>';
 }
 function formatoElegido() {
