@@ -46,6 +46,13 @@ function eventosSinOrganizador() {
     .sort((a, b) => String(eventos[a].nombre).localeCompare(String(eventos[b].nombre), 'es'));
 }
 
+// Identificador abreviado (para buscarlo en Firebase → Authentication → Users, que muestra el correo)
+function uidCorto(uid) { const u = String(uid || ''); return u.length > 10 ? u.slice(0, 4) + '…' + u.slice(-4) : u; }
+function botonIdentificador(uid) {
+  return '<span data-uid class="flex items-center gap-1.5 text-[11px] text-zinc-500">ID: <code>' + esc(uidCorto(uid)) + '</code>' +
+    '<button type="button" onclick="copiarTexto(\'' + esc(uid) + '\',\'Identificador copiado\')" class="underline text-zinc-400 hover:text-zinc-200">Copiar identificador</button></span>';
+}
+
 function enlaceOrganizadores() {
   if (!soyAdmin) return '';
   escucharOrganizadores();
@@ -73,13 +80,14 @@ function vistaOrganizadores() {
     } else {
       h += '<div class="flex justify-between items-start gap-2"><span><b>' + esc(o.nombre) + '</b>' + (yo ? ' <span class="text-[11px] font-bold text-wine-300">TÚ</span>' : '') +
         '<br><span class="text-xs text-zinc-400">' + [o.ciudad ? esc(o.ciudad) : '', o.desde ? 'desde ' + esc(fechaLarga(new Date(o.desde).toISOString().slice(0, 10))) : '',
-          o.eventos.length + (o.eventos.length === 1 ? ' evento' : ' eventos')].filter(Boolean).join(' · ') + '</span></span>' +
+          o.eventos.length + (o.eventos.length === 1 ? ' evento' : ' eventos')].filter(Boolean).join(' · ') + '</span>' + botonIdentificador(o.uid) + '</span>' +
         '<span class="flex gap-1.5"><button type="button" onclick="uiOrg.editar=\'' + esc(o.uid) + '\';dibujar(\'ruta\')" class="' + BTN_CH + '">Nombre</button>' +
         (yo ? '' : '<button type="button" onclick="dosToques(this,()=>quitarOrganizador(\'' + esc(o.uid) + '\'))" class="' + BTN_PELIGRO + '">Quitar permiso</button>') + '</span></div>';
     }
     h += listaEventosTransferibles(o.eventos, o.uid, orgs) + '</div>';
   });
-  h += '</div><p class="text-xs text-zinc-500">Quitar el permiso no borra nada: sus ligas y torneos se quedan como están y solo tú los administras hasta que los transfieras a otro organizador.</p>';
+  h += '</div><p class="text-xs text-zinc-500">¿No sabes quién es? Copia su identificador y búscalo en la consola de Firebase → Authentication → Users: ahí sale su correo.</p>' +
+    '<p class="text-xs text-zinc-500">Quitar el permiso no borra nada: sus ligas y torneos se quedan como están y solo tú los administras hasta que los transfieras a otro organizador.</p>';
 
   const huerfanos = eventosSinOrganizador();
   if (huerfanos.length) {
@@ -103,8 +111,9 @@ function listaEventosTransferibles(ids, dueno, orgs) {
           '<div class="flex gap-2"><button class="' + BTN + ' !py-1.5">Transferir</button><button type="button" onclick="uiOrg.transferir=null;dibujar(\'ruta\')" class="' + BTN2 + ' !py-1.5">Cancelar</button></div>'
           : '<p class="text-xs text-amber-300">No hay otro organizador al cual transferirlo.</p><button type="button" onclick="uiOrg.transferir=null;dibujar(\'ruta\')" class="' + BTN2 + ' !py-1.5">Cerrar</button>') + '</form>';
     }
-    return '<div data-evento-org="' + esc(id) + '" class="flex justify-between items-center gap-2 pl-2 border-l-2 border-zinc-700"><a href="#/liga/' + esc(id) + '" class="text-wine-300 underline truncate">' + esc(ev.nombre) + '</a>' + etiqueta +
-      '<button type="button" onclick="uiOrg.transferir=\'' + esc(id) + '\';dibujar(\'ruta\')" class="' + BTN_CH + ' ml-auto">Transferir</button></div>';
+    return '<div data-evento-org="' + esc(id) + '" class="pl-2 border-l-2 border-zinc-700 space-y-0.5"><div class="flex justify-between items-center gap-2"><a href="#/liga/' + esc(id) + '" class="text-wine-300 underline truncate">' + esc(ev.nombre) + '</a>' + etiqueta +
+      '<button type="button" onclick="uiOrg.transferir=\'' + esc(id) + '\';dibujar(\'ruta\')" class="' + BTN_CH + ' ml-auto">Transferir</button></div>' +
+      (dueno ? '' : '<p class="text-[11px] text-zinc-500">Dueño anterior: ' + esc(ev.organizadorNombre || 'sin nombre') + '</p>' + botonIdentificador(ev.ownerUid)) + '</div>';
   }).join('') + '</div>';
 }
 

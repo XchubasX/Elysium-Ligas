@@ -50,6 +50,14 @@ def correr(nav, g):
     ts = pg.inner_text('[data-sin-organizador]') if pg.locator('[data-sin-organizador]').count() else ''
     g.caso('«Ligas y torneos sin organizador activo»: Liga Vieja', 'Liga Vieja' in ts and 'Liga A' not in ts, ts)
     g.caso('sin desborde horizontal a 390 px', H.sin_desborde(pg))
+    tc = pg.inner_text('[data-organizador="Carla Ruiz"] [data-uid]')
+    g.caso('cada organizador muestra su identificador abreviado y «Copiar identificador»', 'ID: carla' in tc and 'Copiar identificador' in tc, tc)
+    g.caso('explica dónde buscar el identificador (Authentication → Users)', 'Authentication → Users' in H.texto(pg))
+    ts = pg.inner_text('[data-sin-organizador]')
+    g.caso('liga sin organizador: muestra el dueño anterior y su identificador', 'Dueño anterior: Ex' in ts and 'ID: ex-o…ador' in ts, ts)
+    pg.evaluate("() => { window.__copiado = null; navigator.clipboard.writeText = (t) => { window.__copiado = t; return Promise.resolve(); }; }")
+    pg.locator('[data-organizador="Carla Ruiz"] [data-uid] button').click(); pg.wait_for_timeout(150)
+    g.caso('«Copiar identificador» copia el identificador completo', pg.evaluate('window.__copiado') == 'carla', pg.evaluate('window.__copiado'))
 
     # Cambiar nombre
     pg.locator('[data-organizador="Ana López"] button', has_text='Nombre').click(); pg.wait_for_timeout(150)
