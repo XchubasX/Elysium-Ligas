@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**❌ 12 FALLA(S)** — 327 de 339 casos pasaron.
+**❌ 12 FALLA(S)** — 349 de 361 casos pasaron.
 
-- Fecha: 26/10/2026 10:55 (hora de Ciudad de México)
-- Versión probada: `54058a8` + cambios aún sin guardar
-- Duración: 72 s
+- Fecha: 26/10/2026 15:46 (hora de Ciudad de México)
+- Versión probada: `5d7da95` + cambios aún sin guardar
+- Duración: 73 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Sin reglas** (no se encontró la carpeta de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -49,6 +49,7 @@
 | 18 | Eventos En línea: modalidad, plataforma y hora de cada quien | 35 | ✅ |
 | 19 | Inscripciones con Google y pegar lista de jugadores | 39 | ✅ |
 | 20 | Ligas de partidas libres (en línea) | 71 | ✅ |
+| 21 | Organizadores: lista, quitar permiso y transferir (superusuario) | 22 | ✅ |
 
 ## Todos los casos
 
@@ -211,7 +212,7 @@
 | 33 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 36 | WhatsApp: «campeón: Pau» | ✅ |
+| 36 | WhatsApp: «campeón: Fer» | ✅ |
 | 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -490,3 +491,30 @@
 | 69 | guía: el ayudante reporta por otros en partidas libres | ✅ |
 | 70 | Mis eventos: «Partidas libres · 23 partidas» | ✅ |
 | 71 | sin errores de JavaScript | ✅ |
+
+### 21. Organizadores: lista, quitar permiso y transferir (superusuario)
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | organizador normal: no ve «Organizadores» en Mis eventos | ✅ |
+| 2 | organizador normal: #/organizadores dice que es solo para el superusuario | ✅ |
+| 3 | superusuario: «👥 Organizadores (3)» en Mis eventos | ✅ |
+| 4 | la página muestra también las solicitudes pendientes | ✅ |
+| 5 | lista ordenada: nombre guardado (Carla Ruiz), el de sus ligas (Ana López) y el del superusuario | ✅ |
+| 6 | Carla: ciudad, desde cuándo, 1 evento y su torneo con «Transferir» | ✅ |
+| 7 | el superusuario no tiene botón para quitarse el permiso a sí mismo | ✅ |
+| 8 | «Ligas y torneos sin organizador activo»: Liga Vieja | ✅ |
+| 9 | sin desborde horizontal a 390 px | ✅ |
+| 10 | cambiar nombre: se guarda en organizadoresInfo | ✅ |
+| 11 | cambiar nombre: no toca la página pública de sus ligas | ✅ |
+| 12 | transferir: solo ofrece a otros organizadores (no al dueño actual) | ✅ |
+| 13 | transferir: cambia el dueño y el nombre del organizador | ✅ |
+| 14 | transferir: los ayudantes se quedan (Beto), y el nuevo dueño deja de ser ayudante | ✅ |
+| 15 | la lista se actualiza: Carla ahora con 2 eventos | ✅ |
+| 16 | Liga Vieja pasa a Ana y desaparece de «sin organizador» | ✅ |
+| 17 | quitar permiso: se borra de organizadores y organizadoresInfo | ✅ |
+| 18 | sus ligas y torneos se quedan como están (mismo dueño) | ✅ |
+| 19 | ahora salen en «sin organizador activo» | ✅ |
+| 20 | aprobar: guarda nombre, ciudad y fecha en organizadoresInfo | ✅ |
+| 21 | Pepe aparece en la lista | ✅ |
+| 22 | sin errores de JavaScript | ✅ |

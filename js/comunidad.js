@@ -59,8 +59,11 @@ function bloqueSolicitudesAdmin() {
     }).join('') + '<p class="text-xs text-zinc-500">Rechazar borra la solicitud; la persona puede volver a mandarla.</p></div>';
 }
 async function aprobarSolicitud(uid) {
-  const n = (solicitudes[uid] || {}).nombre || '';
-  try { await db.ref().update({ ['organizadores/' + uid]: true, ['solicitudes/' + uid]: null }); aviso(n + ' ya puede organizar'); }
+  const s = solicitudes[uid] || {}; const n = s.nombre || '';
+  // Se guardan nombre, ciudad y fecha para la lista de Organizadores (js/organizadores.js)
+  const info = { nombre: String(n || 'Sin nombre').slice(0, 40), desde: firebase.database.ServerValue.TIMESTAMP };
+  if (s.ciudad) info.ciudad = String(s.ciudad).slice(0, 60);
+  try { await db.ref().update({ ['organizadores/' + uid]: true, ['organizadoresInfo/' + uid]: info, ['solicitudes/' + uid]: null }); aviso(n + ' ya puede organizar'); }
   catch (e) { aviso('No se pudo aprobar. Revisa que las reglas estén actualizadas.', 'error'); }
 }
 async function rechazarSolicitud(uid) {
