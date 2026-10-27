@@ -1,9 +1,9 @@
 # Resultados de las pruebas
 
-**❌ 12 FALLA(S)** — 419 de 431 casos pasaron.
+**❌ 12 FALLA(S)** — 426 de 438 casos pasaron.
 
-- Fecha: 27/10/2026 13:55 (hora de Ciudad de México)
-- Versión probada: `9bbe1d0` + cambios aún sin guardar
+- Fecha: 27/10/2026 14:07 (hora de Ciudad de México)
+- Versión probada: `c9ac653` + cambios aún sin guardar
 - Duración: 102 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Sin reglas** (no se encontró la carpeta de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
@@ -51,7 +51,7 @@
 | 20 | Ligas de partidas libres (en línea) | 79 | ✅ |
 | 21 | Organizadores: lista, quitar permiso y transferir (superusuario) | 26 | ✅ |
 | 22 | Historial de cambios (solo superusuario) | 26 | ✅ |
-| 23 | Revisión de Archon: mesas que no cuadran, TP y lugares | 32 | ✅ |
+| 23 | Revisión de Archon: mesas que no cuadran, TP y lugares | 39 | ✅ |
 
 ## Todos los casos
 
@@ -214,7 +214,7 @@
 | 33 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 36 | WhatsApp: «campeón: Iván» | ✅ |
+| 36 | WhatsApp: «campeón: Sara» | ✅ |
 | 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -598,5 +598,12 @@
 | 28 | libre: 2·1·1·0 en mesa de 4 → cuadra | ✅ |
 | 29 | libre con invitados: 2.5·1.5·0.5 (redondeando 6) en mesa de 5 → se pasa | ✅ |
 | 30 | libre con invitados: 2·0.5·0.5 (redondeando 4) → se acepta (los invitados completan) | ✅ |
-| 31 | guía: «¿Cómo se calculan GW, VP y TP?» y «¿Por qué dice que los VP de una mesa no cuadran?» | ✅ |
-| 32 | sin errores de JavaScript | ✅ |
+| 31 | libre: «⚠️ Hay 2 mesas cuyos VP no cuadran… siguen contando» | ✅ |
+| 32 | libre: cada mesa que no cuadra lo dice (redondeando 4 y 3) | ✅ |
+| 33 | libre: la mesa con invitado (Lalo) no se marca | ✅ |
+| 34 | libre: siguen contando en la tabla (A con 3 partidas) | ✅ |
+| 35 | libre: al corregirla, no deja guardar hasta que cuadre | ✅ |
+| 36 | libre: corregida (1·1·1·1·1), ya no se marca | ✅ |
+| 37 | libre: el público no ve los avisos | ✅ |
+| 38 | guía: «¿Cómo se calculan GW, VP y TP?» y «¿Por qué dice que los VP de una mesa no cuadran?» | ✅ |
+| 39 | sin errores de JavaScript | ✅ |

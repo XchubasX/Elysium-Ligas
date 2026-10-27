@@ -133,6 +133,28 @@ def correr(nav, g):
     b5['jugadores'] = {'a': '2', 'b': '0.5', 'c': '0.5'}
     g.caso('libre con invitados: 2·0.5·0.5 (redondeando 4) → se acepta (los invitados completan)', p(b5) == '', p(b5))
     ctx.close()
+    # Mesas ya guardadas que no cuadran (como la liga de prueba del 26 oct): aviso para el equipo, siguen contando
+    s['eventos']['libre-a']['mesas'] = {
+        'm1': {'fecha': '2026-10-26', 'mesa': 5, 'jugadores': {'a': 3, 'b': 1, 'c': 1, 'd': 0}, 'invitados': 'Lalo', 'por': 'ana', 'creada': 1},
+        'm4': {'fecha': '2026-10-26', 'mesa': 5, 'jugadores': {'a': 3, 'b': 1, 'c': 0, 'd': 0, 'e': 0}, 'por': 'ana', 'creada': 4},
+        'm6': {'fecha': '2026-10-26', 'mesa': 5, 'jugadores': {'a': 1, 'b': 1, 'c': 1, 'd': 0, 'e': 0}, 'por': 'ana', 'creada': 6}}
+    ctx, pg, e = H.abrir(nav, s, '#/liga/libre-a/partidas', usuario=H.ANA); err += e
+    t = pg.inner_text('[data-hay-no-cuadran]') if pg.locator('[data-hay-no-cuadran]').count() else ''
+    g.caso('libre: «⚠️ Hay 2 mesas cuyos VP no cuadran… siguen contando»', 'Hay 2 mesas' in t and 'siguen contando' in t, t)
+    g.caso('libre: cada mesa que no cuadra lo dice (redondeando 4 y 3)', pg.locator('[data-mesa-no-cuadra]').count() == 2 and 'suman 4' in pg.inner_text('[data-mesa="m4"]') and 'suman 3' in pg.inner_text('[data-mesa="m6"]'))
+    g.caso('libre: la mesa con invitado (Lalo) no se marca', not pg.locator('[data-mesa="m1"] [data-mesa-no-cuadra]').count())
+    g.caso('libre: siguen contando en la tabla (A con 3 partidas)', pg.evaluate("() => tablaLibre(eventos['libre-a']).find(f => f.nick === 'A').partidas") == 3)
+    pg.click('[data-mesa="m6"] >> text=Corregir'); pg.wait_for_timeout(200)
+    pg.click('text=Revisar y guardar'); pg.wait_for_timeout(150)
+    g.caso('libre: al corregirla, no deja guardar hasta que cuadre', 'no cuadran' in pg.inner_text('#rpError'), pg.inner_text('#rpError'))
+    pg.select_option('[data-vp-de="d"]', '1'); pg.wait_for_timeout(100); pg.select_option('[data-vp-de="e"]', '1'); pg.wait_for_timeout(100)
+    pg.click('text=Revisar y guardar'); pg.wait_for_timeout(150)
+    pg.click('[data-reportar] button:has-text("guardar") >> nth=0'); pg.wait_for_timeout(300)
+    g.caso('libre: corregida (1·1·1·1·1), ya no se marca', store(pg, 'eventos/libre-a/mesas/m6/jugadores') == {'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1} and 'Hay 1 mesa' in H.texto(pg))
+    ctx.close()
+    ctx, pg, e = H.abrir(nav, s, '#/liga/libre-a/partidas'); err += e
+    g.caso('libre: el público no ve los avisos', not pg.locator('[data-mesa-no-cuadra], [data-hay-no-cuadran]').count())
+    ctx.close()
 
     ctx, pg, e = H.abrir(nav, semilla(), '#/ayuda'); err += e
     t = H.texto(pg)

@@ -93,7 +93,9 @@ function seccionPartidas(id, ev) {
   else if (temporadaCerrada(ev)) h += '<p class="text-sm text-emerald-300 font-semibold">La temporada está cerrada: ya no se reportan mesas.</p>';
   else if (puedeReportar(id, ev)) h += bloqueReportar(id, ev);
   else if (!usuario) h += '<p class="text-xs text-zinc-400">¿Juegas en esta liga? Entra con Google e inscríbete para reportar tus mesas.</p>';
-  const ms = mesasLiga(ev);
+  const ms = mesasLiga(ev); const equipo = puedeCapturar(ev);
+  const malas = equipo ? ms.filter(m => problemaVpLibre(m)).length : 0;
+  if (malas) h += '<p data-hay-no-cuadran class="text-sm text-amber-300 font-semibold">⚠️ ' + (malas === 1 ? 'Hay 1 mesa' : 'Hay ' + malas + ' mesas') + ' cuyos VP no cuadran. ' + (admin ? 'Corrígelas con «Corregir».' : 'El organizador las puede corregir.') + ' Mientras tanto siguen contando en la tabla.</p>';
   h += '<div class="flex justify-between items-center"><h3 class="font-bold">Mesas reportadas</h3><span class="text-xs text-zinc-400">' + ms.length + '</span></div>';
   if (!ms.length) return h + '<p class="text-zinc-400 text-sm py-4 text-center">Todavía no hay mesas.</p>';
   h += '<div class="bg-zinc-800 rounded-xl p-3 text-sm divide-y divide-zinc-700">' + ms.map(m => {
@@ -101,6 +103,7 @@ function seccionPartidas(id, ev) {
     return '<div data-mesa="' + esc(m.id) + '" class="py-2 space-y-1"><div class="flex justify-between gap-2"><span><b>' + esc(fechaCorta(m.fecha)) + '</b> · mesa de ' + esc(m.mesa) + '</span>' +
       '<span class="text-xs text-zinc-400 whitespace-nowrap">' + num1(suma) + ' de ' + esc(m.mesa) + ' VP</span></div>' +
       '<p class="text-zinc-300">' + esc(textoMesa(ev, m.jugadores, m.invitados)) + '</p>' +
+      (equipo && problemaVpLibre(m) ? '<p data-mesa-no-cuadra class="text-xs text-amber-300">⚠️ ' + esc(problemaVpLibre(m)) + '</p>' : '') +
       (admin ? '<div class="flex gap-1.5"><button type="button" onclick="corregirMesa(\'' + esc(m.id) + '\')" class="' + BTN_CH + '">Corregir</button>' +
         '<button type="button" onclick="dosToques(this,()=>borrarMesa(\'' + esc(m.id) + '\'))" class="' + BTN_PELIGRO + '">Borrar</button></div>' : '') + '</div>';
   }).join('') + '</div>';
@@ -203,6 +206,16 @@ function problemaMesa(ev, b, propio) {
   if (c.invitados === 0 && c.jugadores === b.mesa && c.redondeada !== b.mesa) return 'Los VP no cuadran: redondeando cada uno hacia arriba suman ' + num1(c.redondeada) + ', y la mesa tiene ' + b.mesa + ' jugadores. Revisa los VP.';
   if (c.redondeada > b.mesa) return 'Los VP no cuadran: redondeando cada uno hacia arriba suman ' + num1(c.redondeada) + ', más que los ' + b.mesa + ' lugares de la mesa. Revisa los VP.';
   if (c.lugares > b.mesa) return 'Hay ' + c.lugares + ' personas (jugadores e invitados) en una mesa de ' + b.mesa + '.';
+  return '';
+}
+
+// Revisión de VP de una mesa ya guardada (misma regla que al reportar); '' = cuadra.
+// Las mesas guardadas antes de la revisión (27 oct 2026) siguen contando aunque no cuadren.
+function problemaVpLibre(m) {
+  const b = { mesa: m.mesa, jugadores: Object.fromEntries(m.jugadores.map(x => [x.jid, x.vp])), invitados: m.invitados || '' };
+  const c = cuentasMesa(b);
+  if (c.invitados === 0 && c.jugadores === b.mesa && c.redondeada !== b.mesa) return 'Los VP no cuadran: redondeando suman ' + num1(c.redondeada) + ' y la mesa es de ' + b.mesa + ' sin invitados.';
+  if (c.redondeada > b.mesa) return 'Los VP no cuadran: redondeando suman ' + num1(c.redondeada) + ', más que los ' + b.mesa + ' lugares.';
   return '';
 }
 
