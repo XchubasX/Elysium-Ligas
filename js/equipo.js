@@ -136,15 +136,16 @@ function textoCompartirTabla(id, ev) {
   if (esTorneo(ev)) {
     const e = etapaTorneo(ev); const terminado = e.etapa === 'terminado';
     const t = (terminado || e.etapa === 'final') ? resultadoTorneo(ev) : clasificacionTorneo(ev);
+    const lt = lugaresTorneo(ev, t);
     return '🏆 ' + ev.nombre + (terminado && t[0] ? ' · campeón: ' + t[0].nick : (e.etapa === 'ronda' ? ' · clasificación tras la ronda ' + e.ronda : '')) + '\n' +
-      t.slice(0, 5).map((f, i) => (i + 1) + '. ' + f.nick + (typeof f.finalVp === 'number' ? ' · ' + f.finalVp + ' VP en la final' : ' · ' + f.gw + ' GW · ' + f.vp + ' VP')).join('\n') +
+      t.slice(0, 5).map((f, i) => lt[i] + '. ' + f.nick + (typeof f.finalVp === 'number' ? ' · ' + f.finalVp + ' VP en la final' : ' · ' + f.gw + ' GW · ' + f.vp + ' VP')).join('\n') +
       '\nVer todo: ' + location.origin + location.pathname + '#/liga/' + id;
   }
-  const t = tablaLiga(ev);
+  const t = tablaLiga(ev); const ll = lugaresLiga(ev, t);
   const cerradas = jornadasOrdenadas(ev).filter(j => j.estado === 'cerrada');
   const ult = cerradas.length ? cerradas[cerradas.length - 1].numero : null;
   return '🏆 ' + ev.nombre + (ult ? ' · tabla tras la jornada ' + ult : '') + '\n' +
-    t.slice(0, 5).map((f, i) => (i + 1) + '. ' + f.nick + ' · ' + f.gw + ' GW · ' + f.vp + ' VP').join('\n') +
+    t.slice(0, 5).map((f, i) => ll[i] + '. ' + f.nick + ' · ' + f.gw + ' GW · ' + f.vp + ' VP').join('\n') +
     '\nVer todo: ' + location.origin + location.pathname + '#/liga/' + id;
 }
 
@@ -154,12 +155,13 @@ function hojasExcelTorneo(ev) {
   const conHaz = ev.hazanasModo !== 'no'; const j = diaTorneo(ev) || {};
   const hayFinal = !!j.final;
   const tabla = [['#', 'Jugador'].concat(hayFinal ? ['VP final'] : []).concat(['GW', 'VP']).concat(conHaz ? ['Hazañas'] : [])];
-  const lista = hayFinal ? resultadoTorneo(ev) : clasificacionTorneo(ev);
-  lista.forEach((f, i) => tabla.push([i + 1, f.nick].concat(hayFinal ? [typeof f.finalVp === 'number' ? f.finalVp : ''] : []).concat([f.gw, f.vp]).concat(conHaz ? [f.hazanas] : [])));
-  const mesas = [['Ronda', 'Mesa', 'Asiento', 'Jugador', 'VP', 'GW']];
+  const lista = hayFinal ? resultadoTorneo(ev) : clasificacionTorneo(ev); const lt = lugaresTorneo(ev, lista);
+  lista.forEach((f, i) => tabla.push([lt[i], f.nick].concat(hayFinal ? [typeof f.finalVp === 'number' ? f.finalVp : ''] : []).concat([f.gw, f.vp]).concat(conHaz ? [f.hazanas] : [])));
+  const mesas = [['Ronda', 'Mesa', 'Asiento', 'Jugador', 'VP', 'GW', 'TP', 'Revisión']];
   rondasOrdenadas(j).forEach(r => r.mesas.forEach(m => {
-    const res = resultadosMesa(Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }])));
-    m.jugadores.forEach(x => mesas.push([r.n, m.n, x.asiento, nick(x.jid), typeof x.vp === 'number' ? x.vp : '', res[x.jid].gw]));
+    const rev = revisarMesaJ(j, r.id, m.id); const mm = Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }]));
+    const res = resultadosMesa(mm, mesaCuenta(rev)); const tp = tpMesa(mm, mesaCuenta(rev));
+    m.jugadores.forEach(x => mesas.push([r.n, m.n, x.asiento, nick(x.jid), typeof x.vp === 'number' ? x.vp : '', res[x.jid].gw, tp[x.jid], notaRevision(rev)]));
   }));
   finalistas(ev).forEach(f => mesas.push(['Final', 1, '', f.nick, typeof f.vp === 'number' ? f.vp : '', '']));
   const hojas = [['Clasificación', tabla], ['Mesas', mesas]];
@@ -172,13 +174,15 @@ function hojasExcel(ev) {
   if (esLibre(ev)) return hojasExcelLibre(ev);
   const nick = (pid) => ((ev.jugadores || {})[pid] || {}).nick || '(jugador borrado)';
   const conHaz = ev.hazanasModo !== 'no';
-  const tabla = [['#', 'Jugador', 'GW', 'VP'].concat(conHaz ? ['Hazañas'] : []).concat(['Jornadas jugadas'])];
-  tablaLiga(ev).forEach((f, i) => tabla.push([i + 1, f.nick, f.gw, f.vp].concat(conHaz ? [f.hazanas] : []).concat([f.jornadas])));
-  const jornadas = [['Jornada', 'Fecha', 'Ronda', 'Mesa', 'Asiento', 'Jugador', 'VP', 'GW']];
+  const tabla = [['#', 'Jugador', 'GW', 'VP', 'TP'].concat(conHaz ? ['Hazañas'] : []).concat(['Jornadas jugadas'])];
+  const tl = tablaLiga(ev); const ll = lugaresLiga(ev, tl);
+  tl.forEach((f, i) => tabla.push([ll[i], f.nick, f.gw, f.vp, f.tp].concat(conHaz ? [f.hazanas] : []).concat([f.jornadas])));
+  const jornadas = [['Jornada', 'Fecha', 'Ronda', 'Mesa', 'Asiento', 'Jugador', 'VP', 'GW', 'TP', 'Revisión']];
   jornadasOrdenadas(ev).filter(j => j.estado === 'cerrada').forEach(j => {
     rondasOrdenadas(j).forEach(r => r.mesas.forEach(m => {
-      const res = resultadosMesa(Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }])));
-      m.jugadores.forEach(x => jornadas.push([j.numero, j.fecha, r.n, m.n, x.asiento, nick(x.jid), typeof x.vp === 'number' ? x.vp : '', res[x.jid].gw]));
+      const rev = revisarMesaJ(j, r.id, m.id); const mm = Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }]));
+      const res = resultadosMesa(mm, mesaCuenta(rev)); const tp = tpMesa(mm, mesaCuenta(rev));
+      m.jugadores.forEach(x => jornadas.push([j.numero, j.fecha, r.n, m.n, x.asiento, nick(x.jid), typeof x.vp === 'number' ? x.vp : '', res[x.jid].gw, tp[x.jid], notaRevision(rev)]));
     }));
   });
   const hojas = [['Tabla', tabla], ['Jornadas', jornadas]];
@@ -189,6 +193,8 @@ function hojasExcel(ev) {
   }
   return hojas;
 }
+
+function notaRevision(rev) { return rev.estado === 'no-cuadra' ? 'No cuadra: sin GW ni TP' : (rev.estado === 'confirmada' ? 'Confirmada: ' + rev.motivo : ''); }
 
 function cargarXLSX() {
   if (window.XLSX) return Promise.resolve(window.XLSX);

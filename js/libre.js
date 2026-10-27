@@ -56,9 +56,10 @@ function seccionTablaLibre(id, ev) {
     '<div class="grid gap-1.5 px-2.5 py-2 text-[11px] font-semibold text-zinc-400 border-b border-zinc-700" style="grid-template-columns:' + cols + '" role="row">' +
     '<span>#</span><span>Jugador</span><span class="text-right" title="Partidas jugadas">PJ</span><span class="text-right">VP</span>' +
     '<span class="text-right" title="Rendimiento ajustado (70%)">Rend.</span><span class="text-right" title="Participación (30%)">Part.</span><span class="text-right">Total</span></div>';
+  const lugares = lugaresLibre(t);
   t.forEach((f, i) => {
-    h += '<div data-fila="' + esc(f.nick) + '" class="grid gap-1.5 px-2.5 py-2 border-b border-zinc-700/50 ' + (i === 0 ? 'bg-wine-900/30' : '') + '" style="grid-template-columns:' + cols + '" role="row">' +
-      '<span class="font-extrabold text-wine-300">' + (i + 1) + '</span>' +
+    h += '<div data-fila="' + esc(f.nick) + '" class="grid gap-1.5 px-2.5 py-2 border-b border-zinc-700/50 ' + (lugares[i] === 1 ? 'bg-wine-900/30' : '') + '" style="grid-template-columns:' + cols + '" role="row">' +
+      '<span class="font-extrabold text-wine-300">' + lugares[i] + '</span>' +
       '<span class="min-w-0"><span class="block truncate">' + esc(f.nick) + '</span>' + (f.provisional ? '<span class="block text-[10px] font-bold text-amber-300">PROVISIONAL</span>' : '') + '</span>' +
       '<span class="text-right">' + f.partidas + '</span><span class="text-right">' + num1(f.vp) + '</span>' +
       '<span class="text-right">' + num1(f.rendimiento) + '</span><span class="text-right">' + num1(f.participacion) + '</span>' +
@@ -144,7 +145,7 @@ function bloqueReportar(id, ev) {
     }).join('') + '</div></fieldset>' +
     '<label class="block space-y-1"><span class="text-xs font-semibold text-zinc-400">Invitados (solo nombres, sin VP)</span><input id="rpInvitados" maxlength="200" value="' + esc(b.invitados) + '" oninput="leerReporte()" onchange="leerReporte(true)" class="' + INP + '" placeholder="ej. Pedro, Lucía"></label>';
   const c = cuentasMesa(b);
-  h += '<p data-cuentas class="text-xs ' + (c.suma > b.mesa || c.lugares > b.mesa ? 'text-red-300 font-semibold' : 'text-zinc-400') + '">Suma de VP: <b>' + num1(c.suma) + ' de ' + b.mesa + '</b> · Lugares: <b>' + c.lugares + ' de ' + b.mesa + '</b> (' + c.jugadores + ' de la liga' + (c.invitados ? ' + ' + c.invitados + (c.invitados === 1 ? ' invitado' : ' invitados') : '') + ')</p>' +
+  h += '<p data-cuentas class="text-xs ' + (c.redondeada > b.mesa || c.lugares > b.mesa ? 'text-red-300 font-semibold' : 'text-zinc-400') + '">Suma de VP: <b>' + num1(c.suma) + ' de ' + b.mesa + '</b>' + (c.redondeada !== c.suma ? ' (redondeando: ' + num1(c.redondeada) + ')' : '') + ' · Lugares: <b>' + c.lugares + ' de ' + b.mesa + '</b> (' + c.jugadores + ' de la liga' + (c.invitados ? ' + ' + c.invitados + (c.invitados === 1 ? ' invitado' : ' invitados') : '') + ')</p>' +
     '<p id="rpError" class="text-sm text-red-300 hidden" role="alert"></p>' +
     '<div class="flex gap-2"><button type="button" onclick="revisarReporte()" class="' + BTN + ' flex-1">Revisar y guardar</button>' +
     (b.editando ? '<button type="button" onclick="ui.reporte=null;dibujar(\'ruta\')" class="' + BTN2 + '">Cancelar</button>' : '') + '</div>';
@@ -154,7 +155,13 @@ function bloqueReportar(id, ev) {
 function cuentasMesa(b) {
   const vps = Object.values(b.jugadores);
   const invitados = invitadosDe(b.invitados).length;
-  return { suma: vps.reduce((s, v) => s + (v === '' ? 0 : Number(v)), 0), jugadores: vps.length, invitados, lugares: vps.length + invitados };
+  return { suma: vps.reduce((s, v) => s + (v === '' ? 0 : Number(v)), 0), redondeada: vps.reduce((s, v) => s + (v === '' ? 0 : Math.ceil(Number(v))), 0),
+    jugadores: vps.length, invitados, lugares: vps.length + invitados };
+}
+// Empates exactos (todos los criterios) comparten lugar
+function lugaresLibre(t) {
+  const dif = (x, y) => Math.abs(x - y) < 1e-9;
+  return lugaresCon(t, (a, b) => dif(a.total, b.total) && dif(a.rendimiento, b.rendimiento) && dif(a.vp, b.vp) && dif(a.media, b.media) && a.partidas === b.partidas);
 }
 
 // Lee el formulario al borrador. redibujar = cambió algo que cambia el formulario
@@ -191,7 +198,10 @@ function problemaMesa(ev, b, propio) {
   const sinVp = ids.filter(j => b.jugadores[j] === '' || !vpValido(Number(b.jugadores[j]), b.mesa));
   if (sinVp.length) return 'Elige los VP de ' + sinVp.map(j => nickDe(ev, j)).join(', ') + '.';
   const c = cuentasMesa(b);
-  if (c.suma > b.mesa) return 'La suma de VP (' + num1(c.suma) + ') no puede pasar de ' + b.mesa + ' en una mesa de ' + b.mesa + '.';
+  // Revisión de Archon: cada VP redondeado hacia arriba; la suma de la mesa completa da su tamaño.
+  // Con invitados (sin VP) solo se puede revisar que no se pase.
+  if (c.invitados === 0 && c.jugadores === b.mesa && c.redondeada !== b.mesa) return 'Los VP no cuadran: redondeando cada uno hacia arriba suman ' + num1(c.redondeada) + ', y la mesa tiene ' + b.mesa + ' jugadores. Revisa los VP.';
+  if (c.redondeada > b.mesa) return 'Los VP no cuadran: redondeando cada uno hacia arriba suman ' + num1(c.redondeada) + ', más que los ' + b.mesa + ' lugares de la mesa. Revisa los VP.';
   if (c.lugares > b.mesa) return 'Hay ' + c.lugares + ' personas (jugadores e invitados) en una mesa de ' + b.mesa + '.';
   return '';
 }
@@ -273,12 +283,13 @@ async function cambiarTemporada(cerrar) {
 function textoCompartirLibre(id, ev) {
   const t = tablaLibre(ev);
   return '🏆 ' + ev.nombre + (temporadaCerrada(ev) ? ' · clasificación final' : ' · clasificación provisional') + '\n' +
-    t.slice(0, 5).map((f, i) => (i + 1) + '. ' + f.nick + ' · ' + num1(f.total) + ' pts · ' + f.partidas + (f.partidas === 1 ? ' partida' : ' partidas') + (f.provisional ? ' (provisional)' : '')).join('\n') +
+    t.slice(0, 5).map((f, i) => lugaresLibre(t)[i] + '. ' + f.nick + ' · ' + num1(f.total) + ' pts · ' + f.partidas + (f.partidas === 1 ? ' partida' : ' partidas') + (f.provisional ? ' (provisional)' : '')).join('\n') +
     '\nVer todo: ' + location.origin + location.pathname + '#/liga/' + id;
 }
 function hojasExcelLibre(ev) {
   const tabla = [['#', 'Jugador', 'Partidas', 'VP', 'Media VP', 'Rendimiento', 'Participación', 'Total', 'Provisional']];
-  tablaLibre(ev).forEach((f, i) => tabla.push([i + 1, f.nick, f.partidas, f.vp, Number(num2(f.media)), Number(num1(f.rendimiento)), Number(num1(f.participacion)), Number(num1(f.total)), f.provisional ? 'Sí' : '']));
+  const tt = tablaLibre(ev); const lu = lugaresLibre(tt);
+  tt.forEach((f, i) => tabla.push([lu[i], f.nick, f.partidas, f.vp, Number(num2(f.media)), Number(num1(f.rendimiento)), Number(num1(f.participacion)), Number(num1(f.total)), f.provisional ? 'Sí' : '']));
   const ms = [['Fecha', 'Mesa', 'Mesa de', 'Jugador', 'VP', 'Invitados']];
   mesasLiga(ev).slice().reverse().forEach((m, i) => m.jugadores.forEach(x => ms.push([m.fecha, i + 1, m.mesa, nickDe(ev, x.jid), x.vp, m.invitados || ''])));
   return [['Clasificación', tabla], ['Mesas', ms]];

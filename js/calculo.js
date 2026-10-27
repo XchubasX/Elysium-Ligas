@@ -12,45 +12,84 @@ function jornadasOrdenadas(ev) {
   return lista(ev && ev.jornadas).sort((a, b) => (a.numero || 0) - (b.numero || 0));
 }
 
-// mesa = { jugadorId: { asiento, vp } } → { jugadorId: { vp, gw } }
-function resultadosMesa(mesa) {
+// ---------------- Revisión de la mesa (como The Archon de VEKN, 27 oct 2026)
+// En VTES cada eliminado da 1 VP y, si se acaba el tiempo, los que siguen vivos
+// sacan 0.5. Por eso, redondeando hacia arriba los VP de cada jugador, la suma
+// SIEMPRE es el número de jugadores. Si no cuadra (o la mesa no es de 4 o 5),
+// la mesa no da GW ni TP hasta corregirla o que el organizador la confirme con
+// un motivo (p. ej. alguien abandonó). Los VP sí cuentan siempre.
+// Confirmaciones: jornadas/{j}/validadas/{'r1-m2' | 'final'} = { motivo, firma }
+// (firma = los VP de ese momento: si después cambian, hay que volver a confirmar)
+function firmaMesa(mesa) { return Object.keys(mesa || {}).sort().map(j => j + ':' + (mesa[j] || {}).vp).join(','); }
+// → { estado: 'incompleta' | 'ok' | 'no-cuadra' | 'confirmada', problema?, motivo? }
+function revisarMesa(mesa, confirmacion) {
+  const vps = Object.keys(mesa || {}).map(j => (mesa[j] || {}).vp);
+  if (!vps.length || vps.some(v => typeof v !== 'number')) return { estado: 'incompleta' };
+  const n = vps.length, suma = vps.reduce((s, v) => s + Math.ceil(v), 0);
+  let problema = '';
+  if (n < 4 || n > 5) problema = 'Una mesa de ' + n + ' jugadores no da GW ni TP (las mesas son de 4 o de 5).';
+  else if (suma !== n) problema = 'Los VP no cuadran: redondeando cada uno hacia arriba suman ' + suma + ', y la mesa tiene ' + n + ' jugadores.';
+  if (!problema) return { estado: 'ok' };
+  if (confirmacion && confirmacion.firma === firmaMesa(mesa)) return { estado: 'confirmada', problema, motivo: confirmacion.motivo };
+  return { estado: 'no-cuadra', problema };
+}
+function confirmacionDe(j, clave) { return ((j && j.validadas) || {})[clave] || null; }
+function revisarMesaJ(j, rid, mid) { return revisarMesa((((((j || {}).rondas || {})[rid] || {}).mesas) || {})[mid], confirmacionDe(j, rid + '-' + mid)); }
+// ¿La mesa da GW y TP? (completa y cuadra, o confirmada)
+function mesaCuenta(revision) { return revision.estado === 'ok' || revision.estado === 'confirmada'; }
+
+// mesa = { jugadorId: { asiento, vp } } → { jugadorId: { vp, gw } }. cuenta = false → sin GW
+function resultadosMesa(mesa, cuenta) {
   const filas = Object.keys(mesa || {}).map(jid => ({ jid, vp: Number((mesa[jid] || {}).vp) || 0 }));
   const max = filas.reduce((m, f) => Math.max(m, f.vp), -1);
   const conMax = filas.filter(f => f.vp === max).length;
   const out = {};
-  filas.forEach(f => { out[f.jid] = { vp: f.vp, gw: (max >= GW_MIN_VP && f.vp === max && conMax === 1) ? 1 : 0 }; });
+  filas.forEach(f => { out[f.jid] = { vp: f.vp, gw: (cuenta !== false && max >= GW_MIN_VP && f.vp === max && conMax === 1) ? 1 : 0 }; });
   return out;
 }
 
-// Suma de una jornada: { jugadorId: { vp, gw, mesas } }
+// Recorre las mesas de una jornada con su revisión: fn(mesa, rid, mid, cuenta)
+function cadaMesa(j, fn) {
+  Object.keys((j && j.rondas) || {}).forEach(rid => Object.keys((j.rondas[rid] || {}).mesas || {}).forEach(mid => {
+    const mesa = j.rondas[rid].mesas[mid]; fn(mesa, rid, mid, mesaCuenta(revisarMesaJ(j, rid, mid)));
+  }));
+}
+
+// Suma de una jornada: { jugadorId: { vp, gw, tp, mesas } }
 function sumaJornada(j) {
   const t = {};
-  Object.values((j && j.rondas) || {}).forEach(r => {
-    Object.values((r && r.mesas) || {}).forEach(mesa => {
-      const res = resultadosMesa(mesa);
-      Object.keys(res).forEach(jid => {
-        t[jid] = t[jid] || { vp: 0, gw: 0, mesas: 0 };
-        t[jid].vp += res[jid].vp; t[jid].gw += res[jid].gw; t[jid].mesas += 1;
-      });
+  cadaMesa(j, (mesa, rid, mid, cuenta) => {
+    const res = resultadosMesa(mesa, cuenta); const tp = tpMesa(mesa, cuenta);
+    Object.keys(res).forEach(jid => {
+      t[jid] = t[jid] || { vp: 0, gw: 0, tp: 0, mesas: 0 };
+      t[jid].vp += res[jid].vp; t[jid].gw += res[jid].gw; t[jid].tp += tp[jid]; t[jid].mesas += 1;
     });
   });
   return t;
 }
 
-// Tabla general: [{ jid, nick, gw, vp, hazanas, jornadas }]
+// Tabla general: [{ jid, nick, gw, vp, tp, hazanas, jornadas }]
+// Orden: GW, VP, hazañas (si desempatan después de VP) y TP (como en torneos VEKN).
 function tablaLiga(ev) {
   const jugadores = (ev && ev.jugadores) || {};
   const t = {};
-  const fila = (jid) => (t[jid] = t[jid] || { jid, nick: (jugadores[jid] || {}).nick || '(jugador borrado)', gw: 0, vp: 0, hazanas: 0, jornadas: 0 });
+  const fila = (jid) => (t[jid] = t[jid] || { jid, nick: (jugadores[jid] || {}).nick || '(jugador borrado)', gw: 0, vp: 0, tp: 0, hazanas: 0, jornadas: 0 });
   jornadasOrdenadas(ev).filter(j => j.estado === 'cerrada').forEach(j => {
     const s = sumaJornada(j);
-    Object.keys(s).forEach(jid => { const f = fila(jid); f.gw += s[jid].gw; f.vp += s[jid].vp; f.jornadas += 1; });
+    Object.keys(s).forEach(jid => { const f = fila(jid); f.gw += s[jid].gw; f.vp += s[jid].vp; f.tp += s[jid].tp; f.jornadas += 1; });
     Object.values(j.hazanas || {}).forEach(h => { if (h && h.jugador) fila(h.jugador).hazanas += 1; });
   });
-  const desempate = ev && ev.hazanasModo === 'desempate';
-  return Object.values(t).sort((a, b) =>
-    (b.gw - a.gw) || (b.vp - a.vp) || (desempate ? b.hazanas - a.hazanas : 0) || a.nick.localeCompare(b.nick, 'es'));
+  return Object.values(t).sort((a, b) => (compararLiga(ev, a, b)) || a.nick.localeCompare(b.nick, 'es'));
 }
+function compararLiga(ev, a, b) {
+  const desempate = ev && ev.hazanasModo === 'desempate';
+  return (b.gw - a.gw) || (b.vp - a.vp) || (desempate ? b.hazanas - a.hazanas : 0) || (b.tp - a.tp);
+}
+// Lugares con empates (como Archon): empatados exactos comparten lugar → [1, 2, 2, 4]
+function lugaresCon(lista, empatan) {
+  const out = []; lista.forEach((f, i) => { out.push(i > 0 && empatan(lista[i - 1], f) ? out[i - 1] : i + 1); }); return out;
+}
+function lugaresLiga(ev, t) { return lugaresCon(t, (a, b) => compararLiga(ev, a, b) === 0); }
 
 // Hazañas otorgadas en jornadas cerradas: [{ numero, fecha, nombre, nick }]
 function hazanasLiga(ev) {
@@ -138,13 +177,9 @@ function faltasParaCerrar(j) {
   rs.forEach(r => r.mesas.forEach(m => {
     const sin = m.jugadores.filter(x => typeof x.vp !== 'number').length;
     if (sin) out.push('Ronda ' + r.n + ', mesa ' + m.n + ': faltan los VP de ' + sin + (sin === 1 ? ' jugador.' : ' jugadores.'));
+    else if (revisarMesaJ(j, r.id, m.id).estado === 'no-cuadra') out.push('Ronda ' + r.n + ', mesa ' + m.n + ': los VP no cuadran. Corrígelos o que el organizador la confirme con un motivo.');
   }));
   return out;
-}
-// Avisos que no impiden cerrar (la suma de VP de una mesa no puede pasar del número de jugadores)
-function avisosMesa(m) {
-  const suma = m.jugadores.reduce((s, x) => s + (typeof x.vp === 'number' ? x.vp : 0), 0);
-  return suma > m.jugadores.length ? 'La suma de VP (' + suma + ') es mayor que el número de jugadores (' + m.jugadores.length + ').' : '';
 }
 // ¿El jugador ya aparece en alguna jornada? (entonces no se puede quitar de la lista)
 function jugadorUsado(ev, jid) {
@@ -169,7 +204,8 @@ function jugadoresOrdenados(ev) {
 function esTorneo(ev) { return !!ev && ev.tipo === 'torneo'; }
 function diaTorneo(ev) { const j = (ev && ev.jornadas && ev.jornadas.j1) || null; if (j) j.id = 'j1'; return j; }
 
-function tpMesa(mesa) {
+function tpMesa(mesa, cuenta) {
+  if (cuenta === false) return Object.fromEntries(Object.keys(mesa || {}).map(j => [j, 0]));
   const filas = Object.keys(mesa || {}).map(jid => ({ jid, vp: Number((mesa[jid] || {}).vp) || 0 })).sort((a, b) => b.vp - a.vp);
   const escala = filas.length === 4 ? [60, 48, 24, 12] : [60, 48, 36, 24, 12].slice(0, filas.length);
   const out = {}; let i = 0;
@@ -186,10 +222,10 @@ function tpMesa(mesa) {
 function clasificacionTorneo(ev) {
   const j = diaTorneo(ev); const jug = (ev && ev.jugadores) || {}; const t = {};
   const fila = (jid) => (t[jid] = t[jid] || { jid, nick: (jug[jid] || {}).nick || '(jugador borrado)', gw: 0, vp: 0, tp: 0, hazanas: 0, rondas: 0 });
-  Object.values((j && j.rondas) || {}).forEach(r => Object.values((r && r.mesas) || {}).forEach(mesa => {
-    const res = resultadosMesa(mesa); const tp = tpMesa(mesa);
+  cadaMesa(j, (mesa, rid, mid, cuenta) => {
+    const res = resultadosMesa(mesa, cuenta); const tp = tpMesa(mesa, cuenta);
     Object.keys(mesa).forEach(jid => { const f = fila(jid); f.vp += res[jid].vp; f.gw += res[jid].gw; f.tp += tp[jid]; f.rondas += 1; });
-  }));
+  });
   Object.values((j && j.hazanas) || {}).forEach(h => { if (h && h.jugador) fila(h.jugador).hazanas += 1; });
   const desempate = ev && ev.hazanasModo === 'desempate';
   return Object.values(t).sort((a, b) => (b.gw - a.gw) || (b.vp - a.vp) || (b.tp - a.tp) || (desempate ? b.hazanas - a.hazanas : 0) || a.nick.localeCompare(b.nick, 'es'));
@@ -231,6 +267,24 @@ function etapaTorneo(ev) {
   if (j.estado === 'cerrada') return { etapa: 'terminado' };
   if (j.final) return { etapa: 'final' };
   return { etapa: 'ronda', ronda: Math.max(1, rondasOrdenadas(j).length) };
+}
+// Revisión de la final (misma regla que las mesas); confirmación en validadas/final
+function revisarFinal(ev) {
+  const j = diaTorneo(ev); const f = (j && j.final) || {};
+  return revisarMesa(f, confirmacionDe(j, 'final'));
+}
+// Lugares del torneo como Archon. Antes de la final: empatados exactos (GW, VP, TP)
+// comparten lugar. Con final: el ganador 1.º, los otros finalistas 2.º, y los demás
+// conservan su lugar de las rondas.
+function lugaresTorneo(ev, lista) {
+  const c = clasificacionTorneo(ev); const prev = lugaresCon(c, mismoPuesto);
+  const lugarRondas = {}; c.forEach((f, i) => { lugarRondas[f.jid] = prev[i]; });
+  const fin = finalistas(ev); const enFinal = new Set(fin.map(f => f.jid));
+  if (!fin.length || !fin.every(f => typeof f.vp === 'number')) return lista.map(f => lugarRondas[f.jid] || '');
+  // Los que no entraron a la final van después de los finalistas (aunque hayan empatado en el corte)
+  const resto = lista.filter(f => !enFinal.has(f.jid)); const lr = lugaresCon(resto, mismoPuesto); const lugarResto = {};
+  resto.forEach((f, i) => { lugarResto[f.jid] = lr[i] + fin.length; });
+  return lista.map((f, i) => enFinal.has(f.jid) ? (i === 0 ? 1 : 2) : lugarResto[f.jid]);
 }
 function textoRondas(ev) { return (ev.rondasPlan || 3) + ' rondas' + (ev.conFinal ? ' + final' : ''); }
 

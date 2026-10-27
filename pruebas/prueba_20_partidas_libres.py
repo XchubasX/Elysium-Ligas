@@ -133,7 +133,7 @@ def correr(nav, g):
     c = pg.inner_text('[data-cuentas]')
     g.caso('cuenta en vivo: suma 7 de 5 y lugares 5 de 5', 'Suma de VP: 7 de 5' in c and 'Lugares: 5 de 5' in c and '3 de la liga + 2 invitados' in c, c)
     pg.click('text=Revisar y guardar'); pg.wait_for_timeout(100)
-    g.caso('EL CASO DE LA PRUEBA: suma de 7 VP en mesa de 5 no deja guardar', 'no puede pasar de 5' in pg.inner_text('#rpError'), pg.inner_text('#rpError'))
+    g.caso('EL CASO DE LA PRUEBA: suma de 7 VP en mesa de 5 no deja guardar', 'más que los 5 lugares' in pg.inner_text('#rpError'), pg.inner_text('#rpError'))
     marcar(pg, 'p2', 1)
     pg.click('text=Revisar y guardar'); pg.wait_for_timeout(200)
     t = pg.inner_text('[data-reportar]')

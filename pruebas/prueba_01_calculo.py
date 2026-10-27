@@ -18,12 +18,12 @@ def correr(nav, g):
     r = ev("resultadosMesa({a:{vp:2.5},b:{vp:2.5}})")
     g.caso('medios VP: empate 2.5 y 2.5 → nadie gana GW', r['a']['gw'] == 0 and r['b']['gw'] == 0, r)
 
-    t = ev("""tablaLiga({jugadores:{p1:{nick:'Ana'},p2:{nick:'Beto'},p3:{nick:'Caro'}},jornadas:{
-      j1:{numero:1,estado:'cerrada',rondas:{r1:{mesas:{m1:{p1:{vp:3},p2:{vp:1},p3:{vp:0}}}}}},
-      j2:{numero:2,estado:'cerrada',rondas:{r1:{mesas:{m1:{p2:{vp:4},p3:{vp:1}}}},r2:{mesas:{m1:{p3:{vp:2},p1:{vp:1}}}}}},
-      j3:{numero:3,estado:'abierta',rondas:{r1:{mesas:{m1:{p3:{vp:5}}}}}}}})""")
+    # Mesas completas y que cuadran (revisión de Archon: VP redondeados = número de jugadores)
+    t = ev("""tablaLiga({jugadores:{p1:{nick:'Ana'},p2:{nick:'Beto'},p3:{nick:'Caro'},x1:{nick:'X1'},x2:{nick:'X2'},x3:{nick:'X3'}},jornadas:{
+      j1:{numero:1,estado:'cerrada',rondas:{r1:{mesas:{m1:{p1:{vp:3},p2:{vp:1},p3:{vp:0},x1:{vp:1},x2:{vp:0}}}}}},
+      j2:{numero:2,estado:'cerrada',rondas:{r1:{mesas:{m1:{p2:{vp:4},p3:{vp:1},x1:{vp:0},x2:{vp:0},x3:{vp:0}}}},r2:{mesas:{m1:{p3:{vp:2},p1:{vp:1},x1:{vp:1},x2:{vp:1},x3:{vp:0}}}}}},
+      j3:{numero:3,estado:'abierta',rondas:{r1:{mesas:{m1:{p3:{vp:5},x1:{vp:0},x2:{vp:0},x3:{vp:0},p1:{vp:0}}}}}}}}).filter(f => !/^X/.test(f.nick))""")
     g.caso('suma de dos jornadas cerradas, varias rondas',
-           [(f['nick'], f['gw'], f['vp']) for f in t] == [('Beto', 1, 5), ('Caro', 1, 3), ('Ana', 1, 4)] or
            [(f['nick'], f['gw'], f['vp']) for f in t] == [('Beto', 1, 5), ('Ana', 1, 4), ('Caro', 1, 3)], t)
     g.caso('a igualdad de GW, ordena por VP (Beto 5, Ana 4, Caro 3)', [f['nick'] for f in t] == ['Beto', 'Ana', 'Caro'], [f['nick'] for f in t])
     g.caso('la jornada abierta NO cuenta (Caro no suma sus 5 VP)', next(f for f in t if f['nick'] == 'Caro')['vp'] == 3, t)

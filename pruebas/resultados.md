@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**❌ 12 FALLA(S)** — 387 de 399 casos pasaron.
+**❌ 12 FALLA(S)** — 419 de 431 casos pasaron.
 
-- Fecha: 27/10/2026 13:24 (hora de Ciudad de México)
-- Versión probada: `429dfde` + cambios aún sin guardar
-- Duración: 93 s
+- Fecha: 27/10/2026 13:55 (hora de Ciudad de México)
+- Versión probada: `9bbe1d0` + cambios aún sin guardar
+- Duración: 102 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Sin reglas** (no se encontró la carpeta de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -51,6 +51,7 @@
 | 20 | Ligas de partidas libres (en línea) | 79 | ✅ |
 | 21 | Organizadores: lista, quitar permiso y transferir (superusuario) | 26 | ✅ |
 | 22 | Historial de cambios (solo superusuario) | 26 | ✅ |
+| 23 | Revisión de Archon: mesas que no cuadran, TP y lugares | 32 | ✅ |
 
 ## Todos los casos
 
@@ -213,7 +214,7 @@
 | 33 | el público ve la final y las 2 rondas sin controles | ✅ |
 | 34 | Excel del torneo: hojas Clasificación, Mesas y Hazañas | ✅ |
 | 35 | Excel: 20 filas de rondas + 5 de la final | ✅ |
-| 36 | WhatsApp: «campeón: Pau» | ✅ |
+| 36 | WhatsApp: «campeón: Iván» | ✅ |
 | 37 | sin final: tras la ronda 1 no se puede terminar todavía | ✅ |
 | 38 | sin final: tras la última ronda aparece «Terminar torneo» (sin «Pasar a la final») | ✅ |
 | 39 | cambiar la fecha del torneo también cambia la de su día | ✅ |
@@ -562,3 +563,40 @@
 | 24 | detalle de una mesa nueva legible (sin «.sv») | ✅ |
 | 25 | jugador reporta: «Reportó la mesa del mar 20 oct: Carla 2 VP» a su nombre | ✅ |
 | 26 | sin errores de JavaScript | ✅ |
+
+### 23. Revisión de Archon: mesas que no cuadran, TP y lugares
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | mesa 2: «⚠️ Los VP no cuadran: … suman 7, y la mesa tiene 5 jugadores» | ✅ |
+| 2 | la mesa 1 (3·1·1·0·0) cuadra: sin aviso y con GW | ✅ |
+| 3 | la mesa 2 no da GW a Fer (2 VP, único máximo) | ✅ |
+| 4 | clasificación: Fer con 0 GW y 0 TP, pero sus 2 VP sí cuentan | ✅ |
+| 5 | «Terminar torneo» bloqueado: dice qué mesa no cuadra | ✅ |
+| 6 | confirmar: guarda el motivo y los VP de ese momento | ✅ |
+| 7 | la mesa dice «✔ Confirmada aunque no cuadra: Hugo abandonó…» | ✅ |
+| 8 | confirmada: Fer recupera su GW y su TP de 60 | ✅ |
+| 9 | ya se puede terminar el torneo | ✅ |
+| 10 | queda en el historial: «Confirmó ronda 1, mesa 2 aunque no cuadra: Hugo abandonó…» | ✅ |
+| 11 | si cambian los VP después, hay que volver a confirmar | ✅ |
+| 12 | sin desborde horizontal a 390 px | ✅ |
+| 13 | ayudante: ve el aviso, sin botón de confirmar | ✅ |
+| 14 | VP corregidos (2·1·1·1·0): sin aviso y Fer con GW | ✅ |
+| 15 | mesa de 3 jugadores: no da GW ni TP («las mesas son de 4 o de 5») | ✅ |
+| 16 | incompleta / 2·1·1·0 cuadra / 1.5·1·1·1·0.5 no cuadra | ✅ |
+| 17 | liga: D primero (1 GW); A, C y E empatados exactos (2 VP, 72 TP) | ✅ |
+| 18 | liga: X e Y con 0 GW y 1 VP; X va arriba por TP (48 contra 36) | ✅ |
+| 19 | liga: empates exactos comparten lugar | ✅ |
+| 20 | tabla de liga: columna TP y explica el orden (GW, VP y TP) | ✅ |
+| 21 | tabla de liga: 5 empatados exactos, todos en el lugar 1 | ✅ |
+| 22 | sin desborde horizontal a 390 px (tabla con TP) | ✅ |
+| 23 | final: Ana gana (empate a 2 VP, mejor clasificada) y los otros 4 finalistas son «2» | ✅ |
+| 24 | los que no llegaron a la final van del 6 en adelante, con empates (Hugo e Iván empataron con Gabi en el corte) | ✅ |
+| 25 | en pantalla: 1, 2, 2, 2, 2 | ✅ |
+| 26 | final que no cuadra (2·2·2·0·0): aviso y «Terminar torneo» bloqueado | ✅ |
+| 27 | libre: 4 de la liga sin invitados, 1.5·1·1·0.5 (redondeando 5) → no cuadra | ✅ |
+| 28 | libre: 2·1·1·0 en mesa de 4 → cuadra | ✅ |
+| 29 | libre con invitados: 2.5·1.5·0.5 (redondeando 6) en mesa de 5 → se pasa | ✅ |
+| 30 | libre con invitados: 2·0.5·0.5 (redondeando 4) → se acepta (los invitados completan) | ✅ |
+| 31 | guía: «¿Cómo se calculan GW, VP y TP?» y «¿Por qué dice que los VP de una mesa no cuadran?» | ✅ |
+| 32 | sin errores de JavaScript | ✅ |

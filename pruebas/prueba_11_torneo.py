@@ -24,7 +24,7 @@ def correr(nav, g):
     tp = pg.evaluate("tpMesa({a:{vp:2},b:{vp:1},c:{vp:1},d:{vp:0}})")
     g.caso('TP mesa de 4: 60 · 36 · 36 · 12 (sin el 36 del tercer lugar)', tp == {'a': 60, 'b': 36, 'c': 36, 'd': 12}, tp)
     c = pg.evaluate("""clasificacionTorneo({jugadores:{a:{nick:'A'},b:{nick:'B'}},jornadas:{j1:{rondas:{
-        r1:{mesas:{m1:{a:{vp:1},x:{vp:1},y:{vp:1},z:{vp:1},w:{vp:1}}, m2:{b:{vp:1},q:{vp:0},r:{vp:0},s:{vp:0}}}}}}}})""")
+        r1:{mesas:{m1:{a:{vp:1},x:{vp:1},y:{vp:1},z:{vp:1},w:{vp:1}}, m2:{b:{vp:1},q:{vp:0.5},r:{vp:0.5},s:{vp:0.5}}}}}}}})""")
     orden = [f['jid'] for f in c]
     g.caso('empate en GW y VP: desempata el TP (B quedó 1º en su mesa y va arriba de A)', orden.index('b') < orden.index('a'), c)
     ctx.close()

@@ -82,10 +82,10 @@ function bloqueRondas(id, ev, j, editable) {
       (editable && !conVP ? '<span class="flex gap-1.5"><button type="button" onclick="dosToques(this,()=>sortearRonda(\'' + esc(j.id) + '\',\'' + esc(r.id) + '\'))" class="' + BTN_CH + '">Volver a sortear</button>' +
         '<button type="button" onclick="dosToques(this,()=>borrarRonda(\'' + esc(j.id) + '\',\'' + esc(r.id) + '\'))" class="' + BTN_PELIGRO + '">Borrar ronda</button></span>' : '') + '</div>';
     r.mesas.forEach(m => {
-      const res = resultadosMesa(Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }])));
+      const rev = revisarMesaJ(j, r.id, m.id);
+      const res = resultadosMesa(Object.fromEntries(m.jugadores.map(x => [x.jid, { vp: x.vp }])), mesaCuenta(rev));
       const todos = m.jugadores.every(x => typeof x.vp === 'number');
       const ganador = todos ? m.jugadores.find(x => res[x.jid].gw) : null;
-      const alerta = avisosMesa(m);
       h += '<div data-mesa="' + r.n + '-' + m.n + '" class="border border-zinc-700 rounded-lg p-2.5 space-y-1.5"><p class="text-xs font-semibold text-zinc-400">Mesa ' + m.n + ' (' + m.jugadores.length + ')</p>';
       m.jugadores.forEach(x => {
         const gw = todos && res[x.jid].gw;
@@ -99,8 +99,8 @@ function bloqueRondas(id, ev, j, editable) {
         }
         h += '</div>';
       });
-      if (todos && !ganador) h += '<p class="text-xs text-zinc-500">Sin GW en esta mesa.</p>';
-      if (alerta) h += '<p class="text-xs text-amber-300">' + esc(alerta) + '</p>';
+      if (todos && !ganador && mesaCuenta(rev)) h += '<p class="text-xs text-zinc-500">Sin GW en esta mesa.</p>';
+      h += bloqueRevisionMesa(ev, j, r.id + '-' + m.id, rev, editable);
       h += '</div>';
     });
     // Presentes que quedaron sin mesa en esta ronda
@@ -119,6 +119,46 @@ function bloqueRondas(id, ev, j, editable) {
     if (listo && !tope) h += '<button type="button" onclick="sortearRonda(\'' + esc(j.id) + '\',\'' + esc(siguienteId(j.rondas, 'r')) + '\')" class="' + BTN2 + ' w-full">+ Sortear ronda ' + (rs.length + 1) + ' (' + pres.length + ' presentes)</button>';
   }
   return h;
+}
+
+// Aviso «los VP no cuadran» y confirmación con motivo (solo el organizador o el superusuario)
+// clave = 'r1-m2' o 'final'
+function bloqueRevisionMesa(ev, j, clave, rev, editable) {
+  if (rev.estado === 'no-cuadra') {
+    let h = '<div data-no-cuadra="' + esc(clave) + '" class="bg-amber-950/40 border border-amber-700/60 rounded-lg p-2 space-y-1.5"><p class="text-xs text-amber-200 font-semibold">⚠️ ' + esc(rev.problema) + '</p>' +
+      '<p class="text-xs text-zinc-400">Mientras no se corrija, esta mesa no da GW ni TP (los VP sí cuentan). Si es correcta, por ejemplo porque alguien abandonó, el organizador la confirma con un motivo.</p>';
+    if (editable && puedeAdministrar(ev)) {
+      h += '<form class="flex gap-1.5" onsubmit="confirmarMesa(event,\'' + esc(j.id) + '\',\'' + esc(clave) + '\')"><input data-motivo maxlength="200" placeholder="Motivo (ej. Toni abandonó)" class="flex-1 min-w-0 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs">' +
+        '<button class="' + BTN_CH + '">Confirmar mesa</button></form>';
+    }
+    return h + '</div>';
+  }
+  if (rev.estado === 'confirmada') {
+    return '<div data-confirmada="' + esc(clave) + '" class="text-xs text-zinc-400 space-y-1"><p>✔ Confirmada aunque no cuadra: <b class="text-zinc-200">' + esc(rev.motivo) + '</b></p>' +
+      (editable && puedeAdministrar(ev) ? '<button type="button" onclick="dosToques(this,()=>quitarConfirmacion(\'' + esc(j.id) + '\',\'' + esc(clave) + '\'))" class="underline">Quitar confirmación</button>' : '') + '</div>';
+  }
+  return '';
+}
+function mesaDeClave(j, clave) {
+  if (clave === 'final') return j.final || {};
+  const [rid, mid] = clave.split('-'); return ((((j.rondas || {})[rid] || {}).mesas) || {})[mid] || {};
+}
+function nombreClave(j, clave) {
+  if (clave === 'final') return 'la final';
+  const [rid, mid] = clave.split('-'); return 'ronda ' + rid.slice(1) + ', mesa ' + mid.slice(1);
+}
+async function confirmarMesa(e, jid, clave) {
+  e.preventDefault();
+  const motivo = (e.target.querySelector('[data-motivo]').value || '').trim().slice(0, 200);
+  if (!motivo) return aviso('Escribe el motivo.', 'error');
+  const ev = ligaActual(); const j = ev.jornadas[jid]; j.id = jid;
+  const rev = clave === 'final' ? revisarFinal(ev) : revisarMesaJ(j, clave.split('-')[0], clave.split('-')[1]);
+  await guardar(idLigaActual(), { ['jornadas/' + jid + '/validadas/' + clave]: { motivo, firma: firmaMesa(mesaDeClave(j, clave)) } }, 'Mesa confirmada',
+    'Confirmó ' + nombreClave(j, clave) + ' aunque no cuadra: ' + motivo + ' (' + (rev.problema || '') + ')');
+}
+function quitarConfirmacion(jid, clave) {
+  const j = ligaActual().jornadas[jid];
+  return guardar(idLigaActual(), { ['jornadas/' + jid + '/validadas/' + clave]: null }, 'Confirmación quitada', 'Quitó la confirmación de ' + nombreClave(j, clave));
 }
 
 function textoReparto(n) {

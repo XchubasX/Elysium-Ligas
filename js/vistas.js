@@ -186,17 +186,18 @@ function vistaLiga(id, pestana) {
 function seccionTabla(id, ev) {
   const t = tablaLiga(ev);
   if (!t.length) return '<p class="text-zinc-400 text-sm py-6 text-center">Todavía no hay jornadas jugadas. La tabla aparece cuando se cierre la primera.</p>';
-  const conHaz = ev.hazanasModo !== 'no';
+  const conHaz = ev.hazanasModo !== 'no'; const lugares = lugaresLiga(ev, t);
+  const cols = '28px 1fr 36px 44px 44px' + (conHaz ? ' 32px' : '');
   let h = '<div class="bg-zinc-800 rounded-xl overflow-hidden text-sm" role="table" aria-label="Tabla general">' +
-    '<div class="grid gap-2 px-3 py-2 text-[11px] font-semibold text-zinc-400 border-b border-zinc-700" style="grid-template-columns:28px 1fr 40px 48px' + (conHaz ? ' 40px' : '') + '" role="row">' +
-    '<span>#</span><span>Jugador</span><span class="text-right">GW</span><span class="text-right">VP</span>' + (conHaz ? '<span class="text-right" title="Hazañas">🏅</span>' : '') + '</div>';
+    '<div class="grid gap-2 px-3 py-2 text-[11px] font-semibold text-zinc-400 border-b border-zinc-700" style="grid-template-columns:' + cols + '" role="row">' +
+    '<span>#</span><span>Jugador</span><span class="text-right">GW</span><span class="text-right">VP</span><span class="text-right" title="Puntos de torneo (desempate)">TP</span>' + (conHaz ? '<span class="text-right" title="Hazañas">🏅</span>' : '') + '</div>';
   t.forEach((f, i) => {
-    h += '<div class="grid gap-2 px-3 py-2 border-b border-zinc-700/50 ' + (i === 0 ? 'bg-wine-900/30' : '') + '" style="grid-template-columns:28px 1fr 40px 48px' + (conHaz ? ' 40px' : '') + '" role="row">' +
-      '<span class="font-extrabold text-wine-300">' + (i + 1) + '</span><span class="truncate">' + esc(f.nick) + '</span>' +
-      '<span class="text-right font-bold">' + f.gw + '</span><span class="text-right">' + f.vp + '</span>' +
+    h += '<div data-fila-liga="' + esc(f.nick) + '" class="grid gap-2 px-3 py-2 border-b border-zinc-700/50 ' + (lugares[i] === 1 ? 'bg-wine-900/30' : '') + '" style="grid-template-columns:' + cols + '" role="row">' +
+      '<span class="font-extrabold text-wine-300">' + lugares[i] + '</span><span class="truncate">' + esc(f.nick) + '</span>' +
+      '<span class="text-right font-bold">' + f.gw + '</span><span class="text-right">' + f.vp + '</span><span class="text-right text-zinc-400">' + num1(f.tp) + '</span>' +
       (conHaz ? '<span class="text-right text-amber-300">' + (f.hazanas ? f.hazanas : '') + '</span>' : '') + '</div>';
   });
-  h += '</div>';
+  h += '</div><p class="text-xs text-zinc-500">Orden: GW, luego VP' + (ev.hazanasModo === 'desempate' ? ', luego hazañas' : '') + ' y luego TP (puntos de torneo por el lugar en cada mesa: 60·48·36·24·12). Empates exactos comparten lugar.</p>';
   h += '<div class="flex gap-2 flex-wrap"><a href="' + esc(enlaceWhatsApp(textoCompartirTabla(id, ev))) + '" target="_blank" rel="noopener" class="' + BTN + ' !bg-emerald-700 hover:!bg-emerald-600 flex-1">Compartir por WhatsApp</a>' +
     '<button type="button" onclick="descargarExcel(\'' + esc(id) + '\')" class="' + BTN2 + ' flex-1">Descargar Excel</button></div>';
   return h;

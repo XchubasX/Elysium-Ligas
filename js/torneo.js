@@ -32,8 +32,9 @@ function seccionClasificacion(id, ev) {
     '<div class="grid gap-2 px-3 py-2 text-[11px] font-semibold text-zinc-400 border-b border-zinc-700" style="grid-template-columns:' + cols + '" role="row"><span>#</span><span>Jugador</span>' +
     (conFinal ? '<span class="text-right">Final</span>' : '') + '<span class="text-right">GW</span><span class="text-right">VP</span>' + (conHaz ? '<span class="text-right">🏅</span>' : '') + '</div>';
   const nFinal = conFinal ? finalistas(ev).length : (ev.conFinal ? 5 : 0);
+  const lugares = lugaresTorneo(ev, lista);
   lista.forEach((f, i) => {
-    h += filaTabla(cols, i + 1, '<span class="truncate">' + esc(f.nick) + '</span>' +
+    h += filaTabla(cols, lugares[i], '<span class="truncate">' + esc(f.nick) + '</span>' +
       (conFinal ? '<span class="text-right font-bold">' + (typeof f.finalVp === 'number' ? f.finalVp + ' VP' : '—') + '</span>' : '') +
       '<span class="text-right' + (conFinal ? '' : ' font-bold') + '">' + f.gw + '</span><span class="text-right">' + f.vp + '</span>' +
       (conHaz ? '<span class="text-right text-amber-300">' + (f.hazanas || '') + '</span>' : ''), i === 0, nFinal && i + 1 === nFinal && lista.length > nFinal);
@@ -76,21 +77,29 @@ function rondasCompletas(ev, j) {
   const rs = rondasOrdenadas(j);
   return rs.length >= (ev.rondasPlan || 3) && rs.every(r => r.mesas.length && r.mesas.every(m => m.jugadores.every(x => typeof x.vp === 'number')));
 }
+// Mesas de las rondas que no cuadran y nadie confirmó: «Ronda 1, mesa 2»
+function mesasSinCuadrar(j) {
+  const out = []; rondasOrdenadas(j).forEach(r => r.mesas.forEach(m => { if (revisarMesaJ(j, r.id, m.id).estado === 'no-cuadra') out.push('Ronda ' + r.n + ', mesa ' + m.n); })); return out;
+}
 
 function bloqueCierreTorneo(id, ev, j) {
   const listas = rondasCompletas(ev, j);
+  const sinCuadrar = mesasSinCuadrar(j);
+  const avisoCuadrar = sinCuadrar.length ? '<p data-falta-cuadrar class="text-xs text-amber-300">Los VP no cuadran en: ' + esc(sinCuadrar.join(' · ')) + '. Corrígelos o que el organizador confirme esas mesas.</p>' : '';
   if (ev.conFinal && !j.final) {
     if (!listas) return '';
-    const n = clasificacionTorneo(ev).length;
+    const n = clasificacionTorneo(ev).length; const bloqueado = n < 5 || sinCuadrar.length;
     return '<div class="bg-zinc-800 border border-wine-600/50 rounded-xl p-3 space-y-2 text-sm"><p class="font-bold">Rondas terminadas</p>' +
-      (n < 5 ? '<p class="text-amber-300 text-xs">Se necesitan al menos 5 jugadores para la final.</p>' : '') +
-      '<button type="button" ' + (n < 5 ? 'disabled ' : '') + 'onclick="dosToques(this,()=>pasarAFinal())" class="' + BTN + ' w-full disabled:opacity-40">Pasar a la final (top 5)</button></div>';
+      (n < 5 ? '<p class="text-amber-300 text-xs">Se necesitan al menos 5 jugadores para la final.</p>' : '') + avisoCuadrar +
+      '<button type="button" ' + (bloqueado ? 'disabled ' : '') + 'onclick="dosToques(this,()=>pasarAFinal())" class="' + BTN + ' w-full disabled:opacity-40">Pasar a la final (top 5)</button></div>';
   }
   const faltan = ev.conFinal ? finalistas(ev).some(f => typeof f.vp !== 'number') : !listas;
   if (faltan && !ev.conFinal) return '';
+  const finalNoCuadra = ev.conFinal && !faltan && revisarFinal(ev).estado === 'no-cuadra';
+  const bloqueado = faltan || finalNoCuadra || sinCuadrar.length;
   return '<div class="bg-zinc-800 border border-zinc-700 rounded-xl p-3 space-y-2 text-sm">' +
-    (faltan ? '<p class="text-xs text-amber-300">Faltan VP de la final.</p>' : '<p class="text-zinc-300">Todo capturado.</p>') +
-    '<button type="button" ' + (faltan ? 'disabled ' : '') + 'onclick="dosToques(this,()=>cambiarEstadoJornada(\'j1\',\'cerrada\'))" class="' + BTN + ' w-full disabled:opacity-40">Terminar torneo</button></div>';
+    (faltan ? '<p class="text-xs text-amber-300">Faltan VP de la final.</p>' : (finalNoCuadra ? '<p class="text-xs text-amber-300">Los VP de la final no cuadran: corrígelos o confirma la final con un motivo.</p>' : (sinCuadrar.length ? '' : '<p class="text-zinc-300">Todo capturado.</p>'))) + avisoCuadrar +
+    '<button type="button" ' + (bloqueado ? 'disabled ' : '') + 'onclick="dosToques(this,()=>cambiarEstadoJornada(\'j1\',\'cerrada\'))" class="' + BTN + ' w-full disabled:opacity-40">Terminar torneo</button></div>';
 }
 
 async function pasarAFinal() {
@@ -116,8 +125,7 @@ function bloqueFinal(id, ev, j, editable) {
     else h += '<span class="w-12 text-right">' + (typeof f.vp === 'number' ? f.vp + ' VP' : '—') + '</span>';
     h += '</div>';
   });
-  const suma = fs.reduce((s, f) => s + (typeof f.vp === 'number' ? f.vp : 0), 0);
-  if (suma > fs.length) h += '<p class="text-xs text-amber-300">La suma de VP (' + suma + ') es mayor que el número de jugadores (' + fs.length + ').</p>';
+  h += bloqueRevisionMesa(ev, j, 'final', revisarFinal(ev), editable);
   if (editable && !fs.some(f => typeof f.vp === 'number')) h += '<button type="button" onclick="dosToques(this,()=>deshacerFinal())" class="' + BTN_PELIGRO + ' self-start">Regresar a las rondas</button>';
   return h + '</div>';
 }
