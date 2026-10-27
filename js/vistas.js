@@ -1,6 +1,6 @@
 // =====================================================================
 // js/vistas.js — PANTALLAS (se dibujan dentro de <main id="app">)
-// Rutas: #/ portada · #/crear/torneo · #/archivadas · #/liga/{id}/{pestaña} · #/liga/{id}/jornada/{j} · #/invitacion/{id}/{código} · #/mis-eventos · #/organizadores (superusuario) · #/crear
+// Rutas: #/ portada · #/crear/torneo · #/archivadas · #/liga/{id}/{pestaña} · #/liga/{id}/jornada/{j} · #/invitacion/{id}/{código} · #/mis-eventos · #/organizadores y #/historial (superusuario) · #/crear
 // =====================================================================
 const CARD = 'border border-wine-600/40 rounded-xl p-4 flex flex-col gap-2';
 const BTN = 'inline-flex items-center justify-center bg-wine-600 hover:bg-wine-500 text-white font-bold text-sm px-4 py-2.5 rounded-lg transition';
@@ -232,7 +232,7 @@ function vistaMisEventos() {
   if (!datosCargados) return cargando();
   const mias = Object.keys(eventos).filter(id => eventos[id].ownerUid === usuario.uid || esAyudante(eventos[id]));
   mias.sort((a, b) => String(fechaOrden(eventos[a])).localeCompare(String(fechaOrden(eventos[b]))));
-  let h = bloqueSolicitudesAdmin() + enlaceOrganizadores() + bloqueAvisosAdmin() + '<h2 class="text-base font-bold">Mis eventos</h2>';
+  let h = bloqueSolicitudesAdmin() + enlaceOrganizadores() + enlaceHistorial() + bloqueAvisosAdmin() + '<h2 class="text-base font-bold">Mis eventos</h2>';
   if (soyOrganizador || soyAdmin) h += '<div class="grid grid-cols-2 gap-2"><a href="#/crear" class="' + BTN + '">+ Nueva liga</a><a href="#/crear/torneo" class="' + BTN + '">+ Nuevo torneo</a></div>';
   h += mias.length ? '<div class="space-y-2">' + mias.map(id => {
     const ev = eventos[id];

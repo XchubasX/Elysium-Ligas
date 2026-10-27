@@ -1,10 +1,10 @@
 # Resultados de las pruebas
 
-**❌ 12 FALLA(S)** — 361 de 373 casos pasaron.
+**❌ 12 FALLA(S)** — 387 de 399 casos pasaron.
 
-- Fecha: 26/10/2026 17:12 (hora de Ciudad de México)
-- Versión probada: `e4cddaf` + cambios aún sin guardar
-- Duración: 81 s
+- Fecha: 27/10/2026 13:24 (hora de Ciudad de México)
+- Versión probada: `429dfde` + cambios aún sin guardar
+- Duración: 93 s
 - Grupos corridos: todos
 - Cómo se prueba: navegador automatizado con Firebase simulado (no toca datos reales). **Sin reglas** (no se encontró la carpeta de reglas). No sustituye la revisión en el sitio de pruebas: estilos y servicios de Google reales solo se ven ahí.
 
@@ -50,6 +50,7 @@
 | 19 | Inscripciones con Google y pegar lista de jugadores | 39 | ✅ |
 | 20 | Ligas de partidas libres (en línea) | 79 | ✅ |
 | 21 | Organizadores: lista, quitar permiso y transferir (superusuario) | 26 | ✅ |
+| 22 | Historial de cambios (solo superusuario) | 26 | ✅ |
 
 ## Todos los casos
 
@@ -529,4 +530,35 @@
 | 23 | ahora salen en «sin organizador activo» | ✅ |
 | 24 | aprobar: guarda nombre, ciudad y fecha en organizadoresInfo | ✅ |
 | 25 | Pepe aparece en la lista | ✅ |
+| 26 | sin errores de JavaScript | ✅ |
+
+### 22. Historial de cambios (solo superusuario)
+
+| # | Caso | Resultado |
+|---|---|---|
+| 1 | corregir mesa: una anotación nueva | ✅ |
+| 2 | anotación: cuenta, nombre de Google, fecha y liga | ✅ |
+| 3 | anotación: «Corrigió la mesa del lun 5 oct: Ana J 2 VP · Beto J 1 VP · X (invitados)» | ✅ |
+| 4 | detalle con el antes y el después, con nicks | ✅ |
+| 5 | la liga apunta a la anotación (reg) | ✅ |
+| 6 | borrar mesa: anota qué tenía la mesa | ✅ |
+| 7 | el organizador NO ve «Historial de cambios» en Mis eventos | ✅ |
+| 8 | organizador en #/historial: «solo para el superusuario» y sin datos | ✅ |
+| 9 | VP en torneo: «VP de Toni: — → 1.5» | ✅ |
+| 10 | cambiar VP: «VP de Lasombra: 2 → 3» con el detalle | ✅ |
+| 11 | agregar jugador: «Lalo agregado · La Jyhad Eterna» | ✅ |
+| 12 | aprobar solicitud: «Aprobó a Pepe como organizador», sin liga | ✅ |
+| 13 | transferir: anota a quién y de quién, con el dueño antes y después | ✅ |
+| 14 | superusuario: «📜 Historial de cambios» en Mis eventos | ✅ |
+| 15 | dice que solo tú lo ves y que nadie lo puede editar ni borrar | ✅ |
+| 16 | lista los 3 cambios (2 nuevos + 1 anterior) | ✅ |
+| 17 | el más nuevo primero, con fecha y hora, nombre e identificador | ✅ |
+| 18 | un evento borrado se muestra como «(borrado)» | ✅ |
+| 19 | «Detalle» se abre con el antes y el después | ✅ |
+| 20 | filtro por persona: solo lo de Carla | ✅ |
+| 21 | filtro «Sin liga»: la aprobación | ✅ |
+| 22 | buscar texto: «transfir» | ✅ |
+| 23 | sin desborde horizontal a 390 px | ✅ |
+| 24 | detalle de una mesa nueva legible (sin «.sv») | ✅ |
+| 25 | jugador reporta: «Reportó la mesa del mar 20 oct: Carla 2 VP» a su nombre | ✅ |
 | 26 | sin errores de JavaScript | ✅ |

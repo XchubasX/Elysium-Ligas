@@ -21,6 +21,7 @@ function dibujar(motivo) {
   else if (r.vista === 'archivadas') html = vistaPortada(true);
   else if (r.vista === 'mis-eventos') html = vistaMisEventos();
   else if (r.vista === 'organizadores') html = vistaOrganizadores();
+  else if (r.vista === 'historial') html = vistaHistorial();
   else if (r.vista === 'crear') html = vistaCrear(r.id);
   else html = vistaPortada(false);
   $('app').innerHTML = html;

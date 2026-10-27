@@ -122,4 +122,4 @@ function bloqueFinal(id, ev, j, editable) {
   return h + '</div>';
 }
 function deshacerFinal() { return guardar(idLigaActual(), { 'jornadas/j1/final': null }, 'Final deshecha'); }
-function ponerVPFinal(jid, valor) { return guardar(idLigaActual(), { ['jornadas/j1/final/' + jid + '/vp']: valor === '' ? null : Number(valor) }); }
+function ponerVPFinal(jid, valor) { return guardar(idLigaActual(), { ['jornadas/j1/final/' + jid + '/vp']: valor === '' ? null : Number(valor) }, null, 'VP en la final de ' + nickDe(ligaActual(), jid) + ': ' + (valor === '' ? '—' : valor)); }

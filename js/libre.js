@@ -240,7 +240,9 @@ async function guardarReporte() {
   const previa = b.editando && ev.mesas && ev.mesas[b.editando];
   const d = Object.assign(datosMesa(b), previa ? { por: previa.por, creada: previa.creada } : { por: usuario.uid, creada: firebase.database.ServerValue.TIMESTAMP });
   const mid = b.editando || nuevoId('m');
-  if (await guardar(id, { ['mesas/' + mid]: d }, b.editando ? 'Mesa corregida' : 'Mesa guardada')) { ui.reporte = null; dibujar('ruta'); }
+  const jug = Object.keys(d.jugadores).map(j => ({ jid: j, vp: d.jugadores[j] })).sort((x, y) => y.vp - x.vp);
+  if (await guardar(id, { ['mesas/' + mid]: d }, b.editando ? 'Mesa corregida' : 'Mesa guardada',
+    (b.editando ? 'Corrigió la mesa del ' : 'Reportó la mesa del ') + fechaCorta(d.fecha) + ': ' + textoMesa(ev, jug, d.invitados))) { ui.reporte = null; dibujar('ruta'); }
 }
 
 // ---------------- Corregir y borrar (solo el organizador)
@@ -250,7 +252,10 @@ function corregirMesa(mid) {
   ui.reporte = { liga: id, fecha: m.fecha, mesa: m.mesa, jugadores, invitados: m.invitados || '', revisar: false, editando: mid };
   dibujar('ruta'); window.scrollTo(0, 0);
 }
-function borrarMesa(mid) { return guardar(idLigaActual(), { ['mesas/' + mid]: null }, 'Mesa borrada'); }
+function borrarMesa(mid) {
+  const ev = ligaActual(); const m = mesasLiga(ev).find(x => x.id === mid);
+  return guardar(idLigaActual(), { ['mesas/' + mid]: null }, 'Mesa borrada', m ? 'Borró la mesa del ' + fechaCorta(m.fecha) + ': ' + textoMesa(ev, m.jugadores, m.invitados) : 'Borró una mesa');
+}
 
 // ---------------- Temporada (Ajustes del organizador)
 function bloqueTemporada(id, ev) {

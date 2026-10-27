@@ -34,13 +34,15 @@ async function enviarSolicitud(e) {
   const datos = { nombre, creada: firebase.database.ServerValue.TIMESTAMP };
   if (ciudad) datos.ciudad = ciudad; if (mensaje) datos.mensaje = mensaje;
   try {
-    await db.ref('solicitudes/' + usuario.uid).set(datos);
+    const cambios = { ['solicitudes/' + usuario.uid]: datos };
+    anotar(cambios, 'Pidió ser organizador', null, 'Nombre: ' + nombre + (ciudad ? '\nCiudad: ' + ciudad : '') + (mensaje ? '\nMensaje: ' + mensaje : ''));
+    await db.ref().update(cambios);
     miSolicitud = { nombre, ciudad, mensaje, creada: Date.now() };
     aviso('Solicitud enviada'); dibujar('ruta');
   } catch (err) { aviso('No se pudo enviar la solicitud. Intenta de nuevo.', 'error'); }
 }
 async function cancelarSolicitud() {
-  try { await db.ref('solicitudes/' + usuario.uid).remove(); miSolicitud = null; aviso('Solicitud cancelada'); dibujar('ruta'); }
+  try { const c = { ['solicitudes/' + usuario.uid]: null }; anotar(c, 'Canceló su solicitud para ser organizador'); await db.ref().update(c); miSolicitud = null; aviso('Solicitud cancelada'); dibujar('ruta'); }
   catch (e) { aviso('No se pudo cancelar.', 'error'); }
 }
 
@@ -63,11 +65,16 @@ async function aprobarSolicitud(uid) {
   // Se guardan nombre, ciudad y fecha para la lista de Organizadores (js/organizadores.js)
   const info = { nombre: String(n || 'Sin nombre').slice(0, 40), desde: firebase.database.ServerValue.TIMESTAMP };
   if (s.ciudad) info.ciudad = String(s.ciudad).slice(0, 60);
-  try { await db.ref().update({ ['organizadores/' + uid]: true, ['organizadoresInfo/' + uid]: info, ['solicitudes/' + uid]: null }); aviso(n + ' ya puede organizar'); }
+  const cambios = { ['organizadores/' + uid]: true, ['organizadoresInfo/' + uid]: info, ['solicitudes/' + uid]: null };
+  anotar(cambios, 'Aprobó a ' + n + ' como organizador', null, 'Cuenta: ' + uid + (s.ciudad ? '\nCiudad: ' + s.ciudad : '') + (s.mensaje ? '\nMensaje: ' + s.mensaje : ''));
+  try { await db.ref().update(cambios); aviso(n + ' ya puede organizar'); }
   catch (e) { aviso('No se pudo aprobar. Revisa que las reglas estén actualizadas.', 'error'); }
 }
 async function rechazarSolicitud(uid) {
-  try { await db.ref('solicitudes/' + uid).remove(); aviso('Solicitud rechazada'); }
+  const s = solicitudes[uid] || {};
+  const cambios = { ['solicitudes/' + uid]: null };
+  anotar(cambios, 'Rechazó la solicitud de ' + (s.nombre || 'alguien') + ' para ser organizador', null, 'Cuenta: ' + uid + (s.ciudad ? '\nCiudad: ' + s.ciudad : ''));
+  try { await db.ref().update(cambios); aviso('Solicitud rechazada'); }
   catch (e) { aviso('No se pudo rechazar.', 'error'); }
 }
 function solicitudesPendientes() { return soyAdmin ? Object.keys(solicitudes || {}).length : 0; }

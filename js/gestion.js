@@ -109,7 +109,8 @@ function cambiarEstadoJornada(jid, estado) {
   const textos = esTorneo(ligaActual())
     ? { cancelada: 'Torneo cancelado', pendiente: 'Torneo reactivado', abierta: 'Torneo en curso', cerrada: 'Torneo terminado' }
     : { cancelada: 'Jornada cancelada', pendiente: 'Jornada reactivada', abierta: 'Jornada en curso', cerrada: 'Jornada cerrada: la tabla ya se actualizó' };
-  return guardar(idLigaActual(), { ['jornadas/' + jid + '/estado']: estado }, textos[estado]);
+  const j = ((ligaActual() || {}).jornadas || {})[jid] || {};
+  return guardar(idLigaActual(), { ['jornadas/' + jid + '/estado']: estado }, textos[estado], (esTorneo(ligaActual()) ? 'Torneo' : 'Jornada ' + (j.numero || jid)) + ': ' + (j.estado || 'pendiente') + ' → ' + estado);
 }
 
 // ---------------- Jugadores
@@ -155,7 +156,7 @@ async function agregarJugador(e, marcarPresenteEn) {
   const jid = nuevoId('p');
   // Dos pasos: la base solo deja marcar presente a un jugador que ya existe en la lista
   if (!(await guardar(id, { ['jugadores/' + jid]: { nick } }, nick + ' agregado'))) return;
-  if (marcarPresenteEn) await guardar(id, { ['jornadas/' + marcarPresenteEn + '/presentes/' + jid]: true });
+  if (marcarPresenteEn) await guardar(id, { ['jornadas/' + marcarPresenteEn + '/presentes/' + jid]: true }, null, nick + ': presente');
   campo.value = ''; dibujar('ruta');
 }
 
@@ -164,13 +165,13 @@ async function renombrarJugador(e, jid) {
   const nick = $('editNick').value.trim(); const ev = ligaActual();
   if (!nick) return aviso('Escribe el nick.', 'error');
   if (nickRepetido(ev, nick, jid)) return aviso('Ya hay un jugador con ese nick.', 'error');
-  if (await guardar(idLigaActual(), { ['jugadores/' + jid + '/nick']: nick }, 'Nick cambiado')) { ui.editarJugador = null; dibujar('ruta'); }
+  if (await guardar(idLigaActual(), { ['jugadores/' + jid + '/nick']: nick }, 'Nick cambiado', 'Cambió el nick: ' + ((ev.jugadores || {})[jid] || {}).nick + ' → ' + nick)) { ui.editarJugador = null; dibujar('ruta'); }
 }
 
 function quitarJugador(jid) {
   const ev = ligaActual();
   if (jugadorUsado(ev, jid)) return aviso(esLibre(ev) ? 'Ya aparece en alguna mesa reportada: no se puede quitar. Puedes cambiarle el nick.' : 'Ya jugó en alguna jornada: no se puede quitar. Puedes cambiarle el nick.', 'error');
-  return guardar(idLigaActual(), { ['jugadores/' + jid]: null }, 'Jugador quitado');
+  return guardar(idLigaActual(), { ['jugadores/' + jid]: null }, 'Jugador quitado', 'Quitó al jugador «' + (((ev.jugadores || {})[jid] || {}).nick || '?') + '»');
 }
 
 async function copiarJugadores() {

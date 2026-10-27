@@ -62,7 +62,7 @@ function marcarPresente(jid, pid, si) {
     const r = rondasOrdenadas(j).find(r => r.mesas.some(m => m.jugadores.some(x => x.jid === pid)));
     if (r) return aviso('Está sentado en una mesa de la ronda ' + r.n + '. Sácalo de la mesa primero.', 'error');
   }
-  return guardar(idLigaActual(), { ['jornadas/' + jid + '/presentes/' + pid]: si ? true : null });
+  return guardar(idLigaActual(), { ['jornadas/' + jid + '/presentes/' + pid]: si ? true : null }, null, nickDe(ligaActual(), pid) + (si ? ': presente' : ': quitado del pase de lista'));
 }
 
 // ---------------- b) y c) Rondas, mesas y VP
@@ -162,12 +162,14 @@ function moverJugador(jid, rid, desde, pid, destino) {
     if (n >= 5) { aviso('Esa mesa ya tiene 5.', 'error'); dibujar('ruta'); return; }
     cambios[base + mid + '/' + pid] = { asiento: n + 1 };
   }
-  return guardar(idLigaActual(), cambios);
+  return guardar(idLigaActual(), cambios, null, 'Movió a ' + nickDe(ev, pid) + (destino === 'fuera' ? ' fuera de la mesa' : destino === 'nueva' ? ' a una mesa nueva' : ' a otra mesa'));
 }
 
 function ponerVP(jid, rid, mid, pid, valor) {
   const v = valor === '' ? null : Number(valor);
-  return guardar(idLigaActual(), { ['jornadas/' + jid + '/rondas/' + rid + '/mesas/' + mid + '/' + pid + '/vp']: v });
+  const ev = ligaActual(); const antes = (((((ev.jornadas[jid] || {}).rondas || {})[rid] || {}).mesas || {})[mid] || {})[pid] || {};
+  return guardar(idLigaActual(), { ['jornadas/' + jid + '/rondas/' + rid + '/mesas/' + mid + '/' + pid + '/vp']: v }, null,
+    'VP de ' + nickDe(ev, pid) + ': ' + (typeof antes.vp === 'number' ? antes.vp : '—') + ' → ' + (v === null ? '—' : v));
 }
 
 // ---------------- d) Hazañas del día

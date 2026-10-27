@@ -121,13 +121,16 @@ async function guardarNombreOrganizador(e, uid) {
   e.preventDefault();
   const nombre = $('orgNombre').value.trim().slice(0, 40);
   if (!nombre) return aviso('Escribe el nombre.', 'error');
-  try { await db.ref('organizadoresInfo/' + uid + '/nombre').set(nombre); uiOrg.editar = null; aviso('Nombre guardado'); dibujar('ruta'); }
+  const antes = nombreOrganizador(uid);
+  try { const c = { ['organizadoresInfo/' + uid + '/nombre']: nombre }; anotar(c, 'Cambió el nombre del organizador: ' + antes + ' → ' + nombre, null, 'Cuenta: ' + uid); await db.ref().update(c); uiOrg.editar = null; aviso('Nombre guardado'); dibujar('ruta'); }
   catch (x) { aviso('No se pudo guardar. Revisa que las reglas estén actualizadas.', 'error'); }
 }
 
 async function quitarOrganizador(uid) {
   const n = nombreOrganizador(uid);
-  try { await db.ref().update({ ['organizadores/' + uid]: null, ['organizadoresInfo/' + uid]: null }); aviso(n + ' ya no es organizador'); dibujar('ruta'); }
+  const c = { ['organizadores/' + uid]: null, ['organizadoresInfo/' + uid]: null };
+  anotar(c, 'Le quitó el permiso de organizador a ' + n, null, 'Cuenta: ' + uid + '\nSus eventos: ' + (eventosDe(uid).map(id => eventos[id].nombre).join(', ') || 'ninguno'));
+  try { await db.ref().update(c); aviso(n + ' ya no es organizador'); dibujar('ruta'); }
   catch (x) { aviso('No se pudo quitar el permiso.', 'error'); }
 }
 
@@ -138,5 +141,5 @@ async function transferirEvento(e, id) {
   const nombre = nombreOrganizador(destino);
   const cambios = { ownerUid: destino, organizadorNombre: (nombre === 'Sin nombre' ? 'Organizador' : nombre).slice(0, 40) };
   if (ev.ayudantes && ev.ayudantes[destino]) cambios['ayudantes/' + destino] = null; // el nuevo dueño ya no es ayudante de su propia liga
-  if (await guardar(id, cambios, '«' + ev.nombre + '» ahora es de ' + nombre)) { uiOrg.transferir = null; dibujar('ruta'); }
+  if (await guardar(id, cambios, '«' + ev.nombre + '» ahora es de ' + nombre, 'Transfirió a ' + nombre + ' (antes de ' + nombreOrganizador(ev.ownerUid) + ')')) { uiOrg.transferir = null; dibujar('ruta'); }
 }

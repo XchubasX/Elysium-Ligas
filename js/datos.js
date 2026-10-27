@@ -67,16 +67,26 @@ function puedeCapturar(ev) { return puedeAdministrar(ev) || esAyudante(ev); }
 function nombreUsuario() { return (usuario && (usuario.displayName || '').split(' ')[0]) || 'Tú'; }
 
 function crearLiga(id, datos, tipo) {
-  return db.ref('eventos/' + id).set(Object.assign({}, datos, {
-    ownerUid: usuario.uid, tipo: tipo === 'torneo' ? 'torneo' : 'liga', creada: firebase.database.ServerValue.TIMESTAMP
-  }));
+  const cambios = {};
+  const aid = anotar(cambios, (tipo === 'torneo' ? 'Creó el torneo «' : 'Creó la liga «') + datos.nombre + '»', id,
+    detalleCambios({}, Object.fromEntries(Object.keys(datos).filter(k => k !== 'jornadas').map(k => [k, datos[k]]))));
+  cambios['eventos/' + id] = Object.assign({}, datos, {
+    ownerUid: usuario.uid, tipo: tipo === 'torneo' ? 'torneo' : 'liga', creada: firebase.database.ServerValue.TIMESTAMP, reg: aid
+  });
+  return db.ref().update(cambios);
 }
 
 // Escribe varios cambios de una vez dentro de eventos/{id} (rutas relativas).
-// Si la base lo rechaza, avisa y devuelve false.
-async function guardar(id, cambios, textoOk) {
+// En la misma escritura queda anotado en el historial (js/auditoria.js) y
+// eventos/{id}/reg apunta a esa anotación (las reglas lo exigen en resultados).
+// registro = texto para el historial (si no, textoOk). Si la base lo rechaza, avisa y devuelve false.
+async function guardar(id, cambios, textoOk, registro) {
   try {
-    await db.ref('eventos/' + id).update(cambios);
+    const ev = eventos[id] || {};
+    const todo = {};
+    Object.keys(cambios).forEach(k => { todo['eventos/' + id + '/' + k] = cambios[k]; });
+    todo['eventos/' + id + '/reg'] = anotar(todo, (registro || textoOk || textoAutomatico(ev, cambios)) + (ev.nombre ? ' · ' + ev.nombre : ''), id, detalleCambios(ev, cambios));
+    await db.ref().update(todo);
     if (textoOk) aviso(textoOk);
     return true;
   } catch (e) {
@@ -88,7 +98,10 @@ async function guardar(id, cambios, textoOk) {
 async function borrarLiga(id) {
   try {
     // Las invitaciones pendientes se borran una por una (las reglas no dejan borrar la rama completa)
+    const ev = eventos[id] || {};
     const cambios = { ['eventos/' + id]: null };
+    anotar(cambios, 'Borró definitivamente ' + (esTorneo(ev) ? 'el torneo' : 'la liga') + ' «' + (ev.nombre || id) + '»', id,
+      Object.keys(ev.jugadores || {}).length + ' jugadores · ' + Object.keys(ev.jornadas || {}).length + ' jornadas · ' + Object.keys(ev.mesas || {}).length + ' mesas · dueño ' + (ev.organizadorNombre || '') + ' (' + (ev.ownerUid || '') + ')');
     try { const s = await db.ref('invitaciones/' + id).get(); Object.keys(s.val() || {}).forEach(c => { cambios['invitaciones/' + id + '/' + c] = null; }); } catch (e) { /* sin invitaciones */ }
     try { const s = await db.ref('inscripciones/' + id).get(); Object.keys(s.val() || {}).forEach(u => { cambios['inscripciones/' + id + '/' + u] = null; }); } catch (e) { /* sin inscripciones */ }
     await db.ref().update(cambios); aviso('Liga borrada'); return true;

@@ -70,7 +70,9 @@ async function invitarAyudante() {
   const id = idLigaActual(); const codigo = codigoNuevo();
   const datos = { creada: firebase.database.ServerValue.TIMESTAMP, expira: Date.now() + DIAS_INVITACION * 86400000 };
   try {
-    await db.ref('invitaciones/' + id + '/' + codigo).set(datos);
+    const cambios = { ['invitaciones/' + id + '/' + codigo]: datos };
+    anotar(cambios, 'Creó una invitación de ayudante · ' + ((eventos[id] || {}).nombre || id), id);
+    await db.ref().update(cambios);
     ultimaInvitacion = { liga: id, enlace: enlaceInvitacion(id, codigo) };
     aviso('Invitación creada');
     cargarInvitaciones(id);
@@ -78,12 +80,12 @@ async function invitarAyudante() {
 }
 async function cancelarInvitacion(codigo) {
   const id = idLigaActual();
-  try { await db.ref('invitaciones/' + id + '/' + codigo).remove(); aviso('Invitación cancelada'); if (ultimaInvitacion && ultimaInvitacion.enlace.endsWith(codigo)) ultimaInvitacion = null; cargarInvitaciones(id); }
+  try { const c = { ['invitaciones/' + id + '/' + codigo]: null }; anotar(c, 'Canceló una invitación de ayudante · ' + ((eventos[id] || {}).nombre || id), id); await db.ref().update(c); aviso('Invitación cancelada'); if (ultimaInvitacion && ultimaInvitacion.enlace.endsWith(codigo)) ultimaInvitacion = null; cargarInvitaciones(id); }
   catch (e) { aviso('No se pudo cancelar.', 'error'); }
 }
-function quitarAyudante(uid) { return guardar(idLigaActual(), { ['ayudantes/' + uid]: null }, 'Ayudante quitado'); }
+function quitarAyudante(uid) { const a = ((ligaActual() || {}).ayudantes || {})[uid] || {}; return guardar(idLigaActual(), { ['ayudantes/' + uid]: null }, 'Ayudante quitado', 'Quitó a ' + (a.nombre || 'un ayudante') + ' como ayudante'); }
 async function dejarDeAyudar(id) {
-  if (await guardar(id, { ['ayudantes/' + usuario.uid]: null }, 'Ya no eres ayudante de esta liga')) location.hash = '#/mis-eventos';
+  if (await guardar(id, { ['ayudantes/' + usuario.uid]: null }, 'Ya no eres ayudante de esta liga', 'Dejó de ser ayudante')) location.hash = '#/mis-eventos';
 }
 function copiarTexto(t, ok) {
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => aviso(ok || 'Copiado')).catch(() => aviso('Mantén presionado el texto para copiarlo', 'error'));
@@ -122,6 +124,7 @@ async function aceptarInvitacion(id, codigo) {
     ['eventos/' + id + '/ayudantes/' + usuario.uid]: { nombre: nombreUsuario().slice(0, 40), desde: firebase.database.ServerValue.TIMESTAMP, codigo },
     ['invitaciones/' + id + '/' + codigo]: null   // un solo uso: se borra en la misma escritura
   };
+  anotar(cambios, 'Aceptó ser ayudante · ' + ((eventos[id] || {}).nombre || id), id, 'Nombre que se guardó: ' + nombreUsuario());
   try { await db.ref().update(cambios); resultadoInvitacion = 'ok'; aviso('¡Ya eres ayudante!'); }
   catch (e) { console.warn(e); resultadoInvitacion = 'error'; }
   dibujar('ruta');

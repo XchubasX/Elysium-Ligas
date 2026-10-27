@@ -93,15 +93,18 @@ async function enviarInscripcion(e, id) {
   const datos = { nick: nick.slice(0, 30), nombre: String((usuario && usuario.displayName) || '').slice(0, 60), creada: firebase.database.ServerValue.TIMESTAMP, estado: 'pendiente' };
   try {
     // Si quedó una inscripción vieja (lo aceptaron y luego lo quitaron de la liga), se borra primero
-    if (miInscripcion[id]) await db.ref('inscripciones/' + id + '/' + usuario.uid).remove();
-    await db.ref('inscripciones/' + id + '/' + usuario.uid).set(datos);
+    const nombreEv = (eventos[id] || {}).nombre || id;
+    if (miInscripcion[id]) { const c = { ['inscripciones/' + id + '/' + usuario.uid]: null }; anotar(c, 'Quitó su inscripción anterior para inscribirse de nuevo · ' + nombreEv, id); await db.ref().update(c); }
+    const cambios = { ['inscripciones/' + id + '/' + usuario.uid]: datos };
+    anotar(cambios, 'Se inscribió como «' + datos.nick + '» · ' + nombreEv, id);
+    await db.ref().update(cambios);
     guardarNick(datos.nick);
     miInscripcion[id] = { nick: datos.nick, estado: 'pendiente', creada: Date.now() };
     aviso('Inscripción enviada'); dibujar('ruta');
   } catch (x) { err('No se pudo enviar. Puede que las inscripciones ya estén cerradas.'); }
 }
 async function cancelarMiInscripcion(id) {
-  try { await db.ref('inscripciones/' + id + '/' + usuario.uid).remove(); miInscripcion[id] = null; aviso('Inscripción cancelada'); dibujar('ruta'); }
+  try { const c = { ['inscripciones/' + id + '/' + usuario.uid]: null }; anotar(c, 'Canceló su inscripción · ' + ((eventos[id] || {}).nombre || id), id); await db.ref().update(c); miInscripcion[id] = null; aviso('Inscripción cancelada'); dibujar('ruta'); }
   catch (x) { aviso('No se pudo cancelar.', 'error'); }
 }
 
@@ -192,6 +195,11 @@ async function aceptarVarias(lista) {
     cambios['inscripciones/' + id + '/' + x.uid + '/jid'] = jid;
   }
   if (!Object.keys(cambios).length) return false;
+  const quienes = lista.filter(x => t[x.uid]).map(x => {
+    const s = t[x.uid]; const nick = x.nick || s.nick;
+    return '«' + nick + '» (' + (s.nombre || 'sin nombre') + ')' + (x.jid ? ' unido a «' + ((ev.jugadores || {})[x.jid] || {}).nick + '»' : '');
+  });
+  anotar(cambios, (quienes.length === 1 ? 'Aceptó la inscripción de ' + quienes[0] : 'Aceptó ' + quienes.length + ' inscripciones') + ' · ' + (ev.nombre || id), id, quienes.join('\n'));
   try { await db.ref().update(cambios); return true; }
   catch (e) { console.warn(e); aviso('No se pudo aceptar. Revisa tu conexión o tus permisos.', 'error'); return false; }
 }
@@ -217,7 +225,8 @@ async function aceptarTodas() {
   if (await aceptarVarias(lista)) { aviso(lista.length === 1 ? 'Se aceptó 1 inscripción' : 'Se aceptaron ' + lista.length + ' inscripciones'); dibujar('ruta'); }
 }
 async function rechazarInscripcion(uid) {
-  try { await db.ref('inscripciones/' + idLigaActual() + '/' + uid).remove(); aviso('Inscripción rechazada'); dibujar('ruta'); }
+  const id = idLigaActual(); const s = (inscripcionesEquipo[id] || {})[uid] || {};
+  try { const c = { ['inscripciones/' + id + '/' + uid]: null }; anotar(c, 'Rechazó la inscripción de «' + (s.nick || '?') + '» (' + (s.nombre || 'sin nombre') + ') · ' + ((eventos[id] || {}).nombre || id), id); await db.ref().update(c); aviso('Inscripción rechazada'); dibujar('ruta'); }
   catch (e) { aviso('No se pudo rechazar.', 'error'); }
 }
 
